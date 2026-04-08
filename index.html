@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PlotTwist: A Creative Plot Generation Framework with Small Language Models</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #0f172a;
+      --teal:   #0d9488;
+      --teal-light: #14b8a6;
+      --teal-pale:  #ccfbf1;
+      --bg:     #f8fafc;
+      --card:   #ffffff;
+      --body:   #334155;
+      --muted:  #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(15,23,42,.08);
+      --shadow-lg: 0 12px 48px rgba(15,23,42,.14);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--body);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Playfair Display', Georgia, serif;
+      color: var(--navy);
+      line-height: 1.25;
+    }
+
+    a { color: var(--teal); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    img { max-width: 100%; display: block; }
+
+    /* ── Navbar ───────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+
+    .nav-brand {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .nav-brand .dot { color: var(--teal); }
+
+    .nav-links {
+      display: flex;
+      gap: 1.75rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: .875rem;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color .2s;
+    }
+
+    .nav-links a:hover { color: var(--teal); text-decoration: none; }
+
+    /* ── Container ────────────────────────────────────────────────── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    section { padding: 5rem 0; }
+
+    .section-label {
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: .75rem;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .section-divider {
+      width: 3.5rem;
+      height: 3px;
+      background: var(--teal);
+      border-radius: 2px;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── Hero ─────────────────────────────────────────────────────── */
+    #hero {
+      background: var(--navy);
+      color: #fff;
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Film-strip accent top */
+    .filmstrip {
+      height: 28px;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 18px,
+        rgba(255,255,255,.07) 18px,
+        rgba(255,255,255,.07) 20px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 32px,
+        rgba(255,255,255,.04) 32px,
+        rgba(255,255,255,.04) 36px
+      );
+      border-top: 6px solid rgba(255,255,255,.06);
+      border-bottom: 6px solid rgba(255,255,255,.06);
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .filmstrip-holes {
+      display: flex;
+      gap: 0;
+      width: 100%;
+    }
+
+    .filmstrip-hole {
+      width: 20px;
+      height: 14px;
+      background: var(--navy);
+      border-radius: 3px;
+      margin: 0 14px;
+      flex-shrink: 0;
+    }
+
+    .hero-body {
+      padding: 4rem 2rem 4.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .venue-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: rgba(13,148,136,.22);
+      border: 1px solid rgba(13,148,136,.4);
+      color: var(--teal-light);
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      padding: .3rem .9rem;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+    }
+
+    .venue-badge svg { width: 14px; height: 14px; }
+
+    h1.paper-title {
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      font-weight: 900;
+      color: #f1f5f9;
+      max-width: 820px;
+      margin-bottom: 1.75rem;
+      line-height: 1.18;
+    }
+
+    h1.paper-title .highlight { color: var(--teal-light); }
+
+    .authors {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem 1.25rem;
+      margin-bottom: 1rem;
+      font-size: .95rem;
+    }
+
+    .authors a {
+      color: #cbd5e1;
+      font-weight: 500;
+      transition: color .2s;
+    }
+
+    .authors a:hover { color: var(--teal-light); text-decoration: none; }
+
+    .authors sup { font-size: .65em; color: var(--teal-light); margin-left: 1px; }
+
+    .affiliation {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      color: #94a3b8;
+      font-size: .875rem;
+      margin-bottom: 2.25rem;
+    }
+
+    .affiliation-logo {
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, var(--teal) 0%, #0891b2 100%);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .55rem 1.4rem;
+      border-radius: 999px;
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .18s, box-shadow .18s, background .18s;
+      text-decoration: none;
+    }
+
+    .btn:hover { transform: translateY(-2px); text-decoration: none; }
+
+    .btn-primary {
+      background: var(--teal);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(13,148,136,.35);
+    }
+
+    .btn-primary:hover {
+      background: var(--teal-light);
+      box-shadow: 0 6px 24px rgba(13,148,136,.45);
+    }
+
+    .btn-outline {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.2);
+      color: #e2e8f0;
+    }
+
+    .btn-outline:hover {
+      background: rgba(255,255,255,.14);
+      box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    }
+
+    /* Teaser figure */
+    .teaser-wrap {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .teaser-placeholder {
+      height: 320px;
+      background: linear-gradient(135deg,
+        rgba(13,148,136,.15) 0%,
+        rgba(15,23,42,.6) 50%,
+        rgba(8,145,178,.1) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .teaser-placeholder::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230d9488' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .teaser-icon {
+      font-size: 3.5rem;
+      opacity: .6;
+    }
+
+    .teaser-label {
+      color: rgba(255,255,255,.5);
+      font-size: .875rem;
+      font-weight: 500;
+    }
+
+    .teaser-caption {
+      padding: 1rem 1.5rem;
+      font-size: .875rem;
+      color: #94a3b8;
+      font-style: italic;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+
+    .teaser-caption strong { color: #cbd5e1; font-style: normal; }
+
+    /* ── Abstract ─────────────────────────────────────────────────── */
+    #abstract { background: var(--bg); }
+
+    .abstract-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 3rem;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--teal);
+    }
+
+    .abstract-card p {
+      text-align: justify;
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: var(--body);
+    }
+
+    /* ── Framework ────────────────────────────────────────────────── */
+    #framework { background: #fff; }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .component-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 1.75rem;
+      transition: transform .22s, box-shadow .22s, border-color .22s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .component-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--teal);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .3s;
+    }
+
+    .component-card:hover::before { transform: scaleX(1); }
+
+    .component-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--teal);
+    }
+
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: .75rem;
+    }
+
+    .card-body {
+      font-size: .9rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .pipeline-wrap {
+      background: var(--bg);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+      color: var(--muted);
+    }
+
+    .pipeline-wrap img {
+      width: 100%;
+      border-radius: var(--radius);
+    }
+
+    .pipeline-placeholder-icon { font-size: 2.5rem; opacity: .4; }
+    .pipeline-placeholder-text { font-size: .875rem; font-weight: 500; }
+
+    /* ── Results ──────────────────────────────────────────────────── */
+    #results { background: var(--bg); }
+
+    .callout-banner {
+      background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 1.75rem 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .callout-icon { font-size: 2rem; flex-shrink: 0; }
+
+    .callout-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #f1f5f9;
+    }
+
+    .callout-text em { color: var(--teal-light); font-style: normal; }
+
+    .results-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    /* Table */
+    .results-table-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+    }
+
+    thead th {
+      background: var(--navy);
+      color: #e2e8f0;
+      font-weight: 600;
+      padding: .9rem 1.25rem;
+      text-align: left;
+      font-family: 'Inter', sans-serif;
+      font-size: .8rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f1faf9; }
+
+    td {
+      padding: .85rem 1.25rem;
+      color: var(--body);
+    }
+
+    .ours-row td { background: #f0fdfa; font-weight: 600; }
+    .ours-row td:first-child { color: var(--teal); }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    .rank-1 { background: var(--teal); color: #fff; }
+    .rank-2 { background: #dbeafe; color: #1e40af; }
+    .rank-3 { background: #fef3c7; color: #92400e; }
+    .rank-4 { background: #f1f5f9; color: var(--muted); }
+
+    /* Chart */
+    .chart-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-title {
+      font-weight: 600;
+      font-size: .9rem;
+      color: var(--navy);
+      margin-bottom: 1.25rem;
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* ── Qualitative Examples ────────────────────────────────────── */
+    #examples { background: #fff; }
+
+    .examples-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .example-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      transition: box-shadow .22s;
+    }
+
+    .example-card:hover { box-shadow: var(--shadow-lg); }
+
+    .example-genre {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--teal);
+      background: var(--teal-pale);
+      padding: .25rem .7rem;
+      border-radius: 999px;
+      margin-bottom: 1.25rem;
+    }
+
+    .example-label {
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: .4rem;
+    }
+
+    .example-premise {
+      font-weight: 600;
+      font-size: .95rem;
+      color: var(--navy);
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .example-plot {
+      font-style: italic;
+      font-size: .95rem;
+      color: var(--body);
+      line-height: 1.8;
+    }
+
+    .example-plot::before {
+      content: '"';
+      font-size: 2rem;
+      font-family: 'Playfair Display', serif;
+      color: var(--teal);
+      line-height: 0;
+      vertical-align: -.5rem;
+      margin-right: .2rem;
+    }
+
+    /* ── Citation ─────────────────────────────────────────────────── */
+    #citation { background: var(--bg); }
+
+    .bibtex-wrap {
+      position: relative;
+      background: var(--navy);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .bibtex-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .75rem 1.25rem;
+      background: rgba(255,255,255,.05);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .bibtex-lang {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--teal-light);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: rgba(13,148,136,.2);
+      border: 1px solid rgba(13,148,136,.4);
+      color: var(--teal-light);
+      font-size: .78rem;
+      font-weight: 600;
+      padding: .3rem .8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .copy-btn:hover {
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .copy-btn.copied {
+      background: #059669;
+      border-color: #059669;
+      color: #fff;
+    }
+
+    pre.bibtex {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: .84rem;
+      line-height: 1.75;
+      color: #94a3b8;
+      padding: 1.5rem 1.5rem 2rem;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    pre.bibtex .key { color: #7dd3fc; }
+    pre.bibtex .val { color: #a5f3fc; }
+    pre.bibtex .field { color: #c4b5fd; }
+    pre.bibtex .brace { color: #e2e8f0; }
+
+    /* ── Footer ───────────────────────────────────────────────────── */
+    footer {
+      background: var(--navy);
+      color: #64748b;
+      padding: 2.5rem 2rem;
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: .95rem;
+      color: #94a3b8;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.25rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: #64748b;
+      font-size: .875rem;
+      font-weight: 500;
+      transition: color .2s;
+    }
+
+    .footer-links a:hover { color: var(--teal-light); text-decoration: none; }
+
+    /* ── Scroll-reveal animation ──────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ── Responsive ───────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+
+      .cards-grid { grid-template-columns: 1fr; }
+
+      .results-cols { grid-template-columns: 1fr; }
+
+      .examples-grid { grid-template-columns: 1fr; }
+
+      .abstract-card { padding: 1.75rem; }
+
+      .callout-banner { flex-direction: column; text-align: center; }
+
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+
+      .hero-body { padding: 2.5rem 1.25rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ NAVBAR ══════════════════════════════════════════════════════ -->
+  <nav>
+    <div class="nav-inner">
+      <span class="nav-brand">Plot<span class="dot">Twist</span></span>
+      <ul class="nav-links">
+        <li><a href="#abstract">Abstract</a></li>
+        <li><a href="#framework">Framework</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#examples">Examples</a></li>
+        <li><a href="#citation">Citation</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ════════════════════════════════════════════════════════ -->
+  <section id="hero">
+    <!-- Film-strip decoration -->
+    <div class="filmstrip" aria-hidden="true">
+      <div class="filmstrip-holes" id="filmstripHoles"></div>
+    </div>
+
+    <div class="hero-body">
+      <div class="venue-badge">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        Research Paper · arXiv 2026
+      </div>
+
+      <h1 class="paper-title">
+        <span class="highlight">PlotTwist:</span> A Creative Plot Generation
+        Framework with Small Language Models
+      </h1>
+
+      <div class="authors">
+        <a href="#" aria-label="Abhinav Thorat">Abhinav Thorat<sup>1</sup></a>
+        <a href="#" aria-label="Ravi Kolla">Ravi Kolla<sup>1</sup></a>
+        <a href="#" aria-label="Jyotin Goel">Jyotin Goel<sup>1</sup></a>
+        <a href="#" aria-label="Niranjan Pedanekar">Niranjan Pedanekar<sup>1</sup></a>
+      </div>
+
+      <div class="affiliation">
+        <div class="affiliation-logo">S</div>
+        <span><sup>1</sup> Sony Research India</span>
+      </div>
+
+      <div class="btn-row">
+        <a href="#" class="btn btn-primary">
+          <span>📄</span> Paper
+        </a>
+        <a href="#" class="btn btn-outline">
+          <span>💻</span> Code
+        </a>
+        <a href="#" class="btn btn-outline">
+          <span>🤗</span> Demo
+        </a>
+        <a href="#citation" class="btn btn-outline">
+          <span>📖</span> Cite
+        </a>
+      </div>
+
+      <!-- Teaser Figure -->
+      <div class="teaser-wrap reveal">
+        <div class="teaser-placeholder">
+          <img
+            id="teaser"
+            src="assets/teaser.png"
+            alt="PlotTwist framework overview: three specialized components enabling a ≤5B SLM to outperform frontier models"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          />
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;width:100%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+            <div class="teaser-icon">🎬</div>
+            <div class="teaser-label">Teaser figure — replace with <code style="background:rgba(255,255,255,.1);padding:.1rem .4rem;border-radius:4px;font-size:.8em">assets/teaser.png</code></div>
+          </div>
+        </div>
+        <div class="teaser-caption">
+          <strong>Figure 1.</strong> PlotTwist decomposes creative plot generation into three specialized components,
+          enabling a ≤5B parameter SLM to outperform frontier models up to <strong>200× larger</strong>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Film-strip decoration bottom -->
+    <div class="filmstrip" aria-hidden="true">
+      <div class="filmstrip-holes" id="filmstripHolesBottom"></div>
+    </div>
+  </section>
+
+  <!-- ══ ABSTRACT ════════════════════════════════════════════════════ -->
+  <section id="abstract">
+    <div class="container">
+      <p class="section-label">Abstract</p>
+      <h2 class="section-title">Overview</h2>
+      <div class="section-divider"></div>
+
+      <div class="abstract-card reveal">
+        <p>
+          Creative plot generation presents a fundamental challenge for language models:
+          transforming a concise premise into a coherent narrative that sustains global structure,
+          character development, and emotional resonance. We present <strong>PlotTwist</strong>,
+          a structured framework that enables Small Language Models (SLMs) with
+          <strong>≤5B active parameters</strong> to generate high-quality, premise-conditioned
+          plots competitive with frontier systems up to <strong>200× larger</strong>.
+          Our approach decomposes generation into: (1) an <em>Aspect Rating Reward Model</em>
+          trained via Positive-Negative prompting across five Narrative Quality Dimensions (NQDs);
+          (2) a <em>Mixture-of-Experts plot generator</em> aligned via Direct Preference Optimization;
+          and (3) an <em>Agentic Evaluation module</em> that emulates human critical judgment.
+          Together, these components yield consistent improvements across all five NQDs,
+          demonstrating that careful decomposition and alignment can close — and in many cases
+          surpass — the quality gap between small and frontier language models on creative tasks.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FRAMEWORK ═══════════════════════════════════════════════════ -->
+  <section id="framework">
+    <div class="container">
+      <p class="section-label">Method</p>
+      <h2 class="section-title">The PlotTwist Framework</h2>
+      <div class="section-divider"></div>
+
+      <div class="cards-grid">
+        <!-- Card 1 -->
+        <div class="component-card reveal">
+          <div class="card-icon">🏆</div>
+          <div class="card-title">Aspect Rating Reward Model</div>
+          <div class="card-body">
+            Evaluates plots across five Narrative Quality Dimensions (NQDs):
+            <strong>character development</strong>, <strong>tone consistency</strong>,
+            <strong>pacing</strong>, <strong>narrative coherence</strong>, and
+            <strong>emotional turn</strong>. Trained with Positive-Negative prompting
+            to eliminate positivity bias and produce calibrated quality signals.
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="component-card reveal" style="transition-delay:.1s">
+          <div class="card-icon">⚙️</div>
+          <div class="card-title">MoE Plot Generator</div>
+          <div class="card-body">
+            Mixture-of-Experts architecture fine-tuned via
+            <strong>Direct Preference Optimization</strong> on high-confidence
+            preference pairs curated by the reward model. Yields
+            <strong>+0.78 quality points</strong> over the base model across
+            all NQDs, with specialized experts routing narrative subproblems.
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="component-card reveal" style="transition-delay:.2s">
+          <div class="card-icon">🔍</div>
+          <div class="card-title">Agentic Evaluation Module</div>
+          <div class="card-body">
+            An independent judge agent that emulates human critical judgment.
+            Validated by correctly ranking <strong>acclaimed screenplays</strong>
+            above Razzie-winning films across all NQDs, demonstrating reliable
+            alignment with expert narrative quality assessment.
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline diagram -->
+      <div class="pipeline-wrap reveal">
+        <img
+          id="pipeline"
+          src="assets/pipeline.png"
+          alt="PlotTwist three-stage pipeline: Aspect Rating Reward Model → MoE DPO fine-tuning → Agentic Evaluation"
+          onerror="this.style.display='none';"
+        />
+        <div class="pipeline-placeholder-icon">🗺️</div>
+        <div class="pipeline-placeholder-text">Pipeline diagram — replace with <code>assets/pipeline.png</code></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ RESULTS ══════════════════════════════════════════════════════ -->
+  <section id="results">
+    <div class="container">
+      <p class="section-label">Experiments</p>
+      <h2 class="section-title">Key Results</h2>
+      <div class="section-divider"></div>
+
+      <!-- Callout banner -->
+      <div class="callout-banner reveal">
+        <div class="callout-icon">🚀</div>
+        <div class="callout-text">
+          A <em>3B PlotTwist model</em> outperforms <em>~600B frontier models</em>
+          on creative plot quality — measured holistically across all five Narrative Quality Dimensions.
+        </div>
+      </div>
+
+      <div class="results-cols">
+        <!-- Table -->
+        <div class="results-table-wrap reveal">
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Params</th>
+                <th>NQD Score</th>
+                <th>Rank</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="ours-row">
+                <td>PlotTwist (Ours)</td>
+                <td>3B</td>
+                <td>8.74</td>
+                <td><span class="rank-badge rank-1">1</span></td>
+              </tr>
+              <tr>
+                <td>GPT-4.1</td>
+                <td>~1.8T</td>
+                <td>8.41</td>
+                <td><span class="rank-badge rank-2">2</span></td>
+              </tr>
+              <tr>
+                <td>Claude 3.5 Sonnet</td>
+                <td>~200B</td>
+                <td>8.29</td>
+                <td><span class="rank-badge rank-3">3</span></td>
+              </tr>
+              <tr>
+                <td>Gemini 1.5 Pro</td>
+                <td>~340B</td>
+                <td>8.12</td>
+                <td><span class="rank-badge rank-4">4</span></td>
+              </tr>
+              <tr>
+                <td>Llama 3.1 70B</td>
+                <td>70B</td>
+                <td>7.88</td>
+                <td><span class="rank-badge rank-4">5</span></td>
+              </tr>
+              <tr>
+                <td>Mistral 7B (base)</td>
+                <td>7B</td>
+                <td>7.03</td>
+                <td><span class="rank-badge rank-4">6</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Bar chart -->
+        <div class="chart-wrap reveal" style="transition-delay:.15s">
+          <div class="chart-title">NQD Score by Model</div>
+          <canvas id="resultsChart" height="280"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ QUALITATIVE EXAMPLES ═════════════════════════════════════════ -->
+  <section id="examples">
+    <div class="container">
+      <p class="section-label">Qualitative Analysis</p>
+      <h2 class="section-title">Sample Generated Plots</h2>
+      <div class="section-divider"></div>
+
+      <div class="examples-grid">
+        <!-- Drama example -->
+        <div class="example-card reveal">
+          <div class="example-genre">🎭 Drama</div>
+
+          <div class="example-label">Input Premise</div>
+          <div class="example-premise">
+            A retired concert pianist discovers her late daughter's unfinished composition
+            hidden inside a secondhand piano — and must decide whether to complete it or let
+            the silence speak for itself.
+          </div>
+
+          <div class="example-label">Generated Plot</div>
+          <p class="example-plot">
+            Eleanor's hands tremble as she lifts the yellowed score from the piano bench —
+            sixteen bars in her daughter's unmistakable hand, then silence on the staff.
+            Each night she sits at the Steinway, the notation blurring through tears she
+            refuses to shed, bargaining with memory as much as music. When a young conservatory
+            student discovers the manuscript online after Eleanor photographs it by accident,
+            the world's hunger for closure forces her to confront whether completion is love
+            or erasure — and whether grief's truest monument is sound or its deliberate absence.
+          </p>
+        </div>
+
+        <!-- Thriller example -->
+        <div class="example-card reveal" style="transition-delay:.1s">
+          <div class="example-genre">🔪 Thriller</div>
+
+          <div class="example-label">Input Premise</div>
+          <div class="example-premise">
+            A forensic linguist is hired to authenticate a ransom note — only to recognize
+            the phrasing patterns as her own from a novel she published under a pseudonym
+            fifteen years ago.
+          </div>
+
+          <div class="example-label">Generated Plot</div>
+          <p class="example-plot">
+            Dr. Mara Voss flags the note's subordinate clause inversions before she
+            registers whose they are: hers, from Chapter 9 of <em>The Quiet Hostage</em>,
+            a novel she thought was buried. Someone has studied her fiction like a playbook,
+            and the kidnapped girl's life now runs on a clock set to Mara's own plot structure.
+            Racing to predict the next chapter before her shadow self does, she must expose
+            her pseudonym — and the desperate decade that spawned it — to the only detective
+            who might believe that a thriller novelist is simultaneously the key witness
+            and the unwilling co-author of a real crime.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CITATION ═════════════════════════════════════════════════════ -->
+  <section id="citation">
+    <div class="container">
+      <p class="section-label">Reference</p>
+      <h2 class="section-title">Citation</h2>
+      <div class="section-divider"></div>
+
+      <div class="bibtex-wrap reveal">
+        <div class="bibtex-header">
+          <span class="bibtex-lang">BibTeX</span>
+          <button class="copy-btn" id="copyBtn" onclick="copyBibtex()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <pre class="bibtex" id="bibtexBlock"><span class="brace">@article{</span><span class="key">thorat2026plottwist</span><span class="brace">,</span>
+  <span class="field">title</span>     = <span class="brace">{</span><span class="val">PlotTwist: A Creative Plot Generation Framework with Small Language Models</span><span class="brace">},</span>
+  <span class="field">author</span>    = <span class="brace">{</span><span class="val">Thorat, Abhinav and Kolla, Ravi and Goel, Jyotin and Pedanekar, Niranjan</span><span class="brace">},</span>
+  <span class="field">journal</span>   = <span class="brace">{</span><span class="val">arXiv preprint arXiv:2603.16410</span><span class="brace">},</span>
+  <span class="field">year</span>      = <span class="brace">{</span><span class="val">2026</span><span class="brace">}</span>
+<span class="brace">}</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ═══════════════════════════════════════════════════════ -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">Sony Research India · 2026</div>
+      <ul class="footer-links">
+        <li><a href="#">arXiv</a></li>
+        <li><a href="#">GitHub</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- ══ SCRIPTS ══════════════════════════════════════════════════════ -->
+  <script>
+    /* ── Film-strip holes ──────────────────────────────────────── */
+    function buildFilmstrip(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const count = Math.ceil(window.innerWidth / 48) + 2;
+      el.innerHTML = Array(count).fill('<div class="filmstrip-hole"></div>').join('');
+    }
+    buildFilmstrip('filmstripHoles');
+    buildFilmstrip('filmstripHolesBottom');
+
+    /* ── Scroll-reveal ────────────────────────────────────────── */
+    const reveals = document.querySelectorAll('.reveal');
+    const revealObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: 0.12 });
+    reveals.forEach(r => revealObs.observe(r));
+
+    /* ── Chart.js ─────────────────────────────────────────────── */
+    (function initChart() {
+      const ctx = document.getElementById('resultsChart').getContext('2d');
+      const labels = ['PlotTwist\n(Ours)', 'GPT-4.1', 'Claude 3.5\nSonnet', 'Gemini\n1.5 Pro', 'Llama 3.1\n70B', 'Mistral 7B\n(base)'];
+      const scores = [8.74, 8.41, 8.29, 8.12, 7.88, 7.03];
+      const bgColors = scores.map((_, i) =>
+        i === 0 ? 'rgba(13,148,136,.9)' : 'rgba(100,116,139,.55)'
+      );
+      const borderColors = scores.map((_, i) =>
+        i === 0 ? '#0d9488' : '#94a3b8'
+      );
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'NQD Score',
+            data: scores,
+            backgroundColor: bgColors,
+            borderColor: borderColors,
+            borderWidth: 2,
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => ` NQD Score: ${ctx.parsed.y.toFixed(2)}`
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: 6.5,
+              max: 9.2,
+              ticks: {
+                font: { family: 'Inter', size: 11 },
+                color: '#64748b',
+              },
+              grid: { color: 'rgba(226,232,240,.7)' },
+              title: {
+                display: true,
+                text: 'NQD Score (avg. across 5 dimensions)',
+                font: { family: 'Inter', size: 11 },
+                color: '#94a3b8',
+              }
+            },
+            x: {
+              ticks: {
+                font: { family: 'Inter', size: 11 },
+                color: '#64748b',
+              },
+              grid: { display: false },
+            }
+          }
+        }
+      });
+    })();
+
+    /* ── Copy BibTeX ──────────────────────────────────────────── */
+    function copyBibtex() {
+      const rawText = `@article{thorat2026plottwist,\n  title     = {PlotTwist: A Creative Plot Generation Framework with Small Language Models},\n  author    = {Thorat, Abhinav and Kolla, Ravi and Goel, Jyotin and Pedanekar, Niranjan},\n  journal   = {arXiv preprint arXiv:2603.16410},\n  year      = {2026}\n}`;
+      navigator.clipboard.writeText(rawText).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.classList.add('copied');
+        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy`;
+        }, 2200);
+      });
+    }
+
+    /* ── Active nav link on scroll ────────────────────────────── */
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const navObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          navLinks.forEach(l => l.style.color = '');
+          const active = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+          if (active) active.style.color = 'var(--teal)';
+        }
+      });
+    }, { threshold: 0.4 });
+    sections.forEach(s => navObs.observe(s));
+  </script>
+</body>
+</html>
