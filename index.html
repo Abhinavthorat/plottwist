@@ -475,7 +475,18 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
-      align-items: start;
+      align-items: stretch;
+    }
+
+    .results-table-wrap,
+    .chart-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-wrap canvas {
+      flex: 1;
+      min-height: 0;
     }
 
     /* Table */
@@ -1004,7 +1015,7 @@
         <!-- Bar chart -->
         <div class="chart-wrap reveal" style="transition-delay:.15s">
           <div class="chart-title">NQD Score by Model</div>
-          <canvas id="resultsChart" height="280"></canvas>
+          <canvas id="resultsChart"></canvas>
         </div>
       </div>
     </div>
@@ -1152,7 +1163,7 @@
         },
         options: {
           responsive: true,
-          maintainAspectRatio: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
             tooltip: {
