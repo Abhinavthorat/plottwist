@@ -36,6 +36,8 @@
       color: var(--body);
       line-height: 1.65;
       font-size: 16px;
+      overflow-wrap: break-word;
+      max-width: 100%;
     }
 
     h1, h2, h3, h4 {
@@ -138,12 +140,12 @@
       font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0;
     }
 
-    .btn-row { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 2rem; }
+    .btn-row { display: flex; flex-wrap: nowrap; gap: .75rem; margin-bottom: 2rem; width: 100%; max-width: 100%; overflow-x: auto; }
     .btn {
-      display: inline-flex; align-items: center; gap: .45rem;
+      display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
       padding: .55rem 1.4rem; border-radius: 999px; font-size: .875rem;
       font-weight: 600; cursor: pointer; transition: transform .18s, box-shadow .18s, background .18s;
-      text-decoration: none;
+      text-decoration: none; white-space: nowrap; flex: 1;
     }
     .btn:hover { transform: translateY(-2px); text-decoration: none; }
     .btn-primary { background: var(--teal); color: #fff; box-shadow: 0 4px 16px rgba(13,148,136,.35); }
@@ -203,7 +205,7 @@
     .pipeline-img-wrap img { width: 100%; border-radius: var(--radius); }
 
     .cards-grid {
-      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 1rem; margin-bottom: 1.5rem;
     }
     .component-card {
@@ -248,9 +250,8 @@
     .nqd-intro { font-size: .95rem; color: var(--body); line-height: 1.65; margin-bottom: .65rem; }
     .nqd-intro strong { color: #f1f5f9; font-weight: 600; }
 
-    /* 2-column NQD bar grid */
     .nqd-bars {
-      display: grid; grid-template-columns: 1fr 1fr; gap: .65rem 1.25rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: .65rem 1.25rem;
     }
     .nqd-item { display: flex; align-items: center; gap: .6rem; }
     .nqd-label { font-size: .8rem; color: var(--body); white-space: nowrap; min-width: 0; flex-shrink: 0; }
@@ -413,8 +414,6 @@
     /* ── Responsive ───────────────────────────────────────────────── */
     @media (max-width: 768px) {
       .nav-links { display: none; }
-      /* cards wrap to 2-col, never 1-col, above 480px */
-      .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .nqd-grid { grid-template-columns: 1fr; }
       .results-cols { grid-template-columns: 1fr; }
       .examples-grid { grid-template-columns: 1fr; }
@@ -425,11 +424,12 @@
     }
 
     @media (max-width: 480px) {
-      .stat-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .stat-row { grid-template-columns: 1fr; }
       .cards-grid { grid-template-columns: 1fr; }
       .val-grid { grid-template-columns: 1fr; }
       .nqd-bars { grid-template-columns: 1fr; }
       .stat-num { font-size: 1.6rem; }
+      .btn { padding: .55rem 0.5rem; font-size: 0.75rem; }
     }
   </style>
 </head>
@@ -465,21 +465,16 @@
         Framework with Small Language Models
       </h1>
 
-      <div class="authors">
-        <a href="#" aria-label="Abhinav Thorat">Abhinav Thorat<sup>1</sup></a>
-        <a href="#" aria-label="Ravi Kolla">Ravi Kolla<sup>1</sup></a>
-        <a href="#" aria-label="Jyotin Goel">Jyotin Goel<sup>1</sup></a>
-        <a href="#" aria-label="Niranjan Pedanekar">Niranjan Pedanekar<sup>1</sup></a>
-      </div>
-
-      <div class="affiliation">
-        <div class="affiliation-logo">S</div>
-        <span><sup>1</sup> Sony Research India</span>
+      <div class="authors" style="display: block; margin-bottom: 2.25rem;">
+        <p style="font-size: 1.05rem; font-weight: 500; color: #cbd5e1; margin-bottom: 0.3rem;">Abhinav Thorat*, Ravi Kolla*, Jyotin Goel, Niranjan Pedanekar</p>
+        <p style="font-size: 0.95rem; color: #94a3b8; margin-bottom: 0.5rem;">Sony Research India</p>
+        <p style="font-size: 0.8em; color: var(--muted);">* equal contribution</p>
       </div>
 
       <div class="btn-row">
-        <a href="#" class="btn btn-primary"><span>📄</span> Paper</a>
-        <a href="#citation" class="btn btn-outline"><span>📖</span> Cite</a>
+        <a href="https://arxiv.org/abs/2603.16410" class="btn btn-primary"><span>📄</span> Paper</a>
+        <a href="https://github.com/abhinavthorat/plottwist" class="btn btn-primary"><span>💻</span> Code</a>
+        <a href="#" class="btn btn-outline" style="pointer-events: none; opacity: 0.6; cursor: not-allowed;"><span>🤗</span> Demo (Coming Soon)</a>
       </div>
 
       <!-- Stat row -->
@@ -806,9 +801,8 @@
     <div class="footer-inner">
       <div class="footer-brand">Sony Research India · 2026</div>
       <ul class="footer-links">
-        <li><a href="#">arXiv</a></li>
-        <li><a href="#">GitHub</a></li>
-        <li><a href="#">Contact</a></li>
+        <li><a href="https://arxiv.org/abs/2603.16410">Paper</a></li>
+        <li><a href="https://github.com/abhinavthorat/plottwist">Code</a></li>
       </ul>
     </div>
   </footer>

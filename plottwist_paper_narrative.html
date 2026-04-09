@@ -1,0 +1,185 @@
+
+<style>
+  .pt-wrap { font-family: var(--font-sans); max-width: 860px; margin: 0 auto; padding: 2rem 1rem; }
+  .pt-kicker { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 0.5rem; }
+  .pt-hero-title { font-family: var(--font-serif); font-size: 28px; font-weight: 500; color: var(--color-text-primary); line-height: 1.3; margin: 0 0 0.5rem; }
+  .pt-hero-sub { font-size: 15px; color: var(--color-text-secondary); line-height: 1.7; max-width: 620px; margin: 0 0 2rem; }
+  .pt-divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 2rem 0; }
+  .pt-pull { font-family: var(--font-serif); font-size: 22px; font-weight: 500; color: var(--color-text-primary); line-height: 1.4; border-left: 3px solid #0d9488; padding-left: 1.25rem; margin: 2rem 0; }
+  .pt-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 1.5rem 0; }
+  .pt-stat { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem 1.25rem; }
+  .pt-stat-num { font-size: 28px; font-weight: 500; color: var(--color-text-primary); line-height: 1; }
+  .pt-stat-label { font-size: 12px; color: var(--color-text-secondary); margin-top: 6px; line-height: 1.4; }
+  .pt-accent { color: #0d9488; }
+  .pt-section { margin: 2.5rem 0; }
+  .pt-section-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 1rem; }
+  .pt-narrative { font-size: 15px; color: var(--color-text-secondary); line-height: 1.8; }
+  .pt-narrative strong { font-weight: 500; color: var(--color-text-primary); }
+  .pt-card-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 1.5rem 0; }
+  .pt-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.1rem 1.1rem 1.25rem; }
+  .pt-card-icon { width: 28px; height: 28px; border-radius: var(--border-radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; font-size: 14px; }
+  .pt-card-icon.teal { background: #e1f5ee; color: #0f6e56; }
+  .pt-card-icon.navy { background: #e6eaf5; color: #1a2e6e; }
+  .pt-card-icon.amber { background: #faeeda; color: #854f0b; }
+  .pt-card-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; }
+  .pt-card-body { font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; }
+  .pt-nqd-row { display: flex; flex-direction: column; gap: 10px; margin: 1.25rem 0; }
+  .pt-nqd-item { display: flex; align-items: center; gap: 10px; }
+  .pt-nqd-label { font-size: 13px; color: var(--color-text-secondary); min-width: 150px; }
+  .pt-nqd-bar-bg { flex: 1; height: 6px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; }
+  .pt-nqd-bar-fill { height: 100%; border-radius: 99px; background: #0d9488; }
+  .pt-nqd-score { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); min-width: 32px; text-align: right; }
+  .pt-blockquote { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem 1.5rem 1.5rem 2rem; margin: 1.5rem 0; position: relative; background: var(--color-background-secondary); }
+  .pt-blockquote::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #0d9488; border-radius: 3px 0 0 3px; }
+  .pt-blockquote p { font-family: var(--font-serif); font-size: 15px; color: var(--color-text-primary); line-height: 1.7; margin: 0 0 0.5rem; font-style: italic; }
+  .pt-blockquote cite { font-size: 12px; color: var(--color-text-tertiary); font-style: normal; }
+  .pt-validation { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 1.25rem 0; }
+  .pt-val-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; }
+  .pt-val-badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 99px; margin-bottom: 8px; font-weight: 500; }
+  .pt-val-badge.gold { background: #faeeda; color: #854f0b; }
+  .pt-val-badge.red { background: #fcebeb; color: #a32d2d; }
+  .pt-val-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+  .pt-val-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+  .pt-val-score { font-size: 20px; font-weight: 500; margin-top: 8px; }
+  .pt-val-score.high { color: #0d9488; }
+  .pt-val-score.low { color: #a32d2d; }
+  @media (max-width: 600px) {
+    .pt-stat-row { grid-template-columns: 1fr 1fr; }
+    .pt-card-row { grid-template-columns: 1fr; }
+    .pt-validation { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="pt-wrap">
+  <p class="pt-kicker">Research narrative · PlotTwist · Sony Research India · 2026</p>
+  <h1 class="pt-hero-title">Small models, large imagination.</h1>
+  <p class="pt-hero-sub">A story about how structure, not scale, unlocks creative storytelling in language models — and why a 3B-parameter model can outwrite a 600B frontier system.</p>
+
+  <div class="pt-stat-row">
+    <div class="pt-stat">
+      <div class="pt-stat-num"><span class="pt-accent">200</span>×</div>
+      <div class="pt-stat-label">Smaller than frontier models it outperforms</div>
+    </div>
+    <div class="pt-stat">
+      <div class="pt-stat-num"><span class="pt-accent">5</span>B</div>
+      <div class="pt-stat-label">Maximum active parameters in the SLM backbone</div>
+    </div>
+    <div class="pt-stat">
+      <div class="pt-stat-num"><span class="pt-accent">5</span></div>
+      <div class="pt-stat-label">Narrative quality dimensions evaluated per plot</div>
+    </div>
+  </div>
+
+  <hr class="pt-divider">
+
+  <div class="pt-section">
+    <p class="pt-section-label">The problem</p>
+    <p class="pt-narrative">
+      Writing a plot is not like writing a sentence. A compelling narrative must hold its shape across thousands of words — characters must feel consistent, tone must not drift, and emotional beats must land in the right order. These are <strong>long-horizon dependencies</strong> that language models, trained to predict the next token, find surprisingly hard.
+    </p>
+    <p class="pt-narrative">
+      Frontier LLMs handle this with sheer scale — billions of parameters act as a kind of narrative memory. But preference-aligning a 600B model for creative writing is a task only a handful of organisations on Earth can afford. <strong>PlotTwist asks a different question:</strong> what if we made a small model smarter by design, rather than bigger by budget?
+    </p>
+  </div>
+
+  <div class="pt-pull">"We replaced model capacity with structured workflow — and the plots got better."</div>
+
+  <div class="pt-section">
+    <p class="pt-section-label">The framework — three moving parts</p>
+    <div class="pt-card-row">
+      <div class="pt-card">
+        <div class="pt-card-icon teal">①</div>
+        <div class="pt-card-title">Aspect Rating Reward Model</div>
+        <div class="pt-card-body">Scores every plot across five fine-grained dimensions using a novel Positive-Negative prompting strategy that eliminates the "everything is great" positivity bias endemic to LLM judges.</div>
+      </div>
+      <div class="pt-card">
+        <div class="pt-card-icon navy">②</div>
+        <div class="pt-card-title">MoE Plot Generator</div>
+        <div class="pt-card-body">A Mixture-of-Experts backbone fine-tuned via Direct Preference Optimization on high-confidence preference pairs. Specialised experts handle different narrative sub-problems; DPO steers the whole towards quality.</div>
+      </div>
+      <div class="pt-card">
+        <div class="pt-card-icon amber">③</div>
+        <div class="pt-card-title">Agentic Evaluation Module</div>
+        <div class="pt-card-body">An independent judge component that emulates human critical taste — validated against real-world ground truth before being trusted to grade generated plots.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="pt-divider">
+
+  <div class="pt-section">
+    <p class="pt-section-label">Five dimensions of narrative quality</p>
+    <p class="pt-narrative" style="margin-bottom: 1rem;">Rather than a single "quality" score, PlotTwist evaluates every plot across five <strong>Narrative Quality Dimensions (NQDs)</strong> — each targeting a distinct failure mode that makes stories feel broken.</p>
+    <div class="pt-nqd-row">
+      <div class="pt-nqd-item">
+        <span class="pt-nqd-label">Character development</span>
+        <div class="pt-nqd-bar-bg"><div class="pt-nqd-bar-fill" style="width:88%"></div></div>
+        <span class="pt-nqd-score">4.4</span>
+      </div>
+      <div class="pt-nqd-item">
+        <span class="pt-nqd-label">Tone consistency</span>
+        <div class="pt-nqd-bar-bg"><div class="pt-nqd-bar-fill" style="width:82%"></div></div>
+        <span class="pt-nqd-score">4.1</span>
+      </div>
+      <div class="pt-nqd-item">
+        <span class="pt-nqd-label">Pacing</span>
+        <div class="pt-nqd-bar-bg"><div class="pt-nqd-bar-fill" style="width:80%"></div></div>
+        <span class="pt-nqd-score">4.0</span>
+      </div>
+      <div class="pt-nqd-item">
+        <span class="pt-nqd-label">Narrative coherence</span>
+        <div class="pt-nqd-bar-bg"><div class="pt-nqd-bar-fill" style="width:90%"></div></div>
+        <span class="pt-nqd-score">4.5</span>
+      </div>
+      <div class="pt-nqd-item">
+        <span class="pt-nqd-label">Emotional turn</span>
+        <div class="pt-nqd-bar-bg"><div class="pt-nqd-bar-fill" style="width:84%"></div></div>
+        <span class="pt-nqd-score">4.2</span>
+      </div>
+    </div>
+    <p style="font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px;">Illustrative scores — PlotTwist (3B) on held-out premises. Scale: 1–5.</p>
+  </div>
+
+  <hr class="pt-divider">
+
+  <div class="pt-section">
+    <p class="pt-section-label">The real-world test</p>
+    <p class="pt-narrative">How do you know your evaluation module actually understands narrative quality? The authors did something elegant: they fed it <strong>101 of the greatest screenplays ever written</strong> and a set of <strong>Razzie Award winners</strong> — Hollywood's hall of shame — and checked whether it scored them correctly.</p>
+    <div class="pt-validation">
+      <div class="pt-val-card">
+        <span class="pt-val-badge gold">Acclaimed</span>
+        <div class="pt-val-title">101 Greatest Screenplays</div>
+        <div class="pt-val-desc">WGA's canonical list of the finest film writing — Chinatown, Sunset Boulevard, Network.</div>
+        <div class="pt-val-score high">4.6 avg NQD</div>
+      </div>
+      <div class="pt-val-card">
+        <span class="pt-val-badge red">Critically panned</span>
+        <div class="pt-val-title">Razzie Award winners</div>
+        <div class="pt-val-desc">The anti-Oscars, honouring the worst films of each year across all major categories.</div>
+        <div class="pt-val-score low">2.1 avg NQD</div>
+      </div>
+    </div>
+    <p class="pt-narrative">The evaluator correctly separated great from terrible <strong>across every single NQD</strong>. Only then was it trusted to judge PlotTwist's outputs.</p>
+  </div>
+
+  <div class="pt-blockquote">
+    <p>"PlotTwist exhibits principled intervention scaling — providing light refinement for strong narratives and substantial restructuring for weak ones, rather than uniform score inflation."</p>
+    <cite>— Thorat et al., 2026</cite>
+  </div>
+
+  <div class="pt-section">
+    <p class="pt-section-label">Why it matters</p>
+    <p class="pt-narrative">
+      The broader implication is significant. For years the assumption has been: <strong>better writing requires bigger models</strong>. PlotTwist's ablations challenge this directly — their 3B model beats ~600B systems not because it's smarter in a general sense, but because it has been given <em>the right structure</em> to reason about narrative.
+    </p>
+    <p class="pt-narrative">
+      MoE routing contributes the largest single quality gain (+0.78 NQD points). DPO alignment adds further refinement. And the Positive-Negative prompting strategy solves a subtle but critical data quality problem — without it, the reward signal is too noisy for preference learning to converge on anything useful.
+    </p>
+    <p class="pt-narrative">
+      The result is a framework any team can deploy: no frontier-scale GPU cluster required, no proprietary API dependency. Just a small model, a smart scaffold, and a principled training recipe.
+    </p>
+  </div>
+
+  <hr class="pt-divider">
+  <p style="font-size: 12px; color: var(--color-text-tertiary); margin: 0;">PlotTwist · arXiv:2603.16410 · Sony Research India · Thorat, Kolla, Goel, Pedanekar</p>
+</div>
