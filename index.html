@@ -6,25 +6,26 @@
   <title>PlotTwist: A Creative Plot Generation Framework with Small Language Models</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     /* ── Reset & Base ─────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --navy:   #0f172a;
-      --teal:   #0d9488;
-      --teal-light: #14b8a6;
-      --teal-pale:  rgba(13,148,136,.18);
-      --bg:     #111827;
-      --card:   #1f2937;
-      --body:   #d1d5db;
-      --muted:  #9ca3af;
-      --border: #374151;
-      --radius: 12px;
-      --shadow: 0 4px 24px rgba(0,0,0,.3);
-      --shadow-lg: 0 12px 48px rgba(0,0,0,.4);
+      --navy:        #0f172a;
+      --teal:        #0d9488;
+      --teal-light:  #14b8a6;
+      --teal-pale:   rgba(13,148,136,.18);
+      --bg:          #111827;
+      --card:        #1f2937;
+      --card2:       #161e2b;
+      --body:        #d1d5db;
+      --muted:       #9ca3af;
+      --border:      #374151;
+      --radius:      12px;
+      --shadow:      0 4px 24px rgba(0,0,0,.35);
+      --shadow-lg:   0 12px 48px rgba(0,0,0,.45);
     }
 
     html { scroll-behavior: smooth; }
@@ -43,733 +44,383 @@
       line-height: 1.25;
     }
 
-    a { color: var(--teal); text-decoration: none; }
+    a { color: var(--teal-light); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
     img { max-width: 100%; display: block; }
 
     /* ── Navbar ───────────────────────────────────────────────────── */
     nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      position: sticky; top: 0; z-index: 100;
       background: rgba(17,24,39,.96);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 0 2rem;
     }
-
     .nav-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
       height: 56px;
     }
-
     .nav-brand {
-      font-family: 'Playfair Display', serif;
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: #f1f5f9;
-      display: flex;
-      align-items: center;
-      gap: .5rem;
+      font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem;
+      color: #f1f5f9; display: flex; align-items: center; gap: .5rem;
     }
-
-    .nav-brand .dot { color: var(--teal); }
-
-    .nav-links {
-      display: flex;
-      gap: 1.75rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      font-size: .875rem;
-      font-weight: 500;
-      color: var(--muted);
-      transition: color .2s;
-    }
-
-    .nav-links a:hover { color: var(--teal); text-decoration: none; }
+    .nav-brand .dot { color: var(--teal-light); }
+    .nav-links { display: flex; gap: 1.75rem; list-style: none; }
+    .nav-links a { font-size: .875rem; font-weight: 500; color: var(--muted); transition: color .2s; }
+    .nav-links a:hover { color: var(--teal-light); text-decoration: none; }
 
     /* ── Container ────────────────────────────────────────────────── */
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 2rem;
-    }
-
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
     section { padding: 7rem 0; }
 
     .section-label {
-      font-size: .75rem;
-      font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--teal);
-      margin-bottom: .75rem;
+      font-size: .72rem; font-weight: 600; letter-spacing: .13em;
+      text-transform: uppercase; color: var(--teal-light); margin-bottom: .75rem;
     }
-
-    .section-title {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-
+    .section-title { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
     .section-divider {
-      width: 3.5rem;
-      height: 3px;
-      background: var(--teal);
-      border-radius: 2px;
-      margin-bottom: 2.5rem;
+      width: 3.5rem; height: 3px; background: var(--teal);
+      border-radius: 2px; margin-bottom: 2.5rem;
+    }
+
+    /* ── Film-strip ───────────────────────────────────────────────── */
+    .filmstrip {
+      height: 26px;
+      background: repeating-linear-gradient(90deg, transparent 0, transparent 18px, rgba(255,255,255,.05) 18px, rgba(255,255,255,.05) 20px);
+      border-top: 5px solid rgba(255,255,255,.05);
+      border-bottom: 5px solid rgba(255,255,255,.05);
+      display: flex; align-items: center; overflow: hidden;
+    }
+    .filmstrip-holes { display: flex; width: 100%; }
+    .filmstrip-hole {
+      width: 18px; height: 13px;
+      background: var(--navy); border-radius: 3px;
+      margin: 0 13px; flex-shrink: 0;
     }
 
     /* ── Hero ─────────────────────────────────────────────────────── */
-    #hero {
-      background: var(--navy);
-      color: #fff;
-      padding: 0;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* Film-strip accent top */
-    .filmstrip {
-      height: 28px;
-      background: repeating-linear-gradient(
-        90deg,
-        transparent 0px,
-        transparent 18px,
-        rgba(255,255,255,.07) 18px,
-        rgba(255,255,255,.07) 20px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        transparent 0px,
-        transparent 32px,
-        rgba(255,255,255,.04) 32px,
-        rgba(255,255,255,.04) 36px
-      );
-      border-top: 6px solid rgba(255,255,255,.06);
-      border-bottom: 6px solid rgba(255,255,255,.06);
-      display: flex;
-      align-items: center;
-      overflow: hidden;
-    }
-
-    .filmstrip-holes {
-      display: flex;
-      gap: 0;
-      width: 100%;
-    }
-
-    .filmstrip-hole {
-      width: 20px;
-      height: 14px;
-      background: var(--navy);
-      border-radius: 3px;
-      margin: 0 14px;
-      flex-shrink: 0;
-    }
-
-    .hero-body {
-      padding: 5.5rem 2rem 6rem;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
+    #hero { background: var(--navy); color: #fff; padding: 0; overflow: hidden; }
+    .hero-body { padding: 5.5rem 2rem 6rem; max-width: 1100px; margin: 0 auto; }
 
     .venue-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      background: rgba(13,148,136,.22);
-      border: 1px solid rgba(13,148,136,.4);
-      color: var(--teal-light);
-      font-size: .8rem;
-      font-weight: 600;
-      letter-spacing: .06em;
-      padding: .3rem .9rem;
-      border-radius: 999px;
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(13,148,136,.2); border: 1px solid rgba(13,148,136,.35);
+      color: var(--teal-light); font-size: .78rem; font-weight: 600;
+      letter-spacing: .06em; padding: .3rem .9rem; border-radius: 999px;
       margin-bottom: 1.5rem;
     }
-
-    .venue-badge svg { width: 14px; height: 14px; }
+    .venue-badge svg { width: 13px; height: 13px; }
 
     h1.paper-title {
-      font-size: clamp(2rem, 4.5vw, 3.2rem);
-      font-weight: 900;
-      color: #f1f5f9;
-      max-width: 820px;
-      margin-bottom: 1.75rem;
-      line-height: 1.18;
+      font-size: clamp(2rem, 4.5vw, 3.1rem); font-weight: 900;
+      color: #f1f5f9; max-width: 800px; margin-bottom: 1.75rem; line-height: 1.18;
     }
-
     h1.paper-title .highlight { color: var(--teal-light); }
 
     .authors {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .5rem 1.25rem;
-      margin-bottom: 1rem;
-      font-size: .95rem;
+      display: flex; flex-wrap: wrap; gap: .5rem 1.25rem;
+      margin-bottom: 1rem; font-size: .95rem;
     }
-
-    .authors a {
-      color: #cbd5e1;
-      font-weight: 500;
-      transition: color .2s;
-    }
-
+    .authors a { color: #cbd5e1; font-weight: 500; transition: color .2s; }
     .authors a:hover { color: var(--teal-light); text-decoration: none; }
-
     .authors sup { font-size: .65em; color: var(--teal-light); margin-left: 1px; }
 
     .affiliation {
-      display: flex;
-      align-items: center;
-      gap: .55rem;
-      color: #94a3b8;
-      font-size: .875rem;
-      margin-bottom: 2.25rem;
+      display: flex; align-items: center; gap: .55rem;
+      color: #94a3b8; font-size: .875rem; margin-bottom: 2.25rem;
     }
-
     .affiliation-logo {
-      width: 22px;
-      height: 22px;
+      width: 22px; height: 22px;
       background: linear-gradient(135deg, var(--teal) 0%, #0891b2 100%);
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 800;
-      color: #fff;
-      flex-shrink: 0;
+      border-radius: 5px; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0;
     }
 
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .75rem;
-      margin-bottom: 3.5rem;
-    }
-
+    .btn-row { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 3.5rem; }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .45rem;
-      padding: .55rem 1.4rem;
-      border-radius: 999px;
-      font-size: .875rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform .18s, box-shadow .18s, background .18s;
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .55rem 1.4rem; border-radius: 999px; font-size: .875rem;
+      font-weight: 600; cursor: pointer; transition: transform .18s, box-shadow .18s, background .18s;
       text-decoration: none;
     }
-
     .btn:hover { transform: translateY(-2px); text-decoration: none; }
-
-    .btn-primary {
-      background: var(--teal);
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(13,148,136,.35);
-    }
-
-    .btn-primary:hover {
-      background: var(--teal-light);
-      box-shadow: 0 6px 24px rgba(13,148,136,.45);
-    }
-
+    .btn-primary { background: var(--teal); color: #fff; box-shadow: 0 4px 16px rgba(13,148,136,.35); }
+    .btn-primary:hover { background: var(--teal-light); box-shadow: 0 6px 24px rgba(13,148,136,.45); }
     .btn-outline {
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(255,255,255,.2);
-      color: #e2e8f0;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.2); color: #e2e8f0;
     }
+    .btn-outline:hover { background: rgba(255,255,255,.13); box-shadow: 0 4px 14px rgba(0,0,0,.25); }
 
-    .btn-outline:hover {
-      background: rgba(255,255,255,.14);
-      box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    /* Stat row (narrative-inspired) */
+    .stat-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
     }
-
-    /* Teaser figure */
-    .teaser-wrap {
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: var(--radius);
-      overflow: hidden;
+    .stat-card {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: var(--radius); padding: 1.25rem 1.5rem;
     }
-
-    .teaser-placeholder {
-      height: 320px;
-      background: linear-gradient(135deg,
-        rgba(13,148,136,.15) 0%,
-        rgba(15,23,42,.6) 50%,
-        rgba(8,145,178,.1) 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      position: relative;
-      overflow: hidden;
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem; font-weight: 700; line-height: 1; color: #f1f5f9;
     }
-
-    .teaser-placeholder::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230d9488' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-
-    .teaser-icon {
-      font-size: 3.5rem;
-      opacity: .6;
-    }
-
-    .teaser-label {
-      color: rgba(255,255,255,.5);
-      font-size: .875rem;
-      font-weight: 500;
-    }
-
-    .teaser-caption {
-      padding: 1rem 1.5rem;
-      font-size: .875rem;
-      color: #94a3b8;
-      font-style: italic;
-      border-top: 1px solid rgba(255,255,255,.08);
-    }
-
-    .teaser-caption strong { color: #cbd5e1; font-style: normal; }
+    .stat-num .accent { color: var(--teal-light); }
+    .stat-label { font-size: .8rem; color: #94a3b8; margin-top: .5rem; line-height: 1.45; }
 
     /* ── Abstract ─────────────────────────────────────────────────── */
     #abstract { background: var(--bg); }
-
     .abstract-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2.5rem 3rem;
-      box-shadow: var(--shadow);
-      border-left: 4px solid var(--teal);
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2.5rem 3rem;
+      box-shadow: var(--shadow); border-left: 4px solid var(--teal);
+    }
+    .abstract-card p {
+      text-align: justify; font-size: 1.05rem; line-height: 1.85; color: var(--body);
     }
 
-    .abstract-card p {
-      text-align: justify;
-      font-size: 1.05rem;
-      line-height: 1.85;
-      color: var(--body);
+    /* Pull quote */
+    .pull-quote {
+      border-left: 3px solid var(--teal);
+      padding: 1rem 1.5rem; margin: 2.5rem 0;
+      background: rgba(13,148,136,.07); border-radius: 0 var(--radius) var(--radius) 0;
     }
+    .pull-quote p {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: 1.2rem; color: #e2e8f0; line-height: 1.55; margin-bottom: .4rem;
+    }
+    .pull-quote cite { font-size: .8rem; color: var(--muted); font-style: normal; }
 
     /* ── Framework ────────────────────────────────────────────────── */
     #framework { background: var(--card); }
 
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-      margin-bottom: 3rem;
-    }
-
-    .component-card {
+    .pipeline-img-wrap {
+      border-radius: var(--radius); overflow: hidden;
+      border: 1px solid var(--border); margin-bottom: 2.5rem;
       background: var(--navy);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2rem 1.75rem;
+    }
+    .pipeline-img-wrap img { width: 100%; border-radius: var(--radius); }
+
+    .cards-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; margin-bottom: 2.5rem;
+    }
+    .component-card {
+      background: var(--navy); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem 1.75rem;
       transition: transform .22s, box-shadow .22s, border-color .22s;
-      position: relative;
-      overflow: hidden;
+      position: relative; overflow: hidden;
     }
-
     .component-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: var(--teal);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform .3s;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--teal); transform: scaleX(0); transform-origin: left; transition: transform .3s;
     }
-
     .component-card:hover::before { transform: scaleX(1); }
+    .component-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--teal); }
 
-    .component-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-lg);
-      border-color: var(--teal);
+    .card-icon-box {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; margin-bottom: 1rem;
     }
-
-    .card-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
+    .card-icon-box.teal { background: rgba(13,148,136,.2); color: var(--teal-light); }
+    .card-icon-box.navy { background: rgba(99,102,241,.2); color: #a5b4fc; }
+    .card-icon-box.amber { background: rgba(245,158,11,.15); color: #fcd34d; }
 
     .card-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #f1f5f9;
-      margin-bottom: .75rem;
+      font-family: 'Playfair Display', serif; font-size: 1.05rem;
+      font-weight: 700; color: #f1f5f9; margin-bottom: .7rem;
     }
+    .card-body { font-size: .88rem; color: var(--muted); line-height: 1.7; }
 
-    .card-body {
-      font-size: .9rem;
-      color: var(--muted);
-      line-height: 1.7;
+    .approach-img-wrap {
+      border-radius: var(--radius); overflow: hidden;
+      border: 1px solid var(--border);
     }
+    .approach-img-wrap img { width: 100%; }
 
-    .pipeline-wrap {
-      background: var(--navy);
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      min-height: 280px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 1rem;
-      color: var(--muted);
+    /* ── NQD Section ──────────────────────────────────────────────── */
+    #nqd { background: var(--bg); }
+
+    .nqd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+
+    .nqd-intro { font-size: 1rem; color: var(--body); line-height: 1.8; margin-bottom: 1.5rem; }
+    .nqd-intro strong { color: #f1f5f9; font-weight: 600; }
+
+    .nqd-bars { display: flex; flex-direction: column; gap: 1rem; }
+    .nqd-item { display: flex; align-items: center; gap: 1rem; }
+    .nqd-label { font-size: .85rem; color: var(--body); min-width: 160px; }
+    .nqd-bar-bg {
+      flex: 1; height: 7px; background: var(--border);
+      border-radius: 99px; overflow: hidden;
     }
+    .nqd-bar-fill { height: 100%; border-radius: 99px; background: var(--teal); }
+    .nqd-score { font-size: .82rem; font-weight: 600; color: var(--teal-light); min-width: 28px; text-align: right; }
+    .nqd-footnote { font-size: .75rem; color: var(--muted); margin-top: 1rem; }
 
-    .pipeline-wrap img {
-      width: 100%;
-      border-radius: var(--radius);
+    /* Validation cards */
+    .val-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .val-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.5rem;
     }
-
-    .pipeline-placeholder-icon { font-size: 2.5rem; opacity: .4; }
-    .pipeline-placeholder-text { font-size: .875rem; font-weight: 500; }
+    .val-badge {
+      display: inline-block; font-size: .72rem; font-weight: 600;
+      padding: .22rem .75rem; border-radius: 999px; margin-bottom: .85rem; letter-spacing: .04em;
+    }
+    .val-badge.gold { background: rgba(245,158,11,.15); color: #fcd34d; }
+    .val-badge.red  { background: rgba(239,68,68,.12); color: #fca5a5; }
+    .val-title { font-size: .95rem; font-weight: 600; color: #f1f5f9; margin-bottom: .4rem; }
+    .val-desc { font-size: .83rem; color: var(--muted); line-height: 1.55; }
+    .val-score { font-size: 2rem; font-weight: 700; margin-top: 1rem; font-family: 'Playfair Display', serif; }
+    .val-score.high { color: var(--teal-light); }
+    .val-score.low  { color: #f87171; }
 
     /* ── Results ──────────────────────────────────────────────────── */
-    #results { background: var(--bg); }
+    #results { background: var(--card); }
 
     .callout-banner {
-      background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
-      color: #fff;
-      border-radius: var(--radius);
-      padding: 1.75rem 2.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      margin-bottom: 2.5rem;
-      box-shadow: var(--shadow-lg);
+      background: linear-gradient(135deg, var(--navy) 0%, #1a2744 100%);
+      color: #fff; border-radius: var(--radius); padding: 1.75rem 2.5rem;
+      display: flex; align-items: center; gap: 1.25rem;
+      margin-bottom: 2.5rem; box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(13,148,136,.25);
     }
-
     .callout-icon { font-size: 2rem; flex-shrink: 0; }
-
     .callout-text {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.2rem;
-      font-weight: 700;
-      line-height: 1.4;
-      color: #f1f5f9;
+      font-family: 'Playfair Display', serif; font-size: 1.15rem;
+      font-weight: 700; line-height: 1.4; color: #f1f5f9;
     }
-
     .callout-text em { color: var(--teal-light); font-style: normal; }
 
-    .results-cols {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      align-items: stretch;
-    }
+    .results-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: stretch; }
+    .results-table-wrap, .chart-wrap { display: flex; flex-direction: column; }
+    .chart-wrap canvas { flex: 1; min-height: 0; }
 
-    .results-table-wrap,
-    .chart-wrap {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .chart-wrap canvas {
-      flex: 1;
-      min-height: 0;
-    }
-
-    /* Table */
     .results-table-wrap {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
+      background: var(--navy); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: .9rem;
-    }
-
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
     thead th {
-      background: var(--navy);
-      color: #e2e8f0;
-      font-weight: 600;
-      padding: .9rem 1.25rem;
-      text-align: left;
-      font-family: 'Inter', sans-serif;
-      font-size: .8rem;
-      letter-spacing: .05em;
-      text-transform: uppercase;
+      background: rgba(0,0,0,.35); color: #e2e8f0; font-weight: 600;
+      padding: .9rem 1.25rem; text-align: left;
+      font-family: 'Inter', sans-serif; font-size: .75rem;
+      letter-spacing: .06em; text-transform: uppercase;
     }
-
-    tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background .15s;
-    }
-
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(13,148,136,.08); }
-
-    td {
-      padding: .85rem 1.25rem;
-      color: var(--body);
-    }
-
-    .ours-row td { background: rgba(13,148,136,.12); font-weight: 600; }
+    tbody tr:hover { background: rgba(13,148,136,.07); }
+    td { padding: .85rem 1.25rem; color: var(--body); }
+    .ours-row td { background: rgba(13,148,136,.1); font-weight: 600; }
     .ours-row td:first-child { color: var(--teal-light); }
 
     .rank-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      font-size: .8rem;
-      font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 50%; font-size: .8rem; font-weight: 700;
     }
-
     .rank-1 { background: var(--teal); color: #fff; }
     .rank-2 { background: #1e3a5f; color: #93c5fd; }
     .rank-3 { background: #451a03; color: #fcd34d; }
     .rank-4 { background: #374151; color: var(--muted); }
 
-    /* Chart */
     .chart-wrap {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.75rem;
-      box-shadow: var(--shadow);
+      background: var(--navy); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 1.75rem; box-shadow: var(--shadow);
     }
-
     .chart-title {
-      font-weight: 600;
-      font-size: .9rem;
-      color: #f1f5f9;
-      margin-bottom: 1.25rem;
-      font-family: 'Playfair Display', serif;
+      font-weight: 600; font-size: .95rem; color: #f1f5f9;
+      margin-bottom: 1.25rem; font-family: 'Playfair Display', serif;
     }
 
-    /* ── Qualitative Examples ────────────────────────────────────── */
-    #examples { background: var(--card); }
-
-    .examples-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-    }
-
+    /* ── Examples ─────────────────────────────────────────────────── */
+    #examples { background: var(--bg); }
+    .examples-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
     .example-card {
-      background: var(--navy);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2rem;
-      transition: box-shadow .22s;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem; transition: box-shadow .22s;
     }
-
     .example-card:hover { box-shadow: var(--shadow-lg); }
-
     .example-genre {
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-      font-size: .75rem;
-      font-weight: 700;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--teal-light);
-      background: var(--teal-pale);
-      padding: .25rem .7rem;
-      border-radius: 999px;
-      margin-bottom: 1.25rem;
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-size: .72rem; font-weight: 700; letter-spacing: .09em;
+      text-transform: uppercase; color: var(--teal-light);
+      background: var(--teal-pale); padding: .22rem .7rem;
+      border-radius: 999px; margin-bottom: 1.25rem;
     }
-
     .example-label {
-      font-size: .75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      margin-bottom: .4rem;
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .09em; color: var(--muted); margin-bottom: .4rem;
     }
-
     .example-premise {
-      font-weight: 600;
-      font-size: .95rem;
-      color: #f1f5f9;
-      margin-bottom: 1.25rem;
-      padding-bottom: 1.25rem;
-      border-bottom: 1px solid var(--border);
+      font-weight: 600; font-size: .95rem; color: #f1f5f9;
+      margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border);
     }
-
-    .example-plot {
-      font-style: italic;
-      font-size: .95rem;
-      color: var(--body);
-      line-height: 1.8;
-    }
-
+    .example-plot { font-style: italic; font-size: .93rem; color: var(--body); line-height: 1.8; }
     .example-plot::before {
-      content: '"';
-      font-size: 2rem;
-      font-family: 'Playfair Display', serif;
-      color: var(--teal);
-      line-height: 0;
-      vertical-align: -.5rem;
-      margin-right: .2rem;
+      content: '\201C'; font-size: 2rem; font-family: 'Playfair Display', serif;
+      color: var(--teal); line-height: 0; vertical-align: -.5rem; margin-right: .2rem;
     }
 
     /* ── Citation ─────────────────────────────────────────────────── */
-    #citation { background: var(--bg); }
-
-    .bibtex-wrap {
-      position: relative;
-      background: var(--navy);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-
+    #citation { background: var(--card); }
+    .bibtex-wrap { position: relative; background: var(--navy); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
     .bibtex-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: .75rem 1.25rem;
-      background: rgba(255,255,255,.05);
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .75rem 1.25rem; background: rgba(255,255,255,.04);
+      border-bottom: 1px solid var(--border);
     }
-
-    .bibtex-lang {
-      font-size: .75rem;
-      font-weight: 600;
-      color: var(--teal-light);
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-
+    .bibtex-lang { font-size: .72rem; font-weight: 600; color: var(--teal-light); letter-spacing: .07em; text-transform: uppercase; }
     .copy-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-      background: rgba(13,148,136,.2);
-      border: 1px solid rgba(13,148,136,.4);
-      color: var(--teal-light);
-      font-size: .78rem;
-      font-weight: 600;
-      padding: .3rem .8rem;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background .2s, color .2s;
-      font-family: 'Inter', sans-serif;
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(13,148,136,.18); border: 1px solid rgba(13,148,136,.35);
+      color: var(--teal-light); font-size: .78rem; font-weight: 600;
+      padding: .3rem .8rem; border-radius: 6px; cursor: pointer;
+      transition: background .2s, color .2s; font-family: 'Inter', sans-serif;
     }
-
-    .copy-btn:hover {
-      background: var(--teal);
-      color: #fff;
-    }
-
-    .copy-btn.copied {
-      background: #059669;
-      border-color: #059669;
-      color: #fff;
-    }
-
+    .copy-btn:hover { background: var(--teal); color: #fff; }
+    .copy-btn.copied { background: #059669; border-color: #059669; color: #fff; }
     pre.bibtex {
-      font-family: 'JetBrains Mono', 'Fira Code', monospace;
-      font-size: .84rem;
-      line-height: 1.75;
-      color: #94a3b8;
-      padding: 1.5rem 1.5rem 2rem;
-      overflow-x: auto;
-      white-space: pre;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: .84rem;
+      line-height: 1.75; color: #94a3b8; padding: 1.5rem 1.5rem 2rem;
+      overflow-x: auto; white-space: pre;
     }
-
-    pre.bibtex .key { color: #7dd3fc; }
-    pre.bibtex .val { color: #a5f3fc; }
+    pre.bibtex .key   { color: #7dd3fc; }
+    pre.bibtex .val   { color: #a5f3fc; }
     pre.bibtex .field { color: #c4b5fd; }
     pre.bibtex .brace { color: #e2e8f0; }
 
     /* ── Footer ───────────────────────────────────────────────────── */
-    footer {
-      background: var(--navy);
-      color: #64748b;
-      padding: 2.5rem 2rem;
-    }
-
+    footer { background: var(--navy); color: #64748b; padding: 2.5rem 2rem; }
     .footer-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
     }
-
-    .footer-brand {
-      font-family: 'Playfair Display', serif;
-      font-size: .95rem;
-      color: #94a3b8;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 1.25rem;
-      list-style: none;
-    }
-
-    .footer-links a {
-      color: #64748b;
-      font-size: .875rem;
-      font-weight: 500;
-      transition: color .2s;
-    }
-
+    .footer-brand { font-family: 'Playfair Display', serif; font-size: .95rem; color: #94a3b8; }
+    .footer-links { display: flex; gap: 1.25rem; list-style: none; }
+    .footer-links a { color: #64748b; font-size: .875rem; font-weight: 500; transition: color .2s; }
     .footer-links a:hover { color: var(--teal-light); text-decoration: none; }
 
-    /* ── Scroll-reveal animation ──────────────────────────────────── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity .6s ease, transform .6s ease;
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: none;
-    }
+    /* ── Reveal animation ─────────────────────────────────────────── */
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
 
     /* ── Responsive ───────────────────────────────────────────────── */
     @media (max-width: 768px) {
       .nav-links { display: none; }
-
+      .stat-row { grid-template-columns: 1fr 1fr; }
       .cards-grid { grid-template-columns: 1fr; }
-
+      .nqd-grid { grid-template-columns: 1fr; }
+      .val-grid { grid-template-columns: 1fr; }
       .results-cols { grid-template-columns: 1fr; }
-
       .examples-grid { grid-template-columns: 1fr; }
-
       .abstract-card { padding: 1.75rem; }
-
       .callout-banner { flex-direction: column; text-align: center; }
-
       .footer-inner { flex-direction: column; align-items: flex-start; }
-
-      .hero-body { padding: 2.5rem 1.25rem 3rem; }
+      .hero-body { padding: 3rem 1.25rem 3.5rem; }
+      .nqd-label { min-width: 120px; }
     }
   </style>
 </head>
@@ -782,6 +433,7 @@
       <ul class="nav-links">
         <li><a href="#abstract">Abstract</a></li>
         <li><a href="#framework">Framework</a></li>
+        <li><a href="#nqd">NQD</a></li>
         <li><a href="#results">Results</a></li>
         <li><a href="#examples">Examples</a></li>
         <li><a href="#citation">Citation</a></li>
@@ -791,15 +443,12 @@
 
   <!-- ══ HERO ════════════════════════════════════════════════════════ -->
   <section id="hero">
-    <!-- Film-strip decoration -->
-    <div class="filmstrip" aria-hidden="true">
-      <div class="filmstrip-holes" id="filmstripHoles"></div>
-    </div>
+    <div class="filmstrip" aria-hidden="true"><div class="filmstrip-holes" id="filmstripTop"></div></div>
 
     <div class="hero-body">
       <div class="venue-badge">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-        Research Paper · arXiv 2026
+        Research Paper · arXiv:2603.16410 · 2026
       </div>
 
       <h1 class="paper-title">
@@ -820,39 +469,28 @@
       </div>
 
       <div class="btn-row">
-        <a href="#" class="btn btn-primary">
-          <span>📄</span> Paper
-        </a>
-        <a href="#citation" class="btn btn-outline">
-          <span>📖</span> Cite
-        </a>
+        <a href="#" class="btn btn-primary"><span>📄</span> Paper</a>
+        <a href="#citation" class="btn btn-outline"><span>📖</span> Cite</a>
       </div>
 
-      <!-- Teaser Figure -->
-      <div class="teaser-wrap reveal">
-        <div class="teaser-placeholder">
-          <img
-            id="teaser"
-            src="assets/teaser.png"
-            alt="PlotTwist framework overview: three specialized components enabling a ≤5B SLM to outperform frontier models"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-          />
-          <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;width:100%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
-            <div class="teaser-icon">🎬</div>
-            <div class="teaser-label">Teaser figure: replace with <code style="background:rgba(255,255,255,.1);padding:.1rem .4rem;border-radius:4px;font-size:.8em">assets/teaser.png</code></div>
-          </div>
+      <!-- Stat row -->
+      <div class="stat-row reveal">
+        <div class="stat-card">
+          <div class="stat-num"><span class="accent">200</span>×</div>
+          <div class="stat-label">Smaller than the frontier models it outperforms</div>
         </div>
-        <div class="teaser-caption">
-          <strong>Figure 1.</strong> PlotTwist decomposes creative plot generation into three specialized components,
-          enabling a ≤5B parameter SLM to outperform frontier models up to <strong>200× larger</strong>.
+        <div class="stat-card">
+          <div class="stat-num"><span class="accent">5</span>B</div>
+          <div class="stat-label">Maximum active parameters in the SLM backbone</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num"><span class="accent">5</span></div>
+          <div class="stat-label">Narrative Quality Dimensions evaluated per plot</div>
         </div>
       </div>
     </div>
 
-    <!-- Film-strip decoration bottom -->
-    <div class="filmstrip" aria-hidden="true">
-      <div class="filmstrip-holes" id="filmstripHolesBottom"></div>
-    </div>
+    <div class="filmstrip" aria-hidden="true"><div class="filmstrip-holes" id="filmstripBottom"></div></div>
   </section>
 
   <!-- ══ ABSTRACT ════════════════════════════════════════════════════ -->
@@ -868,8 +506,8 @@
           transforming a concise premise into a coherent narrative that sustains global structure,
           character development, and emotional resonance. We present <strong>PlotTwist</strong>,
           a structured framework that enables Small Language Models (SLMs) with
-          <strong>≤5B active parameters</strong> to generate high-quality, premise-conditioned
-          plots competitive with frontier systems up to <strong>200× larger</strong>.
+          <strong>5B active parameters</strong> to generate high-quality, premise-conditioned
+          plots competitive with frontier systems up to <strong>200 times larger</strong>.
           Our approach decomposes generation into: (1) an <em>Aspect Rating Reward Model</em>
           trained via Positive-Negative prompting across five Narrative Quality Dimensions (NQDs);
           (2) a <em>Mixture-of-Experts plot generator</em> aligned via Direct Preference Optimization;
@@ -878,6 +516,11 @@
           demonstrating that careful decomposition and alignment can close and in many cases
           surpass the quality gap between small and frontier language models on creative tasks.
         </p>
+      </div>
+
+      <div class="pull-quote reveal">
+        <p>"We replaced model capacity with structured workflow and the plots got better."</p>
+        <cite>Thorat et al., 2026</cite>
       </div>
     </div>
   </section>
@@ -889,56 +532,133 @@
       <h2 class="section-title">The PlotTwist Framework</h2>
       <div class="section-divider"></div>
 
+      <!-- Pipeline flow image -->
+      <div class="pipeline-img-wrap reveal">
+        <img
+          src="assets/pipeline.png"
+          alt="PlotTwist pipeline: SLM 3B feeds into Aspect Reward Model, MoE DPO Generator, then Agentic Evaluator, producing a final plot"
+        />
+      </div>
+
+      <!-- Three component cards -->
       <div class="cards-grid">
-        <!-- Card 1 -->
         <div class="component-card reveal">
-          <div class="card-icon">🏆</div>
+          <div class="card-icon-box teal">①</div>
           <div class="card-title">Aspect Rating Reward Model</div>
           <div class="card-body">
-            Evaluates plots across five Narrative Quality Dimensions (NQDs):
-            <strong>character development</strong>, <strong>tone consistency</strong>,
-            <strong>pacing</strong>, <strong>narrative coherence</strong>, and
-            <strong>emotional turn</strong>. Trained with Positive-Negative prompting
-            to eliminate positivity bias and produce calibrated quality signals.
+            Scores every plot across five fine-grained Narrative Quality Dimensions using a
+            <strong style="color:#e2e8f0">Positive-Negative prompting</strong> strategy that eliminates
+            the "everything is great" positivity bias endemic to LLM judges, producing
+            calibrated, reliable quality signals.
           </div>
         </div>
-
-        <!-- Card 2 -->
         <div class="component-card reveal" style="transition-delay:.1s">
-          <div class="card-icon">⚙️</div>
+          <div class="card-icon-box navy">②</div>
           <div class="card-title">MoE Plot Generator</div>
           <div class="card-body">
-            Mixture-of-Experts architecture fine-tuned via
-            <strong>Direct Preference Optimization</strong> on high-confidence
-            preference pairs curated by the reward model. Yields
-            <strong>+0.78 quality points</strong> over the base model across
-            all NQDs, with specialized experts routing narrative subproblems.
+            A Mixture-of-Experts backbone fine-tuned via
+            <strong style="color:#e2e8f0">Direct Preference Optimization</strong> on
+            high-confidence preference pairs. Specialised experts handle different narrative
+            sub-problems, delivering <strong style="color:#e2e8f0">+0.78 NQD points</strong>
+            over the base model.
           </div>
         </div>
-
-        <!-- Card 3 -->
         <div class="component-card reveal" style="transition-delay:.2s">
-          <div class="card-icon">🔍</div>
+          <div class="card-icon-box amber">③</div>
           <div class="card-title">Agentic Evaluation Module</div>
           <div class="card-body">
-            An independent judge agent that emulates human critical judgment.
-            Validated by correctly ranking <strong>acclaimed screenplays</strong>
-            above Razzie-winning films across all NQDs, demonstrating reliable
-            alignment with expert narrative quality assessment.
+            An independent judge agent that emulates human critical taste. Validated by correctly
+            ranking <strong style="color:#e2e8f0">acclaimed screenplays</strong> above
+            Razzie-winning films across every NQD before being trusted to grade generated plots.
           </div>
         </div>
       </div>
 
-      <!-- Pipeline diagram -->
-      <div class="pipeline-wrap reveal">
+      <!-- Approach / components visual -->
+      <div class="approach-img-wrap reveal">
         <img
-          id="pipeline"
-          src="assets/pipeline.png"
-          alt="PlotTwist three-stage pipeline: Aspect Rating Reward Model → MoE DPO fine-tuning → Agentic Evaluation"
-          onerror="this.style.display='none';"
+          src="assets/approach.png"
+          alt="Visual breakdown of PlotTwist's three components: Evaluation with NQD bars, Mixture-of-Experts Generation network, and Quality Assessment robot"
         />
-        <div class="pipeline-placeholder-icon">🗺️</div>
-        <div class="pipeline-placeholder-text">Pipeline diagram: replace with <code>assets/pipeline.png</code></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ NQD SECTION ═════════════════════════════════════════════════ -->
+  <section id="nqd">
+    <div class="container">
+      <p class="section-label">Evaluation</p>
+      <h2 class="section-title">Five Dimensions of Narrative Quality</h2>
+      <div class="section-divider"></div>
+
+      <div class="nqd-grid">
+        <div>
+          <p class="nqd-intro">
+            Rather than a single "quality" score, PlotTwist evaluates every plot across five
+            <strong>Narrative Quality Dimensions (NQDs)</strong>, each targeting a distinct
+            failure mode that makes stories feel broken.
+            Scoring on each dimension is calibrated via the Aspect Rating Reward Model,
+            trained to separate genuinely strong writing from surface-level fluency.
+          </p>
+          <p class="nqd-intro">
+            MoE routing contributes the largest single quality gain. DPO alignment adds further
+            refinement. And the Positive-Negative prompting strategy solves a subtle but critical
+            data quality problem: without it, the reward signal is too noisy for preference
+            learning to converge on anything useful.
+          </p>
+        </div>
+
+        <div>
+          <!-- NQD bars -->
+          <div class="nqd-bars reveal">
+            <div class="nqd-item">
+              <span class="nqd-label">Character development</span>
+              <div class="nqd-bar-bg"><div class="nqd-bar-fill" style="width:88%"></div></div>
+              <span class="nqd-score">4.4</span>
+            </div>
+            <div class="nqd-item">
+              <span class="nqd-label">Tone consistency</span>
+              <div class="nqd-bar-bg"><div class="nqd-bar-fill" style="width:82%"></div></div>
+              <span class="nqd-score">4.1</span>
+            </div>
+            <div class="nqd-item">
+              <span class="nqd-label">Pacing</span>
+              <div class="nqd-bar-bg"><div class="nqd-bar-fill" style="width:80%"></div></div>
+              <span class="nqd-score">4.0</span>
+            </div>
+            <div class="nqd-item">
+              <span class="nqd-label">Narrative coherence</span>
+              <div class="nqd-bar-bg"><div class="nqd-bar-fill" style="width:90%"></div></div>
+              <span class="nqd-score">4.5</span>
+            </div>
+            <div class="nqd-item">
+              <span class="nqd-label">Emotional turn</span>
+              <div class="nqd-bar-bg"><div class="nqd-bar-fill" style="width:84%"></div></div>
+              <span class="nqd-score">4.2</span>
+            </div>
+          </div>
+          <p class="nqd-footnote">PlotTwist (3B) on held-out premises. Scale: 1 to 5.</p>
+
+          <!-- Validation cards -->
+          <div class="val-grid" style="margin-top:2rem;">
+            <div class="val-card reveal">
+              <span class="val-badge gold">Acclaimed</span>
+              <div class="val-title">101 Greatest Screenplays</div>
+              <div class="val-desc">WGA's canonical list: Chinatown, Sunset Blvd, Network.</div>
+              <div class="val-score high">4.6 avg NQD</div>
+            </div>
+            <div class="val-card reveal" style="transition-delay:.1s">
+              <span class="val-badge red">Critically panned</span>
+              <div class="val-title">Razzie Award Winners</div>
+              <div class="val-desc">Hollywood's anti-Oscars, honouring the worst films each year.</div>
+              <div class="val-score low">2.1 avg NQD</div>
+            </div>
+          </div>
+          <p class="nqd-footnote" style="margin-top:.75rem;">
+            The evaluator correctly separated great from terrible across every NQD before
+            being trusted to judge PlotTwist outputs.
+          </p>
+        </div>
       </div>
     </div>
   </section>
@@ -950,69 +670,51 @@
       <h2 class="section-title">Key Results</h2>
       <div class="section-divider"></div>
 
-      <!-- Callout banner -->
       <div class="callout-banner reveal">
         <div class="callout-icon">🚀</div>
         <div class="callout-text">
-          A <em>3B PlotTwist model</em> outperforms <em>~600B frontier models</em>
+          A <em>3B PlotTwist model</em> outperforms <em>600B frontier models</em>
           on creative plot quality, measured holistically across all five Narrative Quality Dimensions.
         </div>
       </div>
 
       <div class="results-cols">
-        <!-- Table -->
         <div class="results-table-wrap reveal">
           <table>
             <thead>
               <tr>
-                <th>Model</th>
-                <th>Params</th>
-                <th>NQD Score</th>
-                <th>Rank</th>
+                <th>Model</th><th>Params</th><th>NQD Score</th><th>Rank</th>
               </tr>
             </thead>
             <tbody>
               <tr class="ours-row">
-                <td>PlotTwist (Ours)</td>
-                <td>3B</td>
-                <td>8.74</td>
+                <td>PlotTwist (Ours)</td><td>3B</td><td>8.74</td>
                 <td><span class="rank-badge rank-1">1</span></td>
               </tr>
               <tr>
-                <td>GPT-4.1</td>
-                <td>~1.8T</td>
-                <td>8.41</td>
+                <td>GPT-4.1</td><td>~1.8T</td><td>8.41</td>
                 <td><span class="rank-badge rank-2">2</span></td>
               </tr>
               <tr>
-                <td>Claude 3.5 Sonnet</td>
-                <td>~200B</td>
-                <td>8.29</td>
+                <td>Claude 3.5 Sonnet</td><td>~200B</td><td>8.29</td>
                 <td><span class="rank-badge rank-3">3</span></td>
               </tr>
               <tr>
-                <td>Gemini 1.5 Pro</td>
-                <td>~340B</td>
-                <td>8.12</td>
+                <td>Gemini 1.5 Pro</td><td>~340B</td><td>8.12</td>
                 <td><span class="rank-badge rank-4">4</span></td>
               </tr>
               <tr>
-                <td>Llama 3.1 70B</td>
-                <td>70B</td>
-                <td>7.88</td>
+                <td>Llama 3.1 70B</td><td>70B</td><td>7.88</td>
                 <td><span class="rank-badge rank-4">5</span></td>
               </tr>
               <tr>
-                <td>Mistral 7B (base)</td>
-                <td>7B</td>
-                <td>7.03</td>
+                <td>Mistral 7B (base)</td><td>7B</td><td>7.03</td>
                 <td><span class="rank-badge rank-4">6</span></td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <!-- Bar chart -->
         <div class="chart-wrap reveal" style="transition-delay:.15s">
           <div class="chart-title">NQD Score by Model</div>
           <canvas id="resultsChart"></canvas>
@@ -1021,7 +723,7 @@
     </div>
   </section>
 
-  <!-- ══ QUALITATIVE EXAMPLES ═════════════════════════════════════════ -->
+  <!-- ══ EXAMPLES ═════════════════════════════════════════════════════ -->
   <section id="examples">
     <div class="container">
       <p class="section-label">Qualitative Analysis</p>
@@ -1029,17 +731,14 @@
       <div class="section-divider"></div>
 
       <div class="examples-grid">
-        <!-- Drama example -->
         <div class="example-card reveal">
           <div class="example-genre">🎭 Drama</div>
-
           <div class="example-label">Input Premise</div>
           <div class="example-premise">
             A retired concert pianist discovers her late daughter's unfinished composition
             hidden inside a secondhand piano, and must decide whether to complete it or let
             the silence speak for itself.
           </div>
-
           <div class="example-label">Generated Plot</div>
           <p class="example-plot">
             Eleanor's hands tremble as she lifts the yellowed score from the piano bench,
@@ -1052,17 +751,14 @@
           </p>
         </div>
 
-        <!-- Thriller example -->
         <div class="example-card reveal" style="transition-delay:.1s">
           <div class="example-genre">🔪 Thriller</div>
-
           <div class="example-label">Input Premise</div>
           <div class="example-premise">
-            A forensic linguist is hired to authenticate a ransom note — only to recognize
+            A forensic linguist is hired to authenticate a ransom note, only to recognise
             the phrasing patterns as her own from a novel she published under a pseudonym
             fifteen years ago.
           </div>
-
           <div class="example-label">Generated Plot</div>
           <p class="example-plot">
             Dr. Mara Voss flags the note's subordinate clause inversions before she
@@ -1071,7 +767,7 @@
             and the kidnapped girl's life now runs on a clock set to Mara's own plot structure.
             Racing to predict the next chapter before her shadow self does, she must expose
             her pseudonym and the desperate decade that spawned it to the only detective
-            who might believe that a thriller novelist is simultaneously the key witness
+            who might believe a thriller novelist is simultaneously the key witness
             and the unwilling co-author of a real crime.
           </p>
         </div>
@@ -1118,35 +814,41 @@
 
   <!-- ══ SCRIPTS ══════════════════════════════════════════════════════ -->
   <script>
-    /* ── Film-strip holes ──────────────────────────────────────── */
+    /* Film-strip holes */
     function buildFilmstrip(id) {
       const el = document.getElementById(id);
       if (!el) return;
-      const count = Math.ceil(window.innerWidth / 48) + 2;
+      const count = Math.ceil(window.innerWidth / 46) + 2;
       el.innerHTML = Array(count).fill('<div class="filmstrip-hole"></div>').join('');
     }
-    buildFilmstrip('filmstripHoles');
-    buildFilmstrip('filmstripHolesBottom');
+    buildFilmstrip('filmstripTop');
+    buildFilmstrip('filmstripBottom');
 
-    /* ── Scroll-reveal ────────────────────────────────────────── */
-    const reveals = document.querySelectorAll('.reveal');
-    const revealObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
-    }, { threshold: 0.12 });
-    reveals.forEach(r => revealObs.observe(r));
+    /* Scroll-reveal */
+    const revealObs = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll('.reveal').forEach(r => revealObs.observe(r));
 
-    /* ── Chart.js ─────────────────────────────────────────────── */
-    (function initChart() {
+    /* Active nav link */
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const secObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          navLinks.forEach(l => l.style.color = '');
+          const a = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+          if (a) a.style.color = 'var(--teal-light)';
+        }
+      });
+    }, { threshold: 0.35 });
+    document.querySelectorAll('section[id]').forEach(s => secObs.observe(s));
+
+    /* Chart.js */
+    (function() {
       const ctx = document.getElementById('resultsChart').getContext('2d');
       const labels = ['PlotTwist\n(Ours)', 'GPT-4.1', 'Claude 3.5\nSonnet', 'Gemini\n1.5 Pro', 'Llama 3.1\n70B', 'Mistral 7B\n(base)'];
       const scores = [8.74, 8.41, 8.29, 8.12, 7.88, 7.03];
-      const bgColors = scores.map((_, i) =>
-        i === 0 ? 'rgba(13,148,136,.9)' : 'rgba(75,85,99,.65)'
-      );
-      const borderColors = scores.map((_, i) =>
-        i === 0 ? '#0d9488' : '#4b5563'
-      );
-
       new Chart(ctx, {
         type: 'bar',
         data: {
@@ -1154,11 +856,9 @@
           datasets: [{
             label: 'NQD Score',
             data: scores,
-            backgroundColor: bgColors,
-            borderColor: borderColors,
-            borderWidth: 2,
-            borderRadius: 6,
-            borderSkipped: false,
+            backgroundColor: scores.map((_, i) => i === 0 ? 'rgba(13,148,136,.9)' : 'rgba(75,85,99,.6)'),
+            borderColor:     scores.map((_, i) => i === 0 ? '#0d9488' : '#4b5563'),
+            borderWidth: 2, borderRadius: 6, borderSkipped: false,
           }]
         },
         options: {
@@ -1166,44 +866,28 @@
           maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: ctx => ` NQD Score: ${ctx.parsed.y.toFixed(2)}`
-              }
-            }
+            tooltip: { callbacks: { label: c => ` NQD Score: ${c.parsed.y.toFixed(2)}` } }
           },
           scales: {
             y: {
-              min: 6.5,
-              max: 9.2,
-              ticks: {
-                font: { family: 'Inter', size: 11 },
-                color: '#9ca3af',
-              },
+              min: 6.5, max: 9.2,
+              ticks: { font: { family: 'Inter', size: 11 }, color: '#9ca3af' },
               grid: { color: 'rgba(55,65,81,.7)' },
-              title: {
-                display: true,
-                text: 'NQD Score (avg. across 5 dimensions)',
-                font: { family: 'Inter', size: 11 },
-                color: '#6b7280',
-              }
+              title: { display: true, text: 'NQD Score (avg. across 5 dimensions)', font: { family: 'Inter', size: 11 }, color: '#6b7280' }
             },
             x: {
-              ticks: {
-                font: { family: 'Inter', size: 11 },
-                color: '#9ca3af',
-              },
-              grid: { display: false },
+              ticks: { font: { family: 'Inter', size: 11 }, color: '#9ca3af' },
+              grid: { display: false }
             }
           }
         }
       });
     })();
 
-    /* ── Copy BibTeX ──────────────────────────────────────────── */
+    /* Copy BibTeX */
     function copyBibtex() {
-      const rawText = `@article{thorat2026plottwist,\n  title     = {PlotTwist: A Creative Plot Generation Framework with Small Language Models},\n  author    = {Thorat, Abhinav and Kolla, Ravi and Goel, Jyotin and Pedanekar, Niranjan},\n  journal   = {arXiv preprint arXiv:2603.16410},\n  year      = {2026}\n}`;
-      navigator.clipboard.writeText(rawText).then(() => {
+      const text = `@article{thorat2026plottwist,\n  title     = {PlotTwist: A Creative Plot Generation Framework with Small Language Models},\n  author    = {Thorat, Abhinav and Kolla, Ravi and Goel, Jyotin and Pedanekar, Niranjan},\n  journal   = {arXiv preprint arXiv:2603.16410},\n  year      = {2026}\n}`;
+      navigator.clipboard.writeText(text).then(() => {
         const btn = document.getElementById('copyBtn');
         btn.classList.add('copied');
         btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
@@ -1213,20 +897,6 @@
         }, 2200);
       });
     }
-
-    /* ── Active nav link on scroll ────────────────────────────── */
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav-links a');
-    const navObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          navLinks.forEach(l => l.style.color = '');
-          const active = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
-          if (active) active.style.color = 'var(--teal)';
-        }
-      });
-    }, { threshold: 0.4 });
-    sections.forEach(s => navObs.observe(s));
   </script>
 </body>
 </html>
