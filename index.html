@@ -300,7 +300,7 @@
 
     .results-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: stretch; }
     .results-table-wrap, .chart-wrap { display: flex; flex-direction: column; }
-    .chart-wrap canvas { flex: 1; min-height: 0; }
+    .chart-container { position: relative; flex: 1; min-height: 250px; height: 100%; width: 100%; }
 
     .results-table-wrap {
       background: var(--navy); border: 1px solid var(--border);
@@ -713,7 +713,9 @@
 
         <div class="chart-wrap reveal" style="transition-delay:.15s">
           <div class="chart-title">NQD Score by Model</div>
-          <canvas id="resultsChart"></canvas>
+          <div class="chart-container">
+            <canvas id="resultsChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
