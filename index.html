@@ -104,6 +104,32 @@
   .on-dark .nov-tip{background:#faf8f4;color:#2c313a;box-shadow:0 12px 36px rgba(0,0,0,.45)}
   .on-dark .nov-tip b{color:#5a2ce0}
 
+  /* ── Continuous signal flow along the pipeline ── */
+  .flow path{fill:none;stroke:#7c4dff;stroke-width:2.2;stroke-linecap:round;
+    stroke-dasharray:6 94;stroke-dashoffset:100;opacity:0}
+  @keyframes flowDash{
+    0%{stroke-dashoffset:100;opacity:0}
+    6%{opacity:.95}
+    82%{opacity:.95}
+    100%{stroke-dashoffset:0;opacity:0}
+  }
+  [data-fwbox].live .flow path{animation:flowDash 2.8s linear infinite}
+
+  /* ── Scale chart ── */
+  .sc-pt{opacity:0;transform:scale(.35);transform-box:fill-box;transform-origin:center;
+    transition:opacity .55s ease,transform .55s cubic-bezier(.2,.9,.3,1.35)}
+  .sc.on .sc-pt{opacity:1;transform:none}
+  .sc-fade{opacity:0;transition:opacity .7s ease}
+  .sc.on .sc-fade{opacity:1}
+  .sc-grow{stroke-dasharray:1000;stroke-dashoffset:1000;transition:stroke-dashoffset 1.3s ease-out}
+  .sc.on .sc-grow{stroke-dashoffset:0}
+  @keyframes halo{0%{transform:scale(.55);opacity:.5}100%{transform:scale(2.3);opacity:0}}
+  .sc-halo{transform-box:fill-box;transform-origin:center;opacity:0}
+  .sc.on .sc-halo{animation:halo 3s ease-out infinite}
+  .sc-dot{cursor:default}
+  .sc-dot .sc-name{opacity:0;transition:opacity .2s ease}
+  .sc.on .sc-dot:hover .sc-name{opacity:1}
+
   /* ── Diagram labels: short by default, detail on hover ── */
   .fw-lab{cursor:default}
   .fw-tip{position:absolute;left:50%;bottom:100%;margin-bottom:9px;transform:translate(-50%,4px);
@@ -449,6 +475,26 @@
             <circle cx="1145" cy="175" r="7.5" fill="#16191f"></circle>
             <circle cx="1145" cy="175" r="14" fill="none" stroke="#16191f" stroke-width="1" opacity=".3"></circle>
           </g>
+
+          <!-- Signal travelling the pipeline, staged premise to final plot -->
+          <g class="flow" aria-hidden="true">
+            <path pathLength="100" d="M 103 260 C 150 260 200 260 247 260" style="animation-delay:0s"></path>
+
+            <path pathLength="100" d="M 263 260 C 320 250 340 132 397 117" style="animation-delay:.4s"></path>
+            <path pathLength="100" d="M 263 260 C 320 255 345 215 397 205" style="animation-delay:.4s"></path>
+            <path pathLength="100" d="M 263 260 C 320 265 345 305 397 315" style="animation-delay:.4s"></path>
+            <path pathLength="100" d="M 263 260 C 320 270 340 390 397 405" style="animation-delay:.4s"></path>
+
+            <path pathLength="100" d="M 413 117 C 470 132 520 245 577 259" style="animation-delay:.8s"></path>
+            <path pathLength="100" d="M 413 205 C 470 215 525 250 577 259" style="animation-delay:.8s"></path>
+            <path pathLength="100" d="M 413 315 C 470 305 525 270 577 261" style="animation-delay:.8s"></path>
+            <path pathLength="100" d="M 413 405 C 470 390 520 275 577 261" style="animation-delay:.8s"></path>
+
+            <path pathLength="100" d="M 593 260 C 640 260 690 260 733 260" style="animation-delay:1.2s"></path>
+            <path pathLength="100" d="M 757 252 C 800 238 850 178 892 166" style="animation-delay:1.6s"></path>
+            <path pathLength="100" d="M 908 172 C 950 200 990 275 1032 297" style="animation-delay:2s"></path>
+            <path pathLength="100" d="M 1048 294 C 1080 272 1105 200 1137 181" style="animation-delay:2.4s"></path>
+          </g>
         </svg>
 
         <div class="fw-lab el" data-fw="1" tabindex="0" style="position:absolute;left:7.66%;top:50%;transform:translate(-50%,-50%);width:126px;text-align:center;padding-bottom:52px">
@@ -791,8 +837,100 @@
       </div>
     </div>
 
+    <!-- Performance against scale -->
+    <div class="sc" style="margin-top:78px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap">
+        <div class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880"><svg class="mi"><use href="#ic-reel"/></svg>PERFORMANCE AGAINST SCALE<span class="nov nov-dn" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW<span class="nov-tip"><b>NEW IN THIS WORK</b>Every open-weight baseline from 3.8B to 70B lands between 6.58 and 7.90. Adding parameters moves the score very little. PlotTwist sits at the far left of the axis and above all of them, which is the paper's central claim made visible: structure buys more than scale.</span></span></div>
+        <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#71706a">ACTIVE PARAMETERS, LOG SCALE</div>
+      </div>
+      <p style="margin:16px 0 0;max-width:60ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Open-weight baselines plotted by the parameters actually active per token, against their overall jury mean.</p>
+
+      <div class="sx dark" style="margin-top:26px">
+        <div class="sx-hint">SCROLL <span>&rarr;</span></div>
+        <div class="sx-in">
+        <svg viewBox="0 0 900 430" style="width:100%;min-width:620px;height:auto;display:block" role="img" aria-label="Scatter plot of overall jury score against active parameters. Open-weight baselines from 3.8B to 70B score between 6.58 and 7.90, while PlotTwist at 3B active scores 8.36.">
+          <!-- frontier band -->
+          <rect class="sc-fade" x="70" y="74.1" width="790" height="32.7" fill="rgba(245,243,238,.055)" style="transition-delay:.15s"></rect>
+          <line class="sc-fade" x1="70" y1="74.1" x2="860" y2="74.1" stroke="rgba(245,243,238,.28)" stroke-width="1" stroke-dasharray="4 4" style="transition-delay:.15s"></line>
+          <line class="sc-fade" x1="70" y1="106.8" x2="860" y2="106.8" stroke="rgba(245,243,238,.28)" stroke-width="1" stroke-dasharray="4 4" style="transition-delay:.15s"></line>
+          <text class="sc-fade" x="258" y="100" fill="#8b8880" style="font:400 10px 'JetBrains Mono',monospace;letter-spacing:.1em;transition-delay:.3s">FRONTIER MODELS &middot; SIZE UNDISCLOSED &middot; 8.11 TO 8.35</text>
+
+          <!-- y grid -->
+          <g stroke="rgba(245,243,238,.12)" stroke-width="1">
+            <line x1="70" y1="326.4" x2="860" y2="326.4"></line>
+            <line x1="70" y1="258.2" x2="860" y2="258.2"></line>
+            <line x1="70" y1="190" x2="860" y2="190"></line>
+            <line x1="70" y1="121.8" x2="860" y2="121.8"></line>
+            <line x1="70" y1="53.6" x2="860" y2="53.6"></line>
+          </g>
+          <g fill="#71706a" text-anchor="end" style="font:400 10.5px 'JetBrains Mono',monospace">
+            <text x="58" y="330">6.5</text><text x="58" y="262">7.0</text><text x="58" y="194">7.5</text>
+            <text x="58" y="125.5">8.0</text><text x="58" y="57.5">8.5</text>
+          </g>
+          <text x="20" y="200" fill="#8b8880" transform="rotate(-90 20 200)" text-anchor="middle" style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.16em">JURY MEAN</text>
+
+          <!-- x axis -->
+          <line x1="70" y1="340" x2="860" y2="340" stroke="rgba(245,243,238,.28)" stroke-width="1"></line>
+          <g fill="#71706a" text-anchor="middle" style="font:400 10.5px 'JetBrains Mono',monospace">
+            <text x="151.9" y="360">3B</text><text x="395" y="360">10B</text>
+            <text x="616.9" y="360">30B</text><text x="788" y="360">70B</text>
+          </g>
+          <g stroke="rgba(245,243,238,.2)" stroke-width="1">
+            <line x1="151.9" y1="340" x2="151.9" y2="345"></line><line x1="395" y1="340" x2="395" y2="345"></line>
+            <line x1="616.9" y1="340" x2="616.9" y2="345"></line><line x1="788" y1="340" x2="788" y2="345"></line>
+          </g>
+          <text x="465" y="384" fill="#8b8880" text-anchor="middle" style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.16em">ACTIVE PARAMETERS PER TOKEN</text>
+
+          <!-- comparison connector: PlotTwist to Llama-70B -->
+          <path class="sc-grow" d="M 168 78 C 400 46 700 40 780 226" fill="none" stroke="rgba(168,135,255,.4)" stroke-width="1" stroke-dasharray="1000" style="transition-delay:.9s"></path>
+          <text class="sc-fade" x="470" y="40" text-anchor="middle" fill="#b79bff" style="font:400 11px 'JetBrains Mono',monospace;letter-spacing:.1em;transition-delay:1.5s">23&times; THE ACTIVE PARAMETERS, 1.18 LOWER</text>
+
+          <!-- baselines -->
+          <g class="sc-dot"><circle class="sc-pt" cx="199.6" cy="315.5" r="5" fill="none" stroke="#8b8880" stroke-width="1.4" style="transition-delay:.35s"></circle>
+            <text class="sc-fade" x="199.6" y="303" text-anchor="middle" fill="#8b8880" style="font:400 10px 'JetBrains Mono',monospace;transition-delay:.35s">Phi-4 Mini</text></g>
+          <g class="sc-dot"><circle class="sc-pt" cx="616.9" cy="288.2" r="5" fill="none" stroke="#8b8880" stroke-width="1.4" style="transition-delay:.45s"></circle>
+            <text class="sc-fade" x="616.9" y="276" text-anchor="middle" fill="#8b8880" style="font:400 10px 'JetBrains Mono',monospace;transition-delay:.45s">WizardLM-30B</text></g>
+          <g class="sc-dot"><circle class="sc-pt" cx="788" cy="233.6" r="5" fill="none" stroke="#8b8880" stroke-width="1.4" style="transition-delay:.55s"></circle>
+            <text class="sc-fade" x="788" y="221" text-anchor="middle" fill="#8b8880" style="font:400 10px 'JetBrains Mono',monospace;transition-delay:.55s">Llama-3.3-70B</text></g>
+          <g class="sc-dot"><circle class="sc-pt" cx="571.8" cy="176.4" r="5" fill="none" stroke="#8b8880" stroke-width="1.4" style="transition-delay:.65s"></circle>
+            <text class="sc-fade" x="571.8" y="164" text-anchor="middle" fill="#8b8880" style="font:400 10px 'JetBrains Mono',monospace;transition-delay:.65s">Mistral Small 24B</text></g>
+          <g class="sc-dot"><circle class="sc-pt" cx="463" cy="176.4" r="5" fill="none" stroke="#8b8880" stroke-width="1.4" style="transition-delay:.7s"></circle>
+            <circle class="sc-pt" cx="463" cy="164" r="5" fill="none" stroke="#8b8880" stroke-width="1.4" style="transition-delay:.75s"></circle>
+            <text class="sc-fade" x="463" y="200" text-anchor="middle" fill="#8b8880" style="font:400 10px 'JetBrains Mono',monospace;transition-delay:.75s">Qwen-2.5-14B &middot; DeepSeek-R1-14B</text></g>
+          <g class="sc-dot"><circle class="sc-pt" cx="629.9" cy="135.5" r="5" fill="none" stroke="#8b8880" stroke-width="1.4" style="transition-delay:.85s"></circle>
+            <text class="sc-fade" x="629.9" y="123" text-anchor="middle" fill="#8b8880" style="font:400 10px 'JetBrains Mono',monospace;transition-delay:.85s">Qwen3-32B</text></g>
+
+          <!-- PlotTwist -->
+          <circle class="sc-halo" cx="151.9" cy="72.7" r="10" fill="#7c4dff"></circle>
+          <g class="sc-pt" style="transition-delay:1.05s"><rect x="141.9" y="62.7" width="20" height="20" transform="rotate(45 151.9 72.7)" fill="#7c4dff"></rect></g>
+          <text class="sc-fade" x="151.9" y="106" text-anchor="middle" fill="#b79bff" style="font:500 11.5px 'JetBrains Mono',monospace;letter-spacing:.06em;transition-delay:1.2s">PlotTwist</text>
+          <text class="sc-fade" x="151.9" y="122" text-anchor="middle" fill="#8b8880" style="font:400 10px 'JetBrains Mono',monospace;transition-delay:1.25s">3B active &middot; 8.36</text>
+        </svg>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:rgba(245,243,238,.16);margin-top:30px">
+        <div style="background:#16191f;padding:18px 20px 18px 0">
+          <div style="font:300 28px/1 Newsreader,serif">10.7&times;</div>
+          <div style="margin-top:9px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">FEWER ACTIVE PARAMS THAN<br>DENSE QWEN3-32B &middot; WIN RATE 0.99</div>
+        </div>
+        <div style="background:#16191f;padding:18px 20px">
+          <div style="font:300 28px/1 Newsreader,serif">23&times;</div>
+          <div style="margin-top:9px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">FEWER THAN LLAMA-3.3-70B<br>WIN RATE 0.99</div>
+        </div>
+        <div style="background:#16191f;padding:18px 20px">
+          <div style="font:300 28px/1 Newsreader,serif;color:#b79bff">+0.46</div>
+          <div style="margin-top:9px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">OVER THE BEST OPEN-WEIGHT<br>BASELINE OF ANY SIZE</div>
+        </div>
+        <div style="background:#16191f;padding:18px 20px">
+          <div style="font:300 28px/1 Newsreader,serif">1.32</div>
+          <div style="margin-top:9px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">TOTAL SPREAD ACROSS 3.8B<br>TO 70B OF OPEN BASELINES</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Full Table 1 -->
-    <div style="margin-top:78px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
+    <div style="margin-top:60px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap">
         <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">TABLE 1 &middot; EVERY SYSTEM, EVERY DIMENSION</div>
         <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#71706a">MEAN &plusmn; SD OVER 160 PREMISES</div>
@@ -1285,6 +1423,36 @@
     barsShown = true; paint(variant);
     document.querySelectorAll('[data-wr]').forEach(function (b) { b.style.width = b.dataset.wr + '%'; });
     doTwist(0);
+  }
+
+  /* ── Pipeline flow: only animate while the diagram is on screen ── */
+  var fwBoxEl = document.querySelector('[data-fwbox]');
+  if (fwBoxEl && 'IntersectionObserver' in window) {
+    if (reduce) {
+      fwBoxEl.classList.remove('live');
+    } else {
+      var fio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { fwBoxEl.classList.toggle('live', e.isIntersecting); });
+      }, { threshold: 0.12 });
+      fio.observe(fwBoxEl);
+    }
+  }
+
+  /* ── Scale chart reveal ─────────────────────────────────── */
+  var scEl = document.querySelector('.sc');
+  if (scEl) {
+    if ('IntersectionObserver' in window) {
+      var scio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          scEl.classList.add('on');
+          scio.disconnect();
+        });
+      }, { threshold: 0.2 });
+      scio.observe(scEl);
+    } else {
+      scEl.classList.add('on');
+    }
   }
 
   /* ── Scroll areas: soft edge instead of a native bar ────── */
