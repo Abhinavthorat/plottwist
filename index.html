@@ -57,6 +57,43 @@
 
   [data-reveal]{opacity:0;transform:translateY(16px)}
 
+  /* ── Scroll areas: no chunky native bar, soft edge instead ── */
+  .sx{position:relative}
+  .sx-in{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;padding-bottom:2px}
+  .sx-in::-webkit-scrollbar{height:0;width:0;display:none}
+  .sx::after{content:'';position:absolute;top:0;right:0;bottom:0;width:76px;pointer-events:none;
+    background:linear-gradient(90deg,rgba(245,243,238,0),rgba(245,243,238,.96));opacity:0;transition:opacity .35s ease}
+  .sx.more::after{opacity:1}
+  .sx.dark::after{background:linear-gradient(90deg,rgba(22,25,31,0),rgba(22,25,31,.96))}
+  .sx-hint{position:absolute;right:10px;bottom:10px;display:flex;align-items:center;gap:6px;
+    padding:5px 10px;border-radius:999px;background:rgba(22,25,31,.82);color:#f5f3ee;
+    font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;pointer-events:none;
+    opacity:0;transform:translateX(4px);transition:opacity .35s ease,transform .35s ease;z-index:2}
+  .sx.more .sx-hint{opacity:1;transform:none}
+  .sx.dark .sx-hint{background:rgba(245,243,238,.9);color:#16191f}
+  .sx-hint span{animation:nudge 1.5s ease-in-out infinite}
+  @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
+
+  /* ── Diagram labels: short by default, detail on hover ── */
+  .fw-lab{cursor:default}
+  .fw-tip{position:absolute;left:50%;bottom:100%;margin-bottom:9px;transform:translate(-50%,4px);
+    width:max-content;max-width:186px;padding:7px 10px;border-radius:7px;background:#16191f;color:#e8e5dd;
+    font:400 11px/1.45 Archivo,sans-serif;text-align:center;opacity:0;pointer-events:none;
+    transition:opacity .25s ease,transform .25s ease;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+  .fw-lab:hover .fw-tip,.fw-lab:focus-visible .fw-tip{opacity:1;transform:translate(-50%,0)}
+  /* labels sitting below their node: open downward instead */
+  .fw-lab.dn .fw-tip{bottom:auto;top:100%;margin-bottom:0;margin-top:9px}
+  /* edge labels: anchor inward so the tip never widens the scroll box */
+  .fw-lab.el .fw-tip{left:0;right:auto;transform:translate(0,4px)}
+  .fw-lab.el:hover .fw-tip,.fw-lab.el:focus-visible .fw-tip{transform:translate(0,0)}
+  .fw-lab.er .fw-tip{left:auto;right:0;transform:translate(0,4px)}
+  .fw-lab.er:hover .fw-tip,.fw-lab.er:focus-visible .fw-tip{transform:translate(0,0)}
+  .fw-key{position:relative;display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border-radius:5px;
+    transition:background .25s ease}
+  .fw-lab:hover .fw-key{background:rgba(124,77,255,.09)}
+  .fw-dot{width:3px;height:3px;border-radius:50%;background:#b0aa9e;flex:none;transition:background .25s}
+  .fw-lab:hover .fw-dot{background:#7c4dff}
+
   @media (prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
     [data-reveal]{opacity:1!important;transform:none!important}
@@ -172,28 +209,28 @@
   <section id="research" style="padding:36px 0 0;scroll-margin-top:90px">
     <div data-reveal style="max-width:820px">
       <p style="margin:0;font:300 clamp(28px,3.6vw,44px)/1.24 Newsreader,serif;letter-spacing:-.015em;text-wrap:pretty">Turning a concise premise into a narrative means satisfying many constraints at once: global coherence, character development, pacing, tone consistency, emotional progression.</p>
-      <p style="margin:30px 0 0;max-width:66ch;font:400 17px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">Frontier models reach that quality only after preference alignment, and aligning at frontier scale is computationally prohibitive. PlotTwist externalises narrative structure into explicit evaluative and training signals instead, so a model with no more than 3B active parameters per token generates premise-conditioned plots competitive with frontier systems of vastly greater scale.</p>
+      <p style="margin:30px 0 0;max-width:60ch;font:400 17px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">Frontier models reach that quality only after preference alignment, and aligning at that scale is prohibitive. PlotTwist externalises narrative structure into explicit training signals instead, so 3B active parameters compete with systems many times larger.</p>
     </div>
 
     <div data-reveal style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:#e2ded4;border-top:1px solid #e2ded4;border-bottom:1px solid #e2ded4;margin-top:56px">
       <div style="background:#f5f3ee;padding:20px 18px 18px">
-        <div style="font:300 34px/1 Newsreader,serif">3B</div>
+        <div style="font:300 34px/1 Newsreader,serif" data-count="3" data-suffix="B">3B</div>
         <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">ACTIVE PARAMS<br>PER TOKEN</div>
       </div>
       <div style="background:#f5f3ee;padding:20px 18px 18px">
-        <div style="font:300 34px/1 Newsreader,serif">5</div>
+        <div style="font:300 34px/1 Newsreader,serif" data-count="5">5</div>
         <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">NARRATIVE QUALITY<br>DIMENSIONS</div>
       </div>
       <div style="background:#f5f3ee;padding:20px 18px 18px">
-        <div style="font:300 34px/1 Newsreader,serif">160</div>
+        <div style="font:300 34px/1 Newsreader,serif" data-count="160">160</div>
         <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">PREFERENCE PAIRS<br>FROM 5,000 PREMISES</div>
       </div>
       <div style="background:#f5f3ee;padding:20px 18px 18px">
-        <div style="font:300 34px/1 Newsreader,serif">8.36</div>
+        <div style="font:300 34px/1 Newsreader,serif" data-count="8.36" data-dec="2">8.36</div>
         <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">OVERALL JURY MEAN<br>HIGHEST OF 12 SYSTEMS</div>
       </div>
       <div style="background:#f5f3ee;padding:20px 18px 18px">
-        <div style="font:300 34px/1 Newsreader,serif;color:#5a2ce0">0.91</div>
+        <div style="font:300 34px/1 Newsreader,serif;color:#5a2ce0" data-count="0.91" data-dec="2">0.91</div>
         <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">WIN RATE<br>VS GPT-4.1</div>
       </div>
     </div>
@@ -274,7 +311,9 @@
       <p style="margin:20px 0 0;max-width:62ch;font:400 16.5px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">One premise enters. Candidate plots branch out, a reward model rates every branch across five dimensions, preference optimisation turns the ranking into a twist in the generator's policy, and an independent jury decides what comes out.</p>
     </div>
 
-    <div data-reveal style="margin-top:56px;overflow-x:auto;padding-bottom:8px">
+    <div data-reveal class="sx" style="margin-top:56px">
+      <div class="sx-hint">SCROLL <span>&rarr;</span></div>
+      <div class="sx-in">
       <div data-fwbox style="position:relative;min-width:1000px;width:100%;aspect-ratio:1240/540">
         <svg viewBox="0 0 1240 540" style="position:absolute;inset:0;width:100%;height:100%">
           <g data-fw="1">
@@ -327,34 +366,28 @@
           </g>
         </svg>
 
-        <div data-fw="1" style="position:absolute;left:7.66%;top:50%;transform:translate(-50%,-50%);width:126px;text-align:center;padding-bottom:52px">
-          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">PREMISE</div>
-          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">setting, genre, thematic constraint</div>
+        <div class="fw-lab el" data-fw="1" tabindex="0" style="position:absolute;left:7.66%;top:50%;transform:translate(-50%,-50%);width:126px;text-align:center;padding-bottom:52px">
+          <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>PREMISE<span class="fw-tip">Setting, genre and thematic constraint, in one line</span></span>
         </div>
-        <div data-fw="2" style="position:absolute;left:20.56%;top:50%;transform:translate(-50%,-50%);width:132px;text-align:center;padding-bottom:60px">
-          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">CANDIDATE PLOTS</div>
-          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">base MoE and frontier models, one premise</div>
+        <div class="fw-lab" data-fw="2" tabindex="0" style="position:absolute;left:20.56%;top:50%;transform:translate(-50%,-50%);width:132px;text-align:center;padding-bottom:60px">
+          <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>CANDIDATES<span class="fw-tip">Base MoE plus GPT-4.1, Claude Sonnet 4 and Gemini 2.0 Flash, on one premise</span></span>
         </div>
-        <div data-fw="3" style="position:absolute;left:47.18%;top:50%;transform:translate(-50%,-50%);width:150px;text-align:center;padding-bottom:66px">
-          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">ASPECT RATING<br>REWARD MODEL</div>
-          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">Qwen-3-32B &middot; SFT with Huber loss &middot; five NQDs</div>
+        <div class="fw-lab" data-fw="3" tabindex="0" style="position:absolute;left:47.18%;top:50%;transform:translate(-50%,-50%);width:150px;text-align:center;padding-bottom:66px">
+          <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>REWARD MODEL<span class="fw-tip">Qwen-3-32B, cross-entropy plus Huber loss, scoring five dimensions</span></span>
         </div>
-        <div data-fw="4" style="position:absolute;left:60.08%;top:50%;transform:translate(-50%,-50%);width:132px;text-align:center;padding-top:74px">
-          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5a2ce0">THE TWIST &middot; DPO</div>
-          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">160 high-confidence preference pairs</div>
+        <div class="fw-lab dn" data-fw="4" tabindex="0" style="position:absolute;left:60.08%;top:50%;transform:translate(-50%,-50%);width:132px;text-align:center;padding-top:74px">
+          <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5a2ce0"><i class="fw-dot" style="background:#7c4dff"></i>DPO<span class="fw-tip">The twist. 160 high-confidence pairs redirect the policy</span></span>
         </div>
-        <div data-fw="5" style="position:absolute;left:72.58%;top:30.56%;transform:translate(-50%,-50%);width:146px;text-align:center;padding-bottom:62px">
-          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">MoE PLOT GENERATOR</div>
-          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">Qwen-3-30B-A3B &middot; 3B active per token</div>
+        <div class="fw-lab" data-fw="5" tabindex="0" style="position:absolute;left:72.58%;top:30.56%;transform:translate(-50%,-50%);width:146px;text-align:center;padding-bottom:62px">
+          <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>GENERATOR<span class="fw-tip">Qwen-3-30B-A3B, 3B active per token. The only model that writes</span></span>
         </div>
-        <div data-fw="6" style="position:absolute;left:83.87%;top:55.56%;transform:translate(-50%,-50%);width:146px;text-align:center;padding-top:70px">
-          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">CROSS-FAMILY JURY</div>
-          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">five jurors &middot; two deliberation rounds &middot; held-out judge</div>
+        <div class="fw-lab dn" data-fw="6" tabindex="0" style="position:absolute;left:83.87%;top:55.56%;transform:translate(-50%,-50%);width:146px;text-align:center;padding-top:70px">
+          <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>JURY<span class="fw-tip">Five jurors, two deliberation rounds, one held-out judge</span></span>
         </div>
-        <div data-fw="7" style="position:absolute;left:92.34%;top:32.41%;transform:translate(-50%,-50%);width:120px;text-align:center;padding-bottom:56px">
-          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">FINAL PLOT</div>
-          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">jury mean 8.36</div>
+        <div class="fw-lab er" data-fw="7" tabindex="0" style="position:absolute;left:92.34%;top:32.41%;transform:translate(-50%,-50%);width:120px;text-align:center;padding-bottom:56px">
+          <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>PLOT<span class="fw-tip">Jury mean 8.36, the highest of the twelve systems</span></span>
         </div>
+      </div>
       </div>
     </div>
   </section>
@@ -373,7 +406,8 @@
     <h2 data-reveal style="margin:0;max-width:26ch;font:300 clamp(40px,6.2vw,86px)/1.02 Newsreader,serif;letter-spacing:-.03em;text-wrap:pretty">What happens when the plot takes a <span style="font-style:italic">different turn?</span></h2>
 
     <div style="margin-top:54px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:44px;align-items:center">
-      <div style="overflow-x:auto">
+      <div class="sx">
+        <div class="sx-in">
         <div style="position:relative;min-width:600px;width:100%;aspect-ratio:920/230">
           <svg viewBox="0 0 920 230" style="position:absolute;inset:0;width:100%;height:100%">
             <g fill="none" stroke="#16191f" stroke-width="1.2" stroke-linecap="round">
@@ -404,6 +438,7 @@
             </g>
           </svg>
         </div>
+        </div>
       </div>
 
       <div>
@@ -411,15 +446,15 @@
           <span data-twist="cap1" style="font:400 12px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#8c877d;transition:opacity .5s ease">A &rarr; B &rarr; C &rarr; D</span>
           <span data-twist="cap2" style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#5a2ce0;opacity:0;transition:opacity .5s ease;margin-left:-118px">A &rarr; B &rarr; TWIST &#8599; E &rarr; F</span>
         </div>
-        <p style="margin:26px 0 0;max-width:46ch;font:400 16.5px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">The twist is not in the story. It is in the policy. Ranking four candidate plots with the aspect rating reward model produces a preference signal, and direct preference optimisation on 160 high-confidence pairs redirects the generator's path without any reinforcement learning loop or explicit reward at inference time.</p>
+        <p style="margin:26px 0 0;max-width:44ch;font:400 16.5px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">The twist is not in the story. It is in the policy. Ranking four candidates gives a preference signal, and DPO on 160 pairs redirects the generator, with no reinforcement learning loop and no reward model at inference.</p>
         <div style="display:flex;align-items:flex-end;gap:26px;margin-top:34px;padding-top:26px;border-top:1px solid #e2ded4">
           <div>
-            <div style="font:300 40px/1 Newsreader,serif;color:#8c877d">8.03</div>
+            <div style="font:300 40px/1 Newsreader,serif;color:#8c877d" data-count="8.03" data-dec="2">8.03</div>
             <div style="margin-top:7px;font:500 9.5px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">BASE MoE<br>BEFORE DPO</div>
           </div>
           <div style="font:400 18px/1;color:#5a2ce0;padding-bottom:26px">&rarr;</div>
           <div>
-            <div style="font:300 40px/1 Newsreader,serif;color:#5a2ce0">8.81</div>
+            <div style="font:300 40px/1 Newsreader,serif;color:#5a2ce0" data-count="8.81" data-dec="2">8.81</div>
             <div style="margin-top:7px;font:500 9.5px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">AFTER DPO<br>+0.78 OVERALL</div>
           </div>
         </div>
@@ -445,7 +480,9 @@
       <p style="margin:20px 0 0;max-width:60ch;font:400 16.5px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">Large models never write the plot. They rate it before training and judge it after. The model that writes has 3B active parameters per token.</p>
     </div>
 
-    <div data-reveal style="margin-top:54px;overflow-x:auto;padding-bottom:8px">
+    <div data-reveal class="sx" style="margin-top:54px">
+      <div class="sx-hint">SCROLL <span>&rarr;</span></div>
+      <div class="sx-in">
       <div style="min-width:940px">
         <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d;margin-bottom:14px">RATERS &middot; SYNTHETIC ASPECT LABELS, POSITIVE-NEGATIVE PROMPTING</div>
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
@@ -539,6 +576,7 @@
             <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Llama-3.3-70B &middot; held-out judge</span>
           </div>
         </div>
+      </div>
       </div>
     </div>
   </section>
@@ -653,7 +691,7 @@
             <span id="mPval" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">n/a</span>
           </div>
         </div>
-        <p id="mVerdict" style="margin:24px 0 0;max-width:44ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Highest overall jury mean of the twelve systems evaluated, and first in narrative coherence, tone consistency and pacing, with roughly a tenth of the active parameters of the dense 32B baseline.</p>
+        <p id="mVerdict" style="margin:24px 0 0;max-width:42ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Highest overall mean of the twelve systems, and first in coherence, tone and pacing, on roughly a tenth of the dense 32B baseline&rsquo;s active parameters.</p>
       </div>
     </div>
 
@@ -663,7 +701,9 @@
         <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">TABLE 1 &middot; EVERY SYSTEM, EVERY DIMENSION</div>
         <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#71706a">MEAN &plusmn; SD OVER 160 PREMISES</div>
       </div>
-      <div style="overflow-x:auto;margin-top:20px">
+      <div class="sx dark" style="margin-top:20px">
+        <div class="sx-hint">SCROLL <span>&rarr;</span></div>
+        <div class="sx-in">
         <table class="dk" style="min-width:820px">
           <thead>
             <tr>
@@ -685,6 +725,7 @@
             <tr class="me"><td>PlotTwist</td><td>8.11 <span class="sd">&plusmn;.60</span></td><td><b class="bst">8.42</b> <span class="sd">&plusmn;.41</span></td><td><b class="bst">8.14</b> <span class="sd">&plusmn;.33</span></td><td><b class="bst">8.51</b> <span class="sd">&plusmn;.44</span></td><td>8.61 <span class="sd">&plusmn;.32</span></td><td><b class="bst">8.36</b> <span class="sd">&plusmn;.35</span></td></tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
 
@@ -695,7 +736,9 @@
         <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#71706a">TIES AS 0.5 &middot; HOLM-CORRECTED SIGN TESTS</div>
       </div>
       <p style="margin:16px 0 0;max-width:62ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Because the top overall means sit within hundredths of each other, the pre-specified primary endpoint is the paired win rate, not the mean.</p>
-      <div id="wrTable" style="overflow-x:auto;margin-top:24px">
+      <div id="wrTable" class="sx dark" style="margin-top:24px">
+        <div class="sx-hint">SCROLL <span>&rarr;</span></div>
+        <div class="sx-in">
         <table class="dk" style="min-width:660px">
           <thead>
             <tr><th>Baseline</th><th>Mean</th><th style="text-align:left;padding-left:34px">PlotTwist win rate</th><th>95% CI</th><th>p (Holm)</th></tr>
@@ -714,6 +757,7 @@
             <tr><td>Phi-4 Mini</td><td>6.58</td><td style="text-align:left;padding-left:34px"><span class="wrbar"><i data-wr="99.4"></i></span>0.994</td><td>[0.981, 1.000]</td><td>2.4e&minus;45</td></tr>
           </tbody>
         </table>
+        </div>
       </div>
       <p style="margin:20px 0 0;max-width:62ch;font:400 13px/1.7 'JetBrains Mono',monospace;color:#8b8880;text-wrap:pretty">The Claude Sonnet 4 row is the one unresolved comparison. Neither the sign test nor an equivalence test settles it, so the paper claims competitiveness and nothing more.</p>
     </div>
@@ -751,11 +795,11 @@
         <p style="margin:16px 0 26px;max-width:46ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Scored against critically acclaimed screenplays and Golden Raspberry winners, under repeated balanced subsampling.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(245,243,238,.16)">
           <div style="background:#16191f;padding:18px 20px 18px 0">
-            <div style="font:300 34px/1 Newsreader,serif">8.33</div>
+            <div style="font:300 34px/1 Newsreader,serif" data-count="8.33" data-dec="2">8.33</div>
             <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">101 GREATEST<br>SCREENPLAYS</div>
           </div>
           <div style="background:#16191f;padding:18px 0 18px 20px">
-            <div style="font:300 34px/1 Newsreader,serif;color:#8b8880">6.58</div>
+            <div style="font:300 34px/1 Newsreader,serif;color:#8b8880" data-count="6.58" data-dec="2">6.58</div>
             <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">RAZZIE WORST<br>SCREENPLAY</div>
           </div>
         </div>
@@ -788,15 +832,15 @@
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:36px;margin-top:34px">
         <div>
           <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#a887ff">EVIDENCE GROUNDING</div>
-          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Every criterion score cites a span quoted verbatim from the plot. Between 94% and 99% of roughly 478,000 quoted spans verify against the source text. Grounding is measured and reported, never enforced by dropping cells.</p>
+          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Every score cites a span quoted verbatim from the plot. 94% to 99% of roughly 478,000 spans verify. Grounding is measured, never enforced by dropping cells.</p>
         </div>
         <div>
           <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#a887ff">SAME-FAMILY BIAS AUDIT</div>
-          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Judges score generators from their own family 0.82 points higher, CI [0.80, 0.84]. PlotTwist does not benefit: its leniency-corrected inflation is negative at &minus;0.47, and removing all same-family cells leaves the ranking unchanged.</p>
+          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Judges favour their own family by 0.82 points. PlotTwist does not benefit: its corrected inflation is negative at &minus;0.47, and removing same-family cells leaves the ranking unchanged.</p>
         </div>
         <div>
           <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#a887ff">DELIBERATION CHANGES LITTLE</div>
-          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Agreement moves only from &alpha; 0.455 to 0.458 and two premise-level verdicts flip. The held-out judge reproduces the panel: 0.89 against GPT-4.1, 0.92 against Gemini 2.0 Flash, 0.74 against Agents' Room.</p>
+          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Agreement moves from &alpha; 0.455 to 0.458 and two verdicts flip. The held-out judge reproduces the panel: 0.89 against GPT-4.1, 0.74 against Agents' Room.</p>
         </div>
       </div>
     </div>
@@ -871,7 +915,7 @@
           </svg>
           <div>
             <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5a2ce0">THE UNEXPECTED ENDING</div>
-            <p style="margin:14px 0 0;max-width:50ch;font:400 16.5px/1.65 Archivo,sans-serif;color:#414750;text-wrap:pretty">Trained on 160 pairs curated this way, the 3B-active generator is preferred by the jury on 90.6% of held-out premises against GPT-4.1, 93.8% against Gemini 2.0 Flash, and 73.4% against the multi-agent Agents' Room, all from a single model and a single inference pass.</p>
+            <p style="margin:14px 0 0;max-width:44ch;font:400 16.5px/1.65 Archivo,sans-serif;color:#414750;text-wrap:pretty">Trained on 160 pairs curated this way, the 3B-active generator wins 90.6% of premises against GPT-4.1 and 73.4% against Agents' Room, from a single model and a single pass.</p>
           </div>
         </div>
       </div>
@@ -891,12 +935,12 @@
             Generated by the PlotTwist MoE<br>3B active parameters &middot; single pass
           </div>
         </div>
-        <div style="border-left:1px solid #16191f;padding-left:28px">
-          <p style="margin:0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">Detective Aris Thorne, whose heart remains scarred by the unsolved murder of his wife Elara five years prior, finds his world shattered when City Councilman Silas Croft is discovered in his penthouse with a single, precise stab wound to the heart.</p>
-          <p style="margin:16px 0 0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">The evidence points damningly toward Lena Voss, Aris's former lover, now a social worker fighting for the city's forgotten children. A rare antique switchblade, identical to one Aris gifted her years earlier, is found clutched in Croft's hand.</p>
-          <p style="margin:16px 0 0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">Croft was not merely corrupt. He was the linchpin of a blackmail network exploiting vulnerable families, and the encrypted files reveal he had been threatening Lena with evidence tied directly to Elara's death. The blackmail was never solely about Lena. It was about Aris himself.</p>
-          <p style="margin:16px 0 0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">Elara had been investigating Croft as a journalist and was killed in a staged accident when she came too close. At the rain-lashed docks Aris dismantles the network, but the true reckoning is internal. Choosing love over career, he confesses to the murder to protect Lena, sacrificing his badge and his freedom.</p>
-          <p style="margin:22px 0 0;font:400 11.5px/1.7 'JetBrains Mono',monospace;color:#8c877d">Abridged from Appendix D of the paper.</p>
+        <div data-stage style="border-left:1px solid #16191f;padding-left:28px">
+          <p style="margin:0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">Detective Aris Thorne, still scarred by the unsolved murder of his wife Elara, finds his world shattered when Councilman Silas Croft is found in his penthouse with a single, precise stab wound to the heart.</p>
+          <p style="margin:16px 0 0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">The evidence points damningly toward Lena Voss, his former lover. A rare antique switchblade, identical to one he gifted her years earlier, is found clutched in Croft's hand.</p>
+          <p style="margin:16px 0 0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">Croft was not merely corrupt. He ran a blackmail network, and the encrypted files reveal he had been threatening Lena with evidence tied to Elara's death. The blackmail was never about Lena. It was about Aris.</p>
+          <p style="margin:16px 0 0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">Elara had been investigating Croft as a journalist, and was killed in a staged accident when she came too close. At the rain-lashed docks Aris dismantles the network, then chooses love over career and confesses to the murder to protect Lena.</p>
+          <p style="margin:22px 0 0;font:400 11.5px/1.7 'JetBrains Mono',monospace;color:#8c877d">Abridged from Appendix D.</p>
         </div>
       </div>
     </div>
@@ -982,14 +1026,14 @@
   var CONTRIBS = [
     ['01 &middot; WORKFLOW', 'Structured workflow using SLMs for plot generation',
      'A modular framework of three specialised components: an aspect rating reward model, a DPO-trained mixture-of-experts plot generator, and an independent agentic evaluation module.'],
-    ['02 &middot; POS-NEG', 'Positive-negative prompting for aspect rating reward modelling',
-     'Each aspect is rated twice, once counting only what the plot does well and once counting only what it does badly, and the final rating is the summed difference across five rater models. The strategy mitigates the positivity bias of LLM evaluation and yields reliable aspect-level supervision across all five dimensions.'],
+    ['02 &middot; POS-NEG', 'Positive-negative prompting for reward modelling',
+     'Each aspect is rated twice, once for what the plot does well and once for what it does badly, and the rating is the summed difference across five raters. This cancels the positivity bias of LLM evaluation.'],
     ['03 &middot; JURY', 'Agentic evaluation using a cross-family jury',
-     'Five open-weight jurors drawn from five model families disjoint from the generator, a pre-registered evaluation protocol, two rounds of structured deliberation, a held-out sixth-family judge, and reliability analyses reported alongside the scores.'],
+     'Five open-weight jurors from families disjoint from the generator, a pre-registered protocol, two deliberation rounds, a held-out sixth-family judge, and reliability reported alongside the scores.'],
     ['04 &middot; VALIDATION', 'External validation of the evaluation components',
-     'Both the reward model and the agentic evaluator separate critically acclaimed screenplays from critically panned ones across every narrative quality dimension, with acclaimed plots ahead in 100% of 1,000 balanced subsampling runs.'],
+     'Both the reward model and the jury separate acclaimed screenplays from panned ones on every dimension, with the acclaimed set ahead in 100% of 1,000 balanced runs.'],
     ['05 &middot; ADAPTIVE', 'Efficient, quality-adaptive plot generation',
-     'PlotTwist outperforms all baselines across multiple dimensions with only 3B active parameters, and scales its intervention to the source: lightly refining strong narratives, substantially restructuring weak ones.']
+     'Best of all baselines on 3B active parameters, and the intervention scales to the source: strong narratives are refined, weak ones are restructured.']
   ];
 
   var ring = document.getElementById('selRing');
@@ -1015,13 +1059,13 @@
   var DATA = {
     baseline: { name:'Qwen-2.5-14B', kind:'BASELINE &middot; DENSE 14B, INSTRUCTION-TUNED', s:[7.41,7.53,7.52,7.69,7.95],
       overall:'7.62', params:'14B (dense)', wr:'0.950', ci:'[0.913, 0.981]', pval:'6.4 × 10⁻³⁵',
-      verdict:'PlotTwist wins on 95% of premises against this similarly sized instruction-tuned model, and on at least 95% against every open-weight baseline in the study.' },
+      verdict:'PlotTwist wins 95% of premises here, and at least 95% against every open-weight baseline in the study.' },
     large: { name:'Claude Sonnet 4', kind:'FRONTIER &middot; UNDISCLOSED SCALE', s:[8.30,8.23,8.09,8.49,8.63],
       overall:'8.35', params:'undisclosed', wr:'0.563', ci:'[0.488, 0.638]', pval:'0.13',
-      verdict:'The only inconclusive comparison. Neither the sign test nor the equivalence test resolves it at 160 premises, so the paper claims competitiveness, not superiority.' },
+      verdict:'The one inconclusive comparison. Neither the sign test nor the equivalence test resolves it, so the claim is competitiveness, not superiority.' },
     plottwist: { name:'PlotTwist', kind:'PLOTTWIST &middot; MoE, 3B ACTIVE PER TOKEN', s:[8.11,8.42,8.14,8.51,8.61],
       overall:'8.36', params:'3B active of 30B', wr:'n/a', ci:'n/a', pval:'n/a',
-      verdict:'Highest overall jury mean of the twelve systems evaluated, and first in narrative coherence, tone consistency and pacing, with roughly a tenth of the active parameters of the dense 32B baseline.' }
+      verdict:'Highest overall mean of the twelve systems, and first in coherence, tone and pacing, on roughly a tenth of the dense 32B baseline’s active parameters.' }
   };
   var vEls = document.querySelectorAll('[data-v]'), wEls = document.querySelectorAll('[data-w]');
   var mK = document.getElementById('mKind'), mN = document.getElementById('mName'), mO = document.getElementById('mOverall');
@@ -1142,6 +1186,70 @@
     barsShown = true; paint(variant);
     document.querySelectorAll('[data-wr]').forEach(function (b) { b.style.width = b.dataset.wr + '%'; });
     doTwist(0);
+  }
+
+  /* ── Scroll areas: soft edge instead of a native bar ────── */
+  document.querySelectorAll('.sx').forEach(function (box) {
+    var inner = box.querySelector('.sx-in');
+    if (!inner) return;
+    function sync() {
+      var slack = inner.scrollWidth - inner.clientWidth;
+      box.classList.toggle('more', slack > 20 && inner.scrollLeft < slack - 12);
+    }
+    inner.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+    setTimeout(sync, 60);
+    sync();
+  });
+
+  /* ── Count-up numbers ───────────────────────────────────── */
+  function countUp(el, to, decimals, suffix) {
+    if (reduce) { el.textContent = to.toFixed(decimals) + suffix; return; }
+    var start = null, from = 0, dur = 1100;
+    function step(ts) {
+      if (start === null) start = ts;
+      var p = Math.min(1, (ts - start) / dur);
+      var e = 1 - Math.pow(1 - p, 3);
+      el.textContent = (from + (to - from) * e).toFixed(decimals) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  var counters = document.querySelectorAll('[data-count]');
+  if (counters.length && 'IntersectionObserver' in window) {
+    var cio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        countUp(el, parseFloat(el.dataset.count), +(el.dataset.dec || 0), el.dataset.suffix || '');
+        cio.unobserve(el);
+      });
+    }, { threshold: 0.6 });
+    counters.forEach(function (el) { cio.observe(el); });
+  } else {
+    counters.forEach(function (el) {
+      el.textContent = parseFloat(el.dataset.count).toFixed(+(el.dataset.dec || 0)) + (el.dataset.suffix || '');
+    });
+  }
+
+  /* ── Staged reveal for long prose ───────────────────────── */
+  var staged = document.querySelectorAll('[data-stage] > p');
+  if (staged.length && 'IntersectionObserver' in window && !reduce) {
+    staged.forEach(function (p) {
+      p.style.opacity = '0';
+      p.style.transform = 'translateY(10px)';
+      p.style.transition = 'opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1)';
+    });
+    var sio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        Array.prototype.slice.call(e.target.children).forEach(function (p, i) {
+          setTimeout(function () { p.style.opacity = '1'; p.style.transform = 'none'; }, i * 190);
+        });
+        sio.unobserve(e.target);
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('[data-stage]').forEach(function (b) { sio.observe(b); });
   }
 
   /* ── Scroll: progress, framework illumination, nav spy ──── */
