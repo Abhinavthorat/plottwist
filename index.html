@@ -1,1810 +1,1200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PlotTwist: A Creative Plot Generation Framework with Small Language Models</title>
-  <meta name="description" content="PlotTwist is a structured framework that enables small language models with 3B active parameters to generate premise-conditioned plots competitive with frontier systems. Accepted at LUHME, EMNLP 2026." />
-  <meta property="og:title" content="PlotTwist: A Creative Plot Generation Framework with Small Language Models" />
-  <meta property="og:description" content="Aspect-rating reward modelling, DPO-aligned mixture-of-experts generation, and a cross-family agentic jury. Accepted at LUHME, EMNLP 2026." />
-  <meta property="og:type" content="website" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b0f16'/%3E%3Cpath d='M26 72V28h18a14 14 0 0 1 0 28H26' fill='none' stroke='%235eead4' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='68' cy='66' r='7' fill='%23e6b980'/%3E%3C/svg%3E" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-  <style>
-    /* ══ Reset & tokens ══════════════════════════════════════════════ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlotTwist: A Creative Plot Generation Framework with Small Language Models</title>
+<meta name="description" content="PlotTwist lets a model with 3B active parameters per token generate premise-conditioned plots competitive with frontier systems. Accepted at LUHME, EMNLP 2026.">
+<meta property="og:title" content="PlotTwist: A Creative Plot Generation Framework with Small Language Models">
+<meta property="og:description" content="Aspect-rating reward modelling, DPO-aligned mixture-of-experts generation, and a cross-family agentic jury. Accepted at LUHME, EMNLP 2026.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f5f3ee'/%3E%3Cpath d='M22 74V26h20a15 15 0 0 1 0 30H22' fill='none' stroke='%2316191f' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='58' y='56' width='20' height='20' transform='rotate(45 68 66)' fill='%237c4dff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200;0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Archivo:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:#f5f3ee;color:#16191f;font-family:Archivo,system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  a{color:#16191f;text-decoration:none}
+  a:hover{color:#5a2ce0}
+  ::selection{background:#ded0ff}
+  body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:.045;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+  @keyframes nIn{from{opacity:0}to{opacity:1}}
+  @keyframes drawIn{from{stroke-dashoffset:400}to{stroke-dashoffset:0}}
 
-    :root {
-      --ink:        #05070b;
-      --bg:         #0b0f16;
-      --panel:      #111722;
-      --panel-2:    #151d29;
-      --panel-3:    #1b2432;
-      --line:       rgba(148,163,184,.13);
-      --line-2:     rgba(148,163,184,.22);
-      --text:       #c3cedd;
-      --strong:     #f2f6fa;
-      --muted:      #8593a7;
-      --faint:      #64748b;
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border:1px solid #ddd8ce;border-radius:999px;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#414750;transition:border-color .25s,color .25s,background .25s}
+  .btn:hover{border-color:#7c4dff;color:#5a2ce0;background:rgba(124,77,255,.05)}
+  .btn-solid{border-color:#16191f;color:#16191f}
+  .btn-solid:hover{background:#16191f;color:#f5f3ee;border-color:#16191f}
 
-      --teal:       #14b8a6;
-      --teal-l:     #5eead4;
-      --teal-d:     #0d9488;
-      --teal-pale:  rgba(20,184,166,.12);
-      --gold:       #e6b980;
-      --gold-pale:  rgba(230,185,128,.12);
+  .node-hit{cursor:pointer}
+  .node-hit:hover circle[data-dot]{r:7}
+  .node-hit circle[data-dot]{transition:r .2s ease}
 
-      --r-sm: 8px;
-      --r:    13px;
-      --r-lg: 20px;
+  .acc-row{border-top:1px solid #e2ded4}
+  .acc-head{cursor:pointer;display:flex;align-items:baseline;gap:16px;padding:20px 0;background:none;border:0;width:100%;text-align:left;font:inherit;color:inherit}
+  .acc-head:hover .acc-title{color:#5a2ce0}
+  .acc-body{overflow:hidden;max-height:0;transition:max-height .45s cubic-bezier(.2,.7,.2,1)}
 
-      --shadow:    0 6px 28px rgba(0,0,0,.42);
-      --shadow-lg: 0 20px 64px rgba(0,0,0,.55);
+  .tab{padding:10px 18px;background:transparent;border:1px solid rgba(245,243,238,.25);border-radius:999px;cursor:pointer;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:rgba(245,243,238,.6);transition:all .25s}
+  .tab:hover{color:#f5f3ee;border-color:rgba(245,243,238,.5)}
+  .tab[aria-selected="true"]{border-color:#7c4dff;color:#f5f3ee;background:rgba(124,77,255,.14)}
 
-      --maxw: 1160px;
-      --readw: 780px;
-    }
+  table{width:100%;border-collapse:collapse}
+  .dk th{font:500 9px/1.4 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880;text-align:right;padding:0 0 12px 14px;vertical-align:bottom;border-bottom:1px solid rgba(245,243,238,.22)}
+  .dk th:first-child{text-align:left;padding-left:0}
+  .dk td{font:400 12.5px/1.4 'JetBrains Mono',monospace;color:#c9c5bc;text-align:right;padding:11px 0 11px 14px;border-bottom:1px solid rgba(245,243,238,.08);white-space:nowrap}
+  .dk td:first-child{text-align:left;padding-left:0;font-family:Archivo,sans-serif;font-size:13.5px;color:#f5f3ee}
+  .dk tr:last-child td{border-bottom:none}
+  .dk tr.me td{background:rgba(124,77,255,.10);color:#f5f3ee}
+  .dk tr.me td:first-child{font-weight:600;color:#a887ff}
+  .dk .bst{color:#f5f3ee;font-weight:500}
+  .dk .sd{color:#71706a}
+  .wrbar{display:inline-block;vertical-align:middle;width:64px;height:2px;background:rgba(245,243,238,.16);position:relative;margin-right:10px}
+  .wrbar i{position:absolute;left:0;top:0;height:2px;background:#f5f3ee;width:0;transition:width .9s cubic-bezier(.2,.7,.2,1)}
+  .wrbar.tie i{background:#71706a}
 
-    html { scroll-behavior: smooth; scroll-padding-top: 82px; }
+  [data-reveal]{opacity:0;transform:translateY(16px)}
 
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--ink);
-      color: var(--text);
-      line-height: 1.7;
-      font-size: 16.5px;
-      -webkit-font-smoothing: antialiased;
-      overflow-wrap: break-word;
-    }
-
-    h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; color: var(--strong); line-height: 1.22; font-weight: 700; }
-    a { color: var(--teal-l); text-decoration: none; transition: color .2s; }
-    a:hover { color: #99f6e4; }
-    img { max-width: 100%; display: block; }
-    strong { color: var(--strong); font-weight: 600; }
-
-    ::selection { background: rgba(94,234,212,.24); color: #fff; }
-
-    /* ══ Scroll progress ═════════════════════════════════════════════ */
-    #progress {
-      position: fixed; top: 0; left: 0; height: 2px; width: 0%;
-      background: linear-gradient(90deg, var(--teal-d), var(--teal-l));
-      z-index: 200; transition: width .1s linear;
-    }
-
-    /* ══ Page frame ══════════════════════════════════════════════════ */
-    .page-wrapper {
-      max-width: var(--maxw); margin: 0 auto;
-      background: var(--bg);
-      border-left: 1px solid var(--line);
-      border-right: 1px solid var(--line);
-      box-shadow: 0 0 90px rgba(0,0,0,.65);
-      min-height: 100vh;
-      overflow: hidden;
-    }
-
-    .container { max-width: 1020px; margin: 0 auto; padding: 0 2.25rem; }
-    .prose { max-width: var(--readw); }
-
-    section { padding: 4.25rem 0; border-top: 1px solid var(--line); }
-    section:first-of-type { border-top: none; }
-
-    /* ══ Section headers ═════════════════════════════════════════════ */
-    .sec-head { margin-bottom: 2.25rem; }
-    .sec-label {
-      display: flex; align-items: center; gap: .6rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: .7rem; font-weight: 500; letter-spacing: .17em;
-      text-transform: uppercase; color: var(--teal-l); margin-bottom: .85rem;
-    }
-    .sec-label::before {
-      content: ''; width: 22px; height: 1px; background: var(--teal); flex-shrink: 0;
-    }
-    .sec-title { font-size: clamp(1.75rem, 3.2vw, 2.35rem); letter-spacing: -.015em; margin-bottom: .7rem; }
-    .sec-sub { color: var(--muted); font-size: 1.02rem; max-width: var(--readw); }
-
-    /* ══ Nav ═════════════════════════════════════════════════════════ */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(11,15,22,.86);
-      backdrop-filter: blur(16px) saturate(140%);
-      -webkit-backdrop-filter: blur(16px) saturate(140%);
-      border-bottom: 1px solid var(--line);
-    }
-    .nav-inner {
-      max-width: 1020px; margin: 0 auto; padding: 0 2.25rem;
-      display: flex; align-items: center; justify-content: space-between; height: 60px;
-    }
-    .nav-brand {
-      font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.14rem;
-      color: var(--strong); letter-spacing: -.01em;
-    }
-    .nav-brand .dot { color: var(--teal-l); }
-    .nav-links { display: flex; gap: 1.6rem; list-style: none; }
-    .nav-links a {
-      font-size: .845rem; font-weight: 500; color: var(--muted);
-      position: relative; padding: 2px 0;
-    }
-    .nav-links a::after {
-      content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: 1.5px;
-      background: var(--teal-l); transform: scaleX(0); transform-origin: left;
-      transition: transform .25s ease;
-    }
-    .nav-links a:hover { color: var(--strong); }
-    .nav-links a.active { color: var(--teal-l); }
-    .nav-links a.active::after { transform: scaleX(1); }
-
-    /* ══ Hero ════════════════════════════════════════════════════════ */
-    #hero {
-      position: relative; padding: 0; border-top: none;
-      background:
-        radial-gradient(900px 420px at 15% -10%, rgba(20,184,166,.13), transparent 62%),
-        radial-gradient(700px 360px at 92% 6%, rgba(230,185,128,.07), transparent 60%),
-        linear-gradient(180deg, #0d131c 0%, var(--bg) 100%);
-      overflow: hidden;
-    }
-    #hero::after {
-      content: ''; position: absolute; inset: 0; pointer-events: none;
-      background-image:
-        linear-gradient(rgba(148,163,184,.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148,163,184,.045) 1px, transparent 1px);
-      background-size: 62px 62px;
-      mask-image: radial-gradient(750px 400px at 25% 0%, #000 10%, transparent 78%);
-      -webkit-mask-image: radial-gradient(750px 400px at 25% 0%, #000 10%, transparent 78%);
-    }
-    .hero-body { position: relative; z-index: 1; max-width: 1020px; margin: 0 auto; padding: 4rem 2.25rem 3.25rem; }
-
-    .venue-badge {
-      display: inline-flex; align-items: center; gap: .6rem;
-      background: var(--gold-pale);
-      border: 1px solid rgba(230,185,128,.32);
-      color: var(--gold);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: .715rem; font-weight: 500; letter-spacing: .11em; text-transform: uppercase;
-      padding: .42rem 1rem .42rem .8rem; border-radius: 999px; margin-bottom: 1.9rem;
-    }
-    .venue-badge svg { width: 13px; height: 13px; flex-shrink: 0; }
-    .venue-badge .sep { color: rgba(230,185,128,.42); }
-
-    h1.paper-title {
-      font-size: clamp(2.1rem, 5vw, 3.45rem); font-weight: 900;
-      letter-spacing: -.025em; max-width: 940px; margin-bottom: 1.5rem; line-height: 1.13;
-    }
-    h1.paper-title em { font-style: italic; color: var(--teal-l); font-weight: 700; }
-
-    .hero-tagline {
-      font-size: 1.1rem; color: var(--muted); max-width: 680px;
-      margin-bottom: 2.25rem; line-height: 1.65;
-    }
-
-    .authors { margin-bottom: 2rem; }
-    .authors .names { font-size: 1.02rem; font-weight: 500; color: #d8e2ee; margin-bottom: .3rem; }
-    .authors .affil { font-size: .92rem; color: var(--faint); }
-
-    .btn-row { display: flex; flex-wrap: wrap; gap: .8rem; margin-bottom: 3rem; }
-    .btn {
-      display: inline-flex; align-items: center; gap: .55rem;
-      font-size: .885rem; font-weight: 500; padding: .66rem 1.35rem;
-      border-radius: 999px; border: 1px solid var(--line-2);
-      color: var(--text); background: rgba(255,255,255,.035);
-      transition: all .22s ease;
-    }
-    .btn svg { width: 15px; height: 15px; }
-    .btn:hover { border-color: var(--teal); color: var(--strong); background: var(--teal-pale); transform: translateY(-1px); }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--teal-d), var(--teal));
-      border-color: transparent; color: #04211d; font-weight: 600;
-    }
-    .btn-primary:hover { background: linear-gradient(135deg, var(--teal), var(--teal-l)); color: #04211d; }
-
-    /* Hero stats */
-    .stat-row {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
-      background: var(--line); border: 1px solid var(--line);
-      border-radius: var(--r); overflow: hidden;
-    }
-    .stat-card { background: var(--panel); padding: 1.4rem 1.35rem; }
-    .stat-num {
-      font-family: 'Playfair Display', serif; font-size: 2.1rem; font-weight: 700;
-      color: var(--strong); line-height: 1; margin-bottom: .5rem; letter-spacing: -.02em;
-    }
-    .stat-num .accent { color: var(--teal-l); }
-    .stat-num .unit { font-size: .95rem; font-family: 'Inter', sans-serif; font-weight: 500; color: var(--muted); margin-left: .12rem; }
-    .stat-label { font-size: .775rem; color: var(--faint); line-height: 1.45; }
-
-    /* ══ Prose ═══════════════════════════════════════════════════════ */
-    p.lead { font-size: 1.09rem; color: #cfdae7; margin-bottom: 1.15rem; }
-    p + p { margin-top: 1.05rem; }
-    .prose p { margin-bottom: 1.05rem; }
-    .prose p:last-child { margin-bottom: 0; }
-
-    /* ══ Panels & cards ══════════════════════════════════════════════ */
-    .panel {
-      background: var(--panel); border: 1px solid var(--line);
-      border-radius: var(--r); padding: 1.75rem;
-    }
-    .panel-quiet { background: var(--panel-2); }
-
-    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.1rem; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; }
-    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
-
-    .card {
-      background: var(--panel); border: 1px solid var(--line);
-      border-radius: var(--r); padding: 1.5rem 1.45rem;
-      transition: border-color .25s, transform .25s, background .25s;
-    }
-    .card:hover { border-color: var(--line-2); transform: translateY(-2px); background: var(--panel-2); }
-    .card h4 { font-size: 1.06rem; margin-bottom: .55rem; }
-    .card p { font-size: .895rem; color: var(--muted); line-height: 1.6; }
-
-    .card-num {
-      font-family: 'JetBrains Mono', monospace; font-size: .7rem; font-weight: 600;
-      color: var(--teal-l); letter-spacing: .1em; margin-bottom: .8rem; display: block;
-    }
-
-    .card-icon {
-      width: 38px; height: 38px; border-radius: 10px; margin-bottom: 1rem;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--teal-pale); border: 1px solid rgba(20,184,166,.22);
-      color: var(--teal-l);
-    }
-    .card-icon svg { width: 18px; height: 18px; }
-
-    /* ══ Figure plates ═══════════════════════════════════════════════ */
-    .figure {
-      background: linear-gradient(180deg, #fbfcfd, #f1f4f8);
-      border: 1px solid var(--line-2); border-radius: var(--r-lg);
-      padding: 1.5rem; box-shadow: var(--shadow-lg); margin-bottom: 1rem;
-    }
-    .figure img { border-radius: 6px; margin: 0 auto; }
-    .figure-dark {
-      border: 1px solid var(--line-2); border-radius: var(--r-lg);
-      overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 2.25rem;
-    }
-    .figure-dark img { width: 100%; }
-
-    .figcaption {
-      font-size: .845rem; color: var(--faint); text-align: center;
-      max-width: 680px; margin: 0 auto 0; line-height: 1.6;
-    }
-    .figcaption b { color: var(--muted); font-weight: 600; }
-
-    /* ══ Pillars (3-step) ════════════════════════════════════════════ */
-    .pillar {
-      background: var(--panel); border: 1px solid var(--line);
-      border-radius: var(--r); padding: 1.6rem 1.5rem; position: relative; overflow: hidden;
-    }
-    .pillar::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, var(--teal), transparent);
-    }
-    .pillar .step {
-      font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .14em;
-      text-transform: uppercase; color: var(--faint); margin-bottom: .7rem; display: block;
-    }
-    .pillar h4 { font-size: 1.12rem; margin-bottom: .6rem; }
-    .pillar p { font-size: .88rem; color: var(--muted); line-height: 1.62; margin-bottom: .9rem; }
-    .pillar .meta {
-      font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--teal-l);
-      padding-top: .85rem; border-top: 1px solid var(--line);
-    }
-
-    /* ══ Tables ══════════════════════════════════════════════════════ */
-    .table-wrap {
-      overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r);
-      background: var(--panel); -webkit-overflow-scrolling: touch;
-    }
-    table { width: 100%; border-collapse: collapse; font-size: .845rem; min-width: 660px; }
-    thead th {
-      font-family: 'Inter', sans-serif; font-size: .715rem; font-weight: 600;
-      letter-spacing: .07em; text-transform: uppercase; color: var(--muted);
-      text-align: right; padding: .95rem .85rem; border-bottom: 1px solid var(--line-2);
-      background: var(--panel-2); white-space: nowrap; vertical-align: bottom;
-    }
-    thead th:first-child { text-align: left; }
-    tbody td {
-      padding: .68rem .85rem; text-align: right; border-bottom: 1px solid rgba(148,163,184,.07);
-      font-family: 'JetBrains Mono', monospace; font-size: .81rem; color: var(--text);
-      white-space: nowrap;
-    }
-    tbody td:first-child {
-      text-align: left; font-family: 'Inter', sans-serif; font-size: .875rem; color: #d3dde9;
-    }
-    tbody tr:last-child td { border-bottom: none; }
-    tbody tr:hover td { background: rgba(255,255,255,.022); }
-    tr.highlight td { background: rgba(20,184,166,.075) !important; color: var(--strong); }
-    tr.highlight td:first-child { font-weight: 700; color: var(--teal-l); }
-    tr.highlight { border-top: 1px solid rgba(20,184,166,.3); }
-    td .best { color: var(--strong); font-weight: 600; position: relative; }
-    td .second { text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; }
-    .sd { color: var(--faint); font-size: .93em; }
-
-    .table-note {
-      font-size: .8rem; color: var(--faint); margin-top: .85rem; line-height: 1.6; max-width: var(--readw);
-    }
-    .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); margin-right: .3rem; vertical-align: middle; }
-
-    /* Group heading row inside tables */
-    tr.group td {
-      background: var(--panel-2); font-family: 'JetBrains Mono', monospace;
-      font-size: .68rem; letter-spacing: .13em; text-transform: uppercase;
-      color: var(--faint); padding: .5rem .85rem; text-align: left;
-    }
-
-    /* ══ Charts ══════════════════════════════════════════════════════ */
-    .chart-box { position: relative; width: 100%; }
-    .chart-box canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
-    .h-380 { height: 380px; }
-    .h-420 { height: 420px; }
-    .h-340 { height: 340px; }
-    .h-460 { height: 460px; }
-
-    /* ══ Win-rate bars ═══════════════════════════════════════════════ */
-    .wr-list { display: flex; flex-direction: column; gap: .1rem; }
-    .wr-row {
-      display: grid; grid-template-columns: 190px 1fr 92px; align-items: center;
-      gap: 1rem; padding: .6rem .2rem; border-bottom: 1px solid rgba(148,163,184,.07);
-    }
-    .wr-row:last-child { border-bottom: none; }
-    .wr-name { font-size: .87rem; color: #d3dde9; }
-    .wr-track { height: 8px; background: var(--panel-3); border-radius: 999px; overflow: hidden; position: relative; }
-    .wr-track::after {
-      content: ''; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px;
-      background: var(--line-2);
-    }
-    .wr-fill {
-      height: 100%; border-radius: 999px; width: 0;
-      background: linear-gradient(90deg, var(--teal-d), var(--teal-l));
-      transition: width 1.1s cubic-bezier(.2,.7,.3,1);
-    }
-    .wr-fill.tie { background: linear-gradient(90deg, #475569, #94a3b8); }
-    .wr-val {
-      font-family: 'JetBrains Mono', monospace; font-size: .84rem; color: var(--strong);
-      text-align: right; font-weight: 500;
-    }
-    .wr-val small { display: block; font-size: .66rem; color: var(--faint); font-weight: 400; }
-
-    /* ══ Equations ═══════════════════════════════════════════════════ */
-    .eq {
-      background: var(--panel-2); border: 1px solid var(--line);
-      border-left: 2px solid var(--teal); border-radius: var(--r-sm);
-      padding: 1.1rem 1.3rem; margin: 1.1rem 0;
-      font-family: 'JetBrains Mono', monospace; font-size: .87rem;
-      color: #dbe4ef; overflow-x: auto; line-height: 1.75;
-    }
-    .eq .cm { color: var(--faint); }
-    .eq-note { font-size: .82rem; color: var(--faint); margin-top: .5rem; }
-
-    /* ══ Pipeline funnel ═════════════════════════════════════════════ */
-    .funnel { display: flex; flex-direction: column; gap: .55rem; }
-    .funnel-step {
-      display: flex; align-items: center; gap: 1rem;
-      background: var(--panel-2); border: 1px solid var(--line);
-      border-radius: var(--r-sm); padding: .85rem 1.1rem;
-    }
-    .funnel-step .n {
-      font-family: 'JetBrains Mono', monospace; font-size: .95rem; font-weight: 600;
-      color: var(--teal-l); min-width: 64px;
-    }
-    .funnel-step .t { font-size: .875rem; color: var(--muted); }
-    .funnel-step.final { border-color: rgba(20,184,166,.35); background: var(--teal-pale); }
-    .funnel-step.final .t { color: var(--text); }
-    .funnel-arrow { text-align: center; color: var(--faint); font-size: .8rem; line-height: 1; }
-
-    /* ══ NQD dimension cards ═════════════════════════════════════════ */
-    .nqd-card {
-      background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
-      padding: 1.35rem 1.25rem; transition: border-color .25s, transform .25s;
-    }
-    .nqd-card:hover { border-color: rgba(20,184,166,.32); transform: translateY(-2px); }
-    .nqd-card .idx {
-      font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--faint);
-      letter-spacing: .1em; margin-bottom: .75rem; display: block;
-    }
-    .nqd-card h4 { font-size: .98rem; margin-bottom: .5rem; line-height: 1.3; }
-    .nqd-card p { font-size: .825rem; color: var(--muted); line-height: 1.55; }
-
-    /* ══ Jury roster ═════════════════════════════════════════════════ */
-    .roster { display: grid; grid-template-columns: repeat(5, 1fr); gap: .75rem; }
-    .juror {
-      background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--r-sm);
-      padding: .95rem .85rem; text-align: center;
-    }
-    .juror .jn { font-size: .82rem; color: var(--strong); font-weight: 500; margin-bottom: .3rem; line-height: 1.35; }
-    .juror .jf { font-size: .7rem; color: var(--faint); }
-    .juror .jp {
-      font-family: 'JetBrains Mono', monospace; font-size: .63rem; color: var(--teal-l);
-      margin-top: .5rem; padding-top: .5rem; border-top: 1px solid var(--line);
-    }
-    .judge-strip {
-      margin-top: .75rem; background: var(--gold-pale); border: 1px solid rgba(230,185,128,.25);
-      border-radius: var(--r-sm); padding: .8rem 1.1rem;
-      display: flex; align-items: center; justify-content: center; gap: .6rem;
-      font-size: .84rem; color: var(--text); text-align: center; flex-wrap: wrap;
-    }
-    .judge-strip b { color: var(--gold); font-weight: 600; }
-
-    /* ══ Metric strip ════════════════════════════════════════════════ */
-    .metrics {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
-      background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden;
-    }
-    .metric { background: var(--panel); padding: 1.25rem 1.1rem; text-align: center; }
-    .metric .mv {
-      font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 600;
-      color: var(--teal-l); line-height: 1; margin-bottom: .5rem;
-    }
-    .metric .mv.gold { color: var(--gold); }
-    .metric .ml { font-size: .75rem; color: var(--faint); line-height: 1.45; }
-
-    /* ══ Validation split ════════════════════════════════════════════ */
-    .split {
-      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1.25rem;
-      background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 1.5rem;
-    }
-    .split .side { text-align: center; }
-    .split .sv {
-      font-family: 'Playfair Display', serif; font-size: 2.3rem; font-weight: 700; line-height: 1;
-      margin-bottom: .45rem;
-    }
-    .split .acclaimed .sv { color: var(--teal-l); }
-    .split .panned .sv { color: #94a3b8; }
-    .split .sl { font-size: .78rem; color: var(--faint); line-height: 1.4; }
-    .split .delta {
-      font-family: 'JetBrains Mono', monospace; font-size: .95rem; font-weight: 600;
-      color: var(--gold); background: var(--gold-pale); border: 1px solid rgba(230,185,128,.28);
-      border-radius: 999px; padding: .4rem .9rem; white-space: nowrap;
-    }
-
-    /* ══ Callout ═════════════════════════════════════════════════════ */
-    .callout {
-      background: var(--panel-2); border: 1px solid var(--line);
-      border-left: 2px solid var(--teal); border-radius: var(--r-sm);
-      padding: 1.15rem 1.4rem; font-size: .92rem; color: var(--text); line-height: 1.65;
-    }
-    .callout.warn { border-left-color: var(--gold); }
-    .callout .ct {
-      font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .13em;
-      text-transform: uppercase; color: var(--teal-l); display: block; margin-bottom: .5rem;
-    }
-    .callout.warn .ct { color: var(--gold); }
-
-    /* ══ Example plot ════════════════════════════════════════════════ */
-    .premise-box {
-      background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--r);
-      padding: 1.35rem 1.5rem; margin-bottom: 1.1rem;
-    }
-    .premise-box .pl {
-      font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .13em;
-      text-transform: uppercase; color: var(--teal-l); margin-bottom: .6rem;
-    }
-    .premise-box p { font-size: .95rem; color: #d3dde9; font-style: italic; }
-
-    .plot-box {
-      background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
-      padding: 1.75rem 1.9rem; position: relative;
-    }
-    .plot-box .pl {
-      font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .13em;
-      text-transform: uppercase; color: var(--faint); margin-bottom: 1rem;
-      padding-bottom: .8rem; border-bottom: 1px solid var(--line);
-    }
-    .plot-box p { font-size: .93rem; line-height: 1.78; color: var(--text); margin-bottom: .95rem; }
-    .plot-box p:last-child { margin-bottom: 0; }
-    .plot-box p:first-of-type::first-letter {
-      font-family: 'Playfair Display', serif; font-size: 3rem; float: left;
-      line-height: .85; padding: .1rem .55rem .1rem 0; color: var(--teal-l);
-    }
-
-    /* ══ Limitations list ════════════════════════════════════════════ */
-    .lim-list { list-style: none; display: flex; flex-direction: column; gap: .9rem; }
-    .lim-list li {
-      display: flex; gap: .9rem; font-size: .91rem; color: var(--muted); line-height: 1.65;
-    }
-    .lim-list li::before {
-      content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
-      flex-shrink: 0; margin-top: .62rem;
-    }
-
-    /* ══ BibTeX ══════════════════════════════════════════════════════ */
-    .bibtex-wrap { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--panel); }
-    .bibtex-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .7rem 1.1rem; background: var(--panel-2); border-bottom: 1px solid var(--line);
-    }
-    .bibtex-lang {
-      font-family: 'JetBrains Mono', monospace; font-size: .7rem; letter-spacing: .13em;
-      text-transform: uppercase; color: var(--faint);
-    }
-    .copy-btn {
-      display: inline-flex; align-items: center; gap: .4rem;
-      background: rgba(255,255,255,.045); border: 1px solid var(--line-2); color: var(--muted);
-      font-family: 'Inter', sans-serif; font-size: .76rem; font-weight: 500;
-      padding: .34rem .8rem; border-radius: 6px; cursor: pointer; transition: all .2s;
-    }
-    .copy-btn:hover { color: var(--teal-l); border-color: var(--teal); background: var(--teal-pale); }
-    .copy-btn.copied { color: var(--teal-l); border-color: var(--teal); background: var(--teal-pale); }
-    pre.bibtex {
-      padding: 1.35rem; font-family: 'JetBrains Mono', monospace; font-size: .8rem;
-      line-height: 1.75; color: var(--text); overflow-x: auto;
-    }
-    .bibtex .key { color: var(--teal-l); }
-    .bibtex .field { color: #93c5fd; }
-    .bibtex .val { color: #e2e8f0; }
-    .bibtex .brace { color: var(--faint); }
-
-    /* ══ Footer ══════════════════════════════════════════════════════ */
-    footer { border-top: 1px solid var(--line); background: var(--panel); }
-    .footer-inner {
-      max-width: 1020px; margin: 0 auto; padding: 2.25rem 2.25rem;
-      display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
-    }
-    .footer-brand { font-size: .85rem; color: var(--faint); }
-    .footer-venue {
-      font-family: 'JetBrains Mono', monospace; font-size: .73rem; color: var(--gold);
-      letter-spacing: .08em; text-transform: uppercase;
-    }
-
-    /* ══ Reveal ══════════════════════════════════════════════════════ */
-    .reveal { opacity: 0; transform: translateY(16px); transition: opacity .65s ease, transform .65s ease; }
-    .reveal.visible { opacity: 1; transform: none; }
-
-    @media (prefers-reduced-motion: reduce) {
-      .reveal { opacity: 1; transform: none; transition: none; }
-      html { scroll-behavior: auto; }
-      .wr-fill { transition: none; }
-    }
-
-    /* ══ Utilities ═══════════════════════════════════════════════════ */
-    .mt-1 { margin-top: .75rem; }  .mt-2 { margin-top: 1.35rem; }
-    .mt-3 { margin-top: 2rem; }    .mt-4 { margin-top: 2.75rem; }
-    .mb-2 { margin-bottom: 1.35rem; } .mb-3 { margin-bottom: 2rem; }
-    h3.sub {
-      font-size: 1.28rem; margin-bottom: .85rem; letter-spacing: -.01em;
-      display: flex; align-items: baseline; gap: .7rem;
-    }
-    h3.sub .tag {
-      font-family: 'JetBrains Mono', monospace; font-size: .68rem; font-weight: 500;
-      color: var(--teal-l); letter-spacing: .1em; text-transform: uppercase;
-    }
-
-    /* ══ Responsive ══════════════════════════════════════════════════ */
-    @media (max-width: 900px) {
-      .stat-row { grid-template-columns: repeat(2, 1fr); }
-      .grid-3, .grid-5, .roster, .metrics { grid-template-columns: repeat(2, 1fr); }
-      .nav-links { display: none; }
-    }
-    @media (max-width: 640px) {
-      body { font-size: 15.5px; }
-      .container, .nav-inner { padding: 0 1.25rem; }
-      .hero-body { padding: 2.75rem 1.25rem 2.5rem; }
-      section { padding: 3rem 0; }
-      .grid-2, .grid-3, .grid-5, .roster, .stat-row, .metrics { grid-template-columns: 1fr; }
-      .split { grid-template-columns: 1fr; gap: 1rem; }
-      .wr-row { grid-template-columns: 120px 1fr 74px; gap: .7rem; }
-      .wr-name { font-size: .8rem; }
-      .plot-box { padding: 1.35rem 1.25rem; }
-      .figure { padding: .85rem; border-radius: var(--r); }
-    }
-  </style>
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    [data-reveal]{opacity:1!important;transform:none!important}
+    *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  }
+  @media (max-width:720px){
+    .nav-links{display:none!important}
+    .hide-sm{display:none!important}
+  }
+</style>
 </head>
 <body>
 
-<div id="progress"></div>
+<div style="position:relative;padding-top:58px">
 
-<div class="page-wrapper">
-
-  <!-- ══ NAV ═══════════════════════════════════════════════════════ -->
-  <nav>
-    <div class="nav-inner">
-      <span class="nav-brand">Plot<span class="dot">Twist</span></span>
-      <ul class="nav-links">
-        <li><a href="#abstract">Abstract</a></li>
-        <li><a href="#framework">Framework</a></li>
-        <li><a href="#method">Method</a></li>
-        <li><a href="#evaluation">Evaluation</a></li>
-        <li><a href="#results">Results</a></li>
-        <li><a href="#analysis">Analysis</a></li>
-        <li><a href="#citation">Cite</a></li>
-      </ul>
+<nav style="position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(245,243,238,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)">
+  <div style="max-width:1180px;margin:0 auto;padding:16px 32px 13px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+    <a href="#top" style="display:flex;align-items:center;gap:7px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.2em">
+      <span>PLOT</span>
+      <span style="color:#7c4dff">/</span>
+      <span style="font-style:italic;font-family:Newsreader,serif;font-size:14px;letter-spacing:.06em">TWIST</span>
+    </a>
+    <div class="nav-links" style="display:flex;align-items:center;gap:22px">
+      <a data-spy="research" href="#research" style="font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#8c877d">Research</a>
+      <a data-spy="framework" href="#framework" style="font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#8c877d">Framework</a>
+      <a data-spy="experiments" href="#experiments" style="font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#8c877d">Experiments</a>
+      <a data-spy="examples" href="#examples" style="font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#8c877d">Examples</a>
+      <a data-spy="paper" href="#paper" style="font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#8c877d">Paper</a>
     </div>
-  </nav>
+  </div>
+  <div style="height:1px;background:#e2ded4">
+    <div id="progress" style="height:1px;width:0%;background:#7c4dff"></div>
+  </div>
+</nav>
 
-  <!-- ══ HERO ══════════════════════════════════════════════════════ -->
-  <section id="hero">
-    <div class="hero-body">
+<main id="top" style="max-width:1180px;margin:0 auto;padding:0 32px">
 
-      <div class="venue-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"/><path d="M8.2 13.9 7 22l5-3 5 3-1.2-8.1"/>
+  <!-- ══ HERO ══════════════════════════════════════════════════ -->
+  <section style="padding:74px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:40px;align-items:center">
+    <div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap">
+        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">SONY RESEARCH INDIA</span>
+        <span style="width:22px;height:1px;background:#ddd8ce"></span>
+        <span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8c877d">arXiv:2603.16410</span>
+      </div>
+      <div style="display:inline-flex;align-items:center;gap:9px;margin-bottom:28px;padding:6px 13px;border:1px solid #7c4dff;border-radius:999px;background:rgba(124,77,255,.07)">
+        <span style="width:5px;height:5px;border-radius:50%;background:#7c4dff;flex:none"></span>
+        <span style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#5a2ce0">ACCEPTED AT LUHME &middot; EMNLP 2026</span>
+      </div>
+      <h1 style="margin:0;font:200 clamp(64px,10.5vw,150px)/.9 Newsreader,serif;letter-spacing:-.035em">Plot<span style="font-style:italic;font-weight:300">Twist</span></h1>
+      <p style="margin:22px 0 0;max-width:30ch;font:400 clamp(18px,2vw,22px)/1.4 Archivo,sans-serif;color:#414750;text-wrap:pretty">Creative plot generation with small language models.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:34px">
+        <a href="https://arxiv.org/abs/2603.16410" class="btn btn-solid">PAPER <span style="opacity:.4">&#8599;</span></a>
+        <a href="assets/plottwist-emnlp-2026.pdf" class="btn">PDF <span style="opacity:.4">&#8599;</span></a>
+        <a href="#bibtex" class="btn">BIBTEX</a>
+      </div>
+    </div>
+
+    <div>
+      <svg viewBox="0 0 640 340" style="width:100%;height:auto;overflow:visible" aria-label="Narrative graph: a premise branches into ideas, meets a twist, and resolves into a plot">
+        <g fill="none" stroke="#16191f" stroke-width="1" stroke-linecap="round">
+          <path d="M 66 170 L 244 170" opacity=".45" stroke-dasharray="200" style="animation:drawIn .8s ease-out .30s both"></path>
+          <path d="M 66 170 C 130 170 150 70 244 70" opacity=".45" stroke-dasharray="260" style="animation:drawIn .9s ease-out .38s both"></path>
+          <path d="M 66 170 C 130 170 150 270 244 270" opacity=".45" stroke-dasharray="260" style="animation:drawIn .9s ease-out .46s both"></path>
+          <path d="M 256 70 C 340 70 350 170 414 170" opacity=".45" stroke-dasharray="260" style="animation:drawIn .9s ease-out 1.05s both"></path>
+          <path d="M 256 170 L 414 170" opacity=".45" stroke-dasharray="200" style="animation:drawIn .8s ease-out 1.12s both"></path>
+          <path d="M 256 270 C 340 270 350 170 414 170" opacity=".45" stroke-dasharray="260" style="animation:drawIn .9s ease-out 1.19s both"></path>
+        </g>
+        <path d="M 448 168 C 500 166 512 122 582 120" fill="none" stroke="#7c4dff" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="200" style="animation:drawIn .9s ease-out 1.75s both"></path>
+        <g style="animation:nIn .8s ease-out 2.3s both">
+          <path d="M 444 182 C 470 232 498 252 556 258" fill="none" stroke="#16191f" stroke-width="1" stroke-dasharray="3 4" opacity=".3"></path>
+          <circle cx="564" cy="259" r="4" fill="#f5f3ee" stroke="#16191f" stroke-width="1" opacity=".45"></circle>
+          <text x="564" y="282" text-anchor="middle" fill="#8c877d" style="font:400 10px 'JetBrains Mono',monospace;letter-spacing:.14em">ALT.</text>
+        </g>
+        <g style="animation:nIn .6s ease-out .1s both">
+          <circle cx="60" cy="170" r="5.5" fill="#16191f"></circle>
+          <text x="62" y="196" text-anchor="middle" fill="#16191f" style="font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.16em">PREMISE</text>
+        </g>
+        <g style="animation:nIn .6s ease-out .70s both">
+          <circle cx="250" cy="70" r="4.5" fill="#f5f3ee" stroke="#16191f" stroke-width="1.2"></circle>
+          <text x="250" y="52" text-anchor="middle" fill="#6b7380" style="font:400 10.5px 'JetBrains Mono',monospace;letter-spacing:.16em">IDEA A</text>
+        </g>
+        <g style="animation:nIn .6s ease-out .82s both">
+          <circle cx="250" cy="170" r="4.5" fill="#f5f3ee" stroke="#16191f" stroke-width="1.2"></circle>
+          <text x="250" y="152" text-anchor="middle" fill="#6b7380" style="font:400 10.5px 'JetBrains Mono',monospace;letter-spacing:.16em">IDEA B</text>
+        </g>
+        <g style="animation:nIn .6s ease-out .94s both">
+          <circle cx="250" cy="270" r="4.5" fill="#f5f3ee" stroke="#16191f" stroke-width="1.2"></circle>
+          <text x="250" y="292" text-anchor="middle" fill="#6b7380" style="font:400 10.5px 'JetBrains Mono',monospace;letter-spacing:.16em">IDEA C</text>
+        </g>
+        <g style="animation:nIn .7s ease-out 1.5s both">
+          <rect x="422" y="147" width="24" height="24" transform="rotate(45 434 159)" fill="#7c4dff"></rect>
+          <text x="434" y="200" text-anchor="middle" fill="#5a2ce0" style="font:500 12px 'JetBrains Mono',monospace;letter-spacing:.2em">TWIST</text>
+        </g>
+        <g style="animation:nIn .6s ease-out 2.05s both">
+          <circle cx="590" cy="120" r="5.5" fill="#16191f"></circle>
+          <text x="590" y="100" text-anchor="middle" fill="#16191f" style="font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.16em">PLOT</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <div style="display:flex;flex-direction:column;align-items:center;margin-top:26px">
+    <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
+    <div style="position:relative;width:7px;height:7px">
+      <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">STAGE 01 &middot; THE PREMISE</span>
+    </div>
+    <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
+  </div>
+
+  <!-- ══ RESEARCH ══════════════════════════════════════════════ -->
+  <section id="research" style="padding:36px 0 0;scroll-margin-top:90px">
+    <div data-reveal style="max-width:820px">
+      <p style="margin:0;font:300 clamp(28px,3.6vw,44px)/1.24 Newsreader,serif;letter-spacing:-.015em;text-wrap:pretty">Turning a concise premise into a narrative means satisfying many constraints at once: global coherence, character development, pacing, tone consistency, emotional progression.</p>
+      <p style="margin:30px 0 0;max-width:66ch;font:400 17px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">Frontier models reach that quality only after preference alignment, and aligning at frontier scale is computationally prohibitive. PlotTwist externalises narrative structure into explicit evaluative and training signals instead, so a model with no more than 3B active parameters per token generates premise-conditioned plots competitive with frontier systems of vastly greater scale.</p>
+    </div>
+
+    <div data-reveal style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:#e2ded4;border-top:1px solid #e2ded4;border-bottom:1px solid #e2ded4;margin-top:56px">
+      <div style="background:#f5f3ee;padding:20px 18px 18px">
+        <div style="font:300 34px/1 Newsreader,serif">3B</div>
+        <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">ACTIVE PARAMS<br>PER TOKEN</div>
+      </div>
+      <div style="background:#f5f3ee;padding:20px 18px 18px">
+        <div style="font:300 34px/1 Newsreader,serif">5</div>
+        <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">NARRATIVE QUALITY<br>DIMENSIONS</div>
+      </div>
+      <div style="background:#f5f3ee;padding:20px 18px 18px">
+        <div style="font:300 34px/1 Newsreader,serif">160</div>
+        <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">PREFERENCE PAIRS<br>FROM 5,000 PREMISES</div>
+      </div>
+      <div style="background:#f5f3ee;padding:20px 18px 18px">
+        <div style="font:300 34px/1 Newsreader,serif">8.36</div>
+        <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">OVERALL JURY MEAN<br>HIGHEST OF 12 SYSTEMS</div>
+      </div>
+      <div style="background:#f5f3ee;padding:20px 18px 18px">
+        <div style="font:300 34px/1 Newsreader,serif;color:#5a2ce0">0.91</div>
+        <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">WIN RATE<br>VS GPT-4.1</div>
+      </div>
+    </div>
+
+    <!-- Contributions: interactive node graph -->
+    <div data-reveal style="margin-top:96px">
+      <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px">
+        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">CONTRIBUTIONS</span>
+        <span style="flex:1;height:1px;background:#e2ded4"></span>
+        <span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#b0aa9e">SELECT A NODE</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;align-items:center;margin-top:24px">
+        <svg viewBox="0 0 620 380" style="width:100%;height:auto;overflow:visible">
+          <g fill="none" stroke="#16191f" stroke-width="1" opacity=".4">
+            <path d="M 310 178 C 310 140 310 110 310 66"></path>
+            <path d="M 300 182 C 250 178 180 160 118 148"></path>
+            <path d="M 320 182 C 370 178 440 160 502 148"></path>
+            <path d="M 302 190 C 260 220 210 270 168 300"></path>
+            <path d="M 318 190 C 360 220 410 270 452 300"></path>
+          </g>
+          <circle id="selRing" cx="310" cy="52" r="14" fill="none" stroke="#7c4dff" stroke-width="1.4" style="transition:cx .45s cubic-bezier(.2,.7,.2,1),cy .45s cubic-bezier(.2,.7,.2,1)"></circle>
+          <g class="node-hit" data-pick="0" role="button" tabindex="0" aria-label="Workflow contribution">
+            <circle cx="310" cy="52" r="16" fill="transparent"></circle>
+            <circle data-dot cx="310" cy="52" r="5.5" fill="#16191f"></circle>
+            <text x="310" y="30" text-anchor="middle" fill="#16191f" style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.16em">WORKFLOW</text>
+          </g>
+          <g class="node-hit" data-pick="1" role="button" tabindex="0" aria-label="Positive negative prompting contribution">
+            <circle cx="104" cy="145" r="16" fill="transparent"></circle>
+            <circle data-dot cx="104" cy="145" r="5.5" fill="#16191f"></circle>
+            <text x="104" y="123" text-anchor="middle" fill="#16191f" style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.16em">POS-NEG</text>
+          </g>
+          <g class="node-hit" data-pick="2" role="button" tabindex="0" aria-label="Jury contribution">
+            <circle cx="516" cy="145" r="16" fill="transparent"></circle>
+            <circle data-dot cx="516" cy="145" r="5.5" fill="#16191f"></circle>
+            <text x="516" y="123" text-anchor="middle" fill="#16191f" style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.16em">JURY</text>
+          </g>
+          <g class="node-hit" data-pick="3" role="button" tabindex="0" aria-label="Validation contribution">
+            <circle cx="156" cy="308" r="16" fill="transparent"></circle>
+            <circle data-dot cx="156" cy="308" r="5.5" fill="#16191f"></circle>
+            <text x="156" y="336" text-anchor="middle" fill="#16191f" style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.16em">VALIDATION</text>
+          </g>
+          <g class="node-hit" data-pick="4" role="button" tabindex="0" aria-label="Adaptive generation contribution">
+            <circle cx="464" cy="308" r="16" fill="transparent"></circle>
+            <circle data-dot cx="464" cy="308" r="5.5" fill="#16191f"></circle>
+            <text x="464" y="336" text-anchor="middle" fill="#16191f" style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.16em">ADAPTIVE</text>
+          </g>
+          <g>
+            <rect x="298" y="172" width="24" height="24" transform="rotate(45 310 184)" fill="#7c4dff"></rect>
+            <text x="310" y="222" text-anchor="middle" fill="#16191f" style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:.2em">PLOTTWIST</text>
+          </g>
         </svg>
-        Accepted <span class="sep">/</span> LUHME <span class="sep">/</span> EMNLP 2026
-      </div>
 
-      <h1 class="paper-title">PlotTwist: A Creative Plot Generation Framework with <em>Small Language Models</em></h1>
-
-      <p class="hero-tagline">
-        A structured framework that lets a 3B active-parameter model turn a one-line premise
-        into a plot that holds its own against frontier systems many times its size.
-      </p>
-
-      <div class="authors">
-        <p class="names">Abhinav Thorat, Ravi Kolla, Jyotin Goel, Niranjan Pedanekar</p>
-        <p class="affil">Sony Research India</p>
-      </div>
-
-      <div class="btn-row">
-        <a href="assets/plottwist-emnlp-2026.pdf" class="btn btn-primary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-          Paper (PDF)
-        </a>
-        <a href="https://arxiv.org/abs/2603.16410" class="btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>
-          arXiv
-        </a>
-        <a href="#citation" class="btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3-4 4-8 4-12a4 4 0 1 1 8 0c0 4-1 8-4 12"/><path d="M14 21c3-4 4-8 4-12"/></svg>
-          BibTeX
-        </a>
-      </div>
-
-      <div class="stat-row reveal">
-        <div class="stat-card">
-          <div class="stat-num"><span class="accent">3</span><span class="unit">B</span></div>
-          <div class="stat-label">Active parameters per token in the plot generator</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num"><span class="accent">8.36</span></div>
-          <div class="stat-label">Best overall jury score across all twelve systems</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num"><span class="accent">0.91</span></div>
-          <div class="stat-label">Per-premise win rate against GPT-4.1</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num"><span class="accent">160</span></div>
-          <div class="stat-label">Preference pairs needed to align the generator</div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ══ ABSTRACT ══════════════════════════════════════════════════ -->
-  <section id="abstract">
-    <div class="container">
-      <div class="sec-head">
-        <p class="sec-label">Abstract</p>
-        <h2 class="sec-title">Structure instead of scale</h2>
-      </div>
-
-      <div class="prose reveal">
-        <p class="lead">
-          Creative plot generation asks a language model to turn a concise premise into a coherent
-          narrative while satisfying several constraints at once: global coherence, character
-          development, pacing, tone consistency, and emotional progression.
-        </p>
-        <p>
-          Recent large language models are fluent on general-purpose tasks, but they need preference
-          alignment to do well on a domain-specific task like this one. Running that alignment at
-          frontier scale is computationally prohibitive, which limits both accessibility and practical
-          deployment.
-        </p>
-        <p>
-          PlotTwist addresses this by decomposing generation into three specialised components: an
-          <strong>Aspect Rating Reward Model</strong> trained with a novel positive and negative prompting
-          strategy, a <strong>Mixture-of-Experts plot generator</strong> aligned via Direct Preference
-          Optimization, and an <strong>Agentic Evaluation module</strong> whose cross-family jury emulates
-          human critical judgment for unbiased, independent, post-hoc assessment.
-        </p>
-        <p>
-          The result is a system with 3B active parameters that outperforms every baseline across
-          multiple Narrative Quality Dimensions, achieving higher win rates against all but the strongest
-          baseline, with which it remains competitive. It also reliably separates plots drawn from
-          critically acclaimed screenplays from those drawn from widely panned ones, which establishes
-          structured preference-based alignment as a resource-efficient route to high-quality creative
-          plot generation.
-        </p>
-      </div>
-
-      <!-- Contributions -->
-      <div class="mt-4">
-        <h3 class="sub reveal"><span class="tag">Contributions</span></h3>
-        <div class="grid-3 reveal" style="margin-top:1.1rem">
-          <div class="card">
-            <span class="card-num">01</span>
-            <h4>Structured workflow with SLMs</h4>
-            <p>A modular framework of an aspect rating reward model, a DPO-trained MoE plot generator, and an independent agentic evaluation module.</p>
-          </div>
-          <div class="card">
-            <span class="card-num">02</span>
-            <h4>Positive and negative prompting</h4>
-            <p>A prompting strategy that mitigates positivity bias in LLM-based evaluation, giving reliable aspect-level supervision across five dimensions.</p>
-          </div>
-          <div class="card">
-            <span class="card-num">03</span>
-            <h4>Cross-family jury</h4>
-            <p>Five open-weight jurors from five disjoint families, with a pre-registered protocol covering structured deliberation, a held-out judge, and reliability analyses.</p>
-          </div>
-        </div>
-        <div class="grid-2 reveal" style="margin-top:1.1rem">
-          <div class="card">
-            <span class="card-num">04</span>
-            <h4>External validation of the evaluators</h4>
-            <p>Both the reward model and the agentic evaluator reliably separate acclaimed from critically panned plots across every dimension, so the scoring machinery is validated against outside signals rather than itself.</p>
-          </div>
-          <div class="card">
-            <span class="card-num">05</span>
-            <h4>Quality-adaptive generation</h4>
-            <p>PlotTwist scales its intervention to the source: it lightly refines already strong narratives and substantially restructures weak ones, rather than uniformly inflating scores.</p>
+        <div style="border-left:1px solid #16191f;padding:4px 0 4px 26px;min-height:200px">
+          <div id="contribPanel" aria-live="polite">
+            <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d" id="cKicker">01 &middot; WORKFLOW</div>
+            <h3 id="cTitle" style="margin:14px 0 0;font:300 27px/1.24 Newsreader,serif;letter-spacing:-.01em">Structured workflow using SLMs for plot generation</h3>
+            <p id="cBody" style="margin:14px 0 0;max-width:52ch;font:400 15.5px/1.65 Archivo,sans-serif;color:#414750;text-wrap:pretty">A modular framework of three specialised components: an aspect rating reward model, a DPO-trained mixture-of-experts plot generator, and an independent agentic evaluation module.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ══ FRAMEWORK ═════════════════════════════════════════════════ -->
-  <section id="framework">
-    <div class="container">
-      <div class="sec-head">
-        <p class="sec-label">Framework</p>
-        <h2 class="sec-title">Three modules, one pipeline</h2>
-        <p class="sec-sub">
-          Rather than asking one monolithic model to learn every aspect of narrative quality through
-          token prediction, PlotTwist externalises narrative structure into explicit evaluative and
-          training signals.
-        </p>
-      </div>
+  <div style="display:flex;flex-direction:column;align-items:center;margin-top:80px">
+    <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
+    <div style="position:relative;width:7px;height:7px">
+      <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">STAGE 02 &middot; THE POSSIBILITIES BRANCH</span>
+    </div>
+    <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
+  </div>
 
-      <figure class="figure-dark reveal">
-        <img src="assets/approach.png" alt="Three panels: aspect-level evaluation of plots, mixture-of-experts generation, and automated quality assessment." loading="lazy" />
-      </figure>
+  <!-- ══ FRAMEWORK ═════════════════════════════════════════════ -->
+  <section id="framework" style="padding:30px 0 0;scroll-margin-top:90px">
+    <div data-reveal style="max-width:760px">
+      <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">THE FRAMEWORK</span>
+      <h2 style="margin:16px 0 0;font:300 clamp(34px,4.4vw,54px)/1.1 Newsreader,serif;letter-spacing:-.02em">The story-generation machine</h2>
+      <p style="margin:20px 0 0;max-width:62ch;font:400 16.5px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">One premise enters. Candidate plots branch out, a reward model rates every branch across five dimensions, preference optimisation turns the ranking into a twist in the generator's policy, and an independent jury decides what comes out.</p>
+    </div>
 
-      <figure class="figure reveal">
-        <img src="assets/paper-framework.png" alt="The PlotTwist framework: step 1 trains a reward model from multi-aspect ratings, step 2 trains the generator with DPO using reward model preferences, step 3 evaluates plots with an agentic aspect-focused jury." loading="lazy" />
-      </figure>
-      <p class="figcaption mb-3"><b>Figure 1.</b> The PlotTwist framework. Reward modelling, preference-aligned generation, and independent agentic evaluation are trained and run as separate stages.</p>
+    <div data-reveal style="margin-top:56px;overflow-x:auto;padding-bottom:8px">
+      <div data-fwbox style="position:relative;min-width:1000px;width:100%;aspect-ratio:1240/540">
+        <svg viewBox="0 0 1240 540" style="position:absolute;inset:0;width:100%;height:100%">
+          <g data-fw="1">
+            <circle cx="95" cy="260" r="6" fill="#16191f"></circle>
+          </g>
+          <g data-fw="2" fill="none" stroke="#16191f" stroke-width="1" stroke-linecap="round">
+            <path d="M 103 260 C 150 260 200 260 247 260" opacity=".45"></path>
+            <path d="M 263 260 C 320 250 340 132 397 117" opacity=".45"></path>
+            <path d="M 263 260 C 320 255 345 215 397 205" opacity=".45"></path>
+            <path d="M 263 260 C 320 265 345 305 397 315" opacity=".45"></path>
+            <path d="M 263 260 C 320 270 340 390 397 405" opacity=".45"></path>
+            <circle cx="255" cy="260" r="6" fill="#16191f" stroke="none"></circle>
+            <circle cx="405" cy="117" r="4.5" fill="#f5f3ee" stroke="#16191f" stroke-width="1.2"></circle>
+            <circle cx="405" cy="205" r="4.5" fill="#f5f3ee" stroke="#16191f" stroke-width="1.2"></circle>
+            <circle cx="405" cy="315" r="4.5" fill="#f5f3ee" stroke="#16191f" stroke-width="1.2"></circle>
+            <circle cx="405" cy="405" r="4.5" fill="#f5f3ee" stroke="#16191f" stroke-width="1.2"></circle>
+            <text x="405" y="98" text-anchor="middle" fill="#6b7380" stroke="none" style="font:400 13px 'JetBrains Mono',monospace">A</text>
+            <text x="382" y="209" text-anchor="middle" fill="#6b7380" stroke="none" style="font:400 13px 'JetBrains Mono',monospace">B</text>
+            <text x="382" y="319" text-anchor="middle" fill="#6b7380" stroke="none" style="font:400 13px 'JetBrains Mono',monospace">C</text>
+            <text x="405" y="429" text-anchor="middle" fill="#6b7380" stroke="none" style="font:400 13px 'JetBrains Mono',monospace">D</text>
+          </g>
+          <g data-fw="3">
+            <g fill="none" stroke="#16191f" stroke-width="1" stroke-linecap="round" opacity=".45">
+              <path d="M 413 117 C 470 132 520 245 577 259"></path>
+              <path d="M 413 205 C 470 215 525 250 577 259"></path>
+              <path d="M 413 315 C 470 305 525 270 577 261"></path>
+              <path d="M 413 405 C 470 390 520 275 577 261"></path>
+            </g>
+            <path d="M 588 273 C 606 330 630 402 652 428" fill="none" stroke="#16191f" stroke-width="1" stroke-dasharray="3 4" opacity=".28"></path>
+            <circle cx="659" cy="433" r="4.5" fill="#f5f3ee" stroke="#16191f" stroke-width="1" opacity=".4"></circle>
+            <text x="678" y="437" fill="#8c877d" style="font:400 11px 'JetBrains Mono',monospace;letter-spacing:.12em">rejected</text>
+            <circle cx="585" cy="260" r="6" fill="#16191f"></circle>
+          </g>
+          <g data-fw="4">
+            <path d="M 593 260 C 640 260 690 260 733 260" fill="none" stroke="#16191f" stroke-width="1" opacity=".45"></path>
+            <rect x="734" y="249" width="22" height="22" transform="rotate(45 745 260)" fill="#7c4dff"></rect>
+          </g>
+          <g data-fw="5">
+            <path d="M 757 252 C 800 238 850 178 892 166" fill="none" stroke="#7c4dff" stroke-width="1.4" stroke-linecap="round"></path>
+            <circle cx="900" cy="165" r="6" fill="#16191f"></circle>
+          </g>
+          <g data-fw="6">
+            <path d="M 908 172 C 950 200 990 275 1032 297" fill="none" stroke="#16191f" stroke-width="1" opacity=".45"></path>
+            <circle cx="1040" cy="300" r="6" fill="#16191f"></circle>
+          </g>
+          <g data-fw="7">
+            <path d="M 1048 294 C 1080 272 1105 200 1137 181" fill="none" stroke="#16191f" stroke-width="1" opacity=".45"></path>
+            <circle cx="1145" cy="175" r="7.5" fill="#16191f"></circle>
+            <circle cx="1145" cy="175" r="14" fill="none" stroke="#16191f" stroke-width="1" opacity=".3"></circle>
+          </g>
+        </svg>
 
-      <div class="grid-3 reveal">
-        <div class="pillar">
-          <span class="step">Step 01</span>
-          <h4>Aspect Rating Reward Model</h4>
-          <p>Scores a plot on five narrative dimensions. Trained by supervised fine-tuning on synthetic aspect ratings produced by a five-model ensemble under positive and negative prompting.</p>
-          <div class="meta">Qwen-3-32B, 4-bit, CE + Huber</div>
+        <div data-fw="1" style="position:absolute;left:7.66%;top:50%;transform:translate(-50%,-50%);width:126px;text-align:center;padding-bottom:52px">
+          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">PREMISE</div>
+          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">setting, genre, thematic constraint</div>
         </div>
-        <div class="pillar">
-          <span class="step">Step 02</span>
-          <h4>MoE Plot Generator</h4>
-          <p>A sparse mixture-of-experts backbone aligned with Direct Preference Optimization on preference pairs the reward model ranked and filtered under strict thresholds.</p>
-          <div class="meta">Qwen-3-30B-A3B, 3B active</div>
+        <div data-fw="2" style="position:absolute;left:20.56%;top:50%;transform:translate(-50%,-50%);width:132px;text-align:center;padding-bottom:60px">
+          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">CANDIDATE PLOTS</div>
+          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">base MoE and frontier models, one premise</div>
         </div>
-        <div class="pillar">
-          <span class="step">Step 03</span>
-          <h4>Agentic Evaluation</h4>
-          <p>A jury of five open-weight models from families disjoint from the generator scores each plot independently, deliberates on contested cells, and is consolidated by a held-out judge.</p>
-          <div class="meta">5 jurors + 1 held-out judge</div>
+        <div data-fw="3" style="position:absolute;left:47.18%;top:50%;transform:translate(-50%,-50%);width:150px;text-align:center;padding-bottom:66px">
+          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">ASPECT RATING<br>REWARD MODEL</div>
+          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">Qwen-3-32B &middot; SFT with Huber loss &middot; five NQDs</div>
+        </div>
+        <div data-fw="4" style="position:absolute;left:60.08%;top:50%;transform:translate(-50%,-50%);width:132px;text-align:center;padding-top:74px">
+          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5a2ce0">THE TWIST &middot; DPO</div>
+          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">160 high-confidence preference pairs</div>
+        </div>
+        <div data-fw="5" style="position:absolute;left:72.58%;top:30.56%;transform:translate(-50%,-50%);width:146px;text-align:center;padding-bottom:62px">
+          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">MoE PLOT GENERATOR</div>
+          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">Qwen-3-30B-A3B &middot; 3B active per token</div>
+        </div>
+        <div data-fw="6" style="position:absolute;left:83.87%;top:55.56%;transform:translate(-50%,-50%);width:146px;text-align:center;padding-top:70px">
+          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">CROSS-FAMILY JURY</div>
+          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">five jurors &middot; two deliberation rounds &middot; held-out judge</div>
+        </div>
+        <div data-fw="7" style="position:absolute;left:92.34%;top:32.41%;transform:translate(-50%,-50%);width:120px;text-align:center;padding-bottom:56px">
+          <div style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em">FINAL PLOT</div>
+          <div style="margin-top:5px;font:400 11.5px/1.4 Archivo,sans-serif;color:#6b7380">jury mean 8.36</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ══ METHOD ════════════════════════════════════════════════════ -->
-  <section id="method">
-    <div class="container">
-      <div class="sec-head">
-        <p class="sec-label">Methodology</p>
-        <h2 class="sec-title">How each component works</h2>
-      </div>
+  <div style="display:flex;flex-direction:column;align-items:center;margin-top:60px">
+    <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
+    <div style="position:relative;width:7px;height:7px">
+      <div style="width:7px;height:7px;border-radius:50%;background:#7c4dff"></div>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5a2ce0">STAGE 03 &middot; THE TWIST</span>
+    </div>
+    <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
+  </div>
 
-      <!-- 4.1 Reward model -->
-      <h3 class="sub reveal"><span class="tag">4.1</span> Aspect Rating Reward Model</h3>
-      <div class="prose reveal mb-2">
-        <p>
-          No dataset provides fine-grained plot ratings across the dimensions we care about, so we build
-          one. We sample 5,000 movies from MovieLens across a broad range of IMDb ratings, scrape each
-          plot from Wikipedia, and keep only plots of at most 4,000 words. IMDb ratings never enter
-          training; they are used purely for curation and stratification.
-        </p>
-        <p>
-          Ratings are then generated synthetically by an ensemble of five models: Qwen-2.5-7B,
-          Llama-3.3-70B, Llama-3.1-8B, DeepSeek-14B, and Gemma-27B. Model diversity keeps any single
-          family's bias out of the labels.
-        </p>
-      </div>
+  <!-- ══ THE TWIST ═════════════════════════════════════════════ -->
+  <section data-twistbox style="padding:40px 0 0">
+    <h2 data-reveal style="margin:0;max-width:26ch;font:300 clamp(40px,6.2vw,86px)/1.02 Newsreader,serif;letter-spacing:-.03em;text-wrap:pretty">What happens when the plot takes a <span style="font-style:italic">different turn?</span></h2>
 
-      <div class="callout reveal mb-2">
-        <span class="ct">The key idea: positive and negative prompting</span>
-        Each model is asked twice about the same aspect. Once to rate only what the plot does
-        <strong>well</strong> on that aspect, and once to rate only what it does <strong>badly</strong>.
-        Scoring the two poles separately counteracts the positivity bias that LLM judges show when asked
-        for a single verdict, and it correlates more strongly with external quality indicators.
-      </div>
-
-      <div class="eq reveal">
-        r<sub>a</sub>(p) = &Sigma;<sub>m</sub> ( r<sup>+</sup><sub>a,m</sub>(p) &minus; r<sup>&minus;</sup><sub>a,m</sub>(p) )
-        <span class="cm">&nbsp;&nbsp;// aspect a, plot p, summed over the five raters m</span>
-      </div>
-      <p class="eq-note reveal mb-2">
-        Each pole is scored 1 to 10. A well-executed aspect should score high on the positive prompt and
-        low on the negative one, so the difference is large.
-      </p>
-
-      <div class="prose reveal mb-2">
-        <p>
-          The reward model itself is Qwen-3-32B under 4-bit quantization, fine-tuned with a joint
-          objective. Token-level cross-entropy supervises generation of the target response, while a
-          Huber loss penalises deviation between predicted and target aspect ratings, which keeps the
-          regression head robust to outlying labels.
-        </p>
-      </div>
-
-      <div class="eq reveal">
-        L<sub>CE</sub>(&theta;) = &minus;(1/T) &Sigma;<sub>t=1..T</sub> log p<sub>&theta;</sub>(y<sub>t</sub> | x<sub>1:t</sub>)
-        <br /><br />
-        L<sub>&delta;</sub>(r) = &frac12; r&sup2;<span class="cm">&nbsp;&nbsp;if |r| &le; &delta;</span>
-        <br />
-        L<sub>&delta;</sub>(r) = &delta;(|r| &minus; &frac12;&delta;)<span class="cm">&nbsp;&nbsp;if |r| &gt; &delta;</span>,&nbsp;&nbsp;<span class="cm">with &delta; = 1</span>
-      </div>
-
-      <!-- NQD -->
-      <div class="mt-4">
-        <h3 class="sub reveal"><span class="tag">Rubric</span> Five Narrative Quality Dimensions</h3>
-        <p class="sec-sub reveal mb-2">
-          Drawn from computational narrative modelling and affective narratology, these five dimensions
-          span the structural, temporal, stylistic, character-centric, and affective aspects of narrative
-          quality while keeping the evaluation space compact.
-        </p>
-        <div class="grid-5 reveal">
-          <div class="nqd-card">
-            <span class="idx">NQD 01</span>
-            <h4>Narrative Coherence</h4>
-            <p>Global logical consistency and causal connectivity across the whole arc.</p>
-          </div>
-          <div class="nqd-card">
-            <span class="idx">NQD 02</span>
-            <h4>Character Development</h4>
-            <p>Meaningful character evolution, motivation, and believable transformation.</p>
-          </div>
-          <div class="nqd-card">
-            <span class="idx">NQD 03</span>
-            <h4>Pacing</h4>
-            <p>Distribution of narrative progression, rhythm, and timing of events.</p>
-          </div>
-          <div class="nqd-card">
-            <span class="idx">NQD 04</span>
-            <h4>Tone Consistency</h4>
-            <p>Stylistic alignment, atmosphere, and earned rather than jarring tonal shifts.</p>
-          </div>
-          <div class="nqd-card">
-            <span class="idx">NQD 05</span>
-            <h4>Emotional Turning Points</h4>
-            <p>Effectiveness of the major affective transitions and their payoff.</p>
-          </div>
+    <div style="margin-top:54px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:44px;align-items:center">
+      <div style="overflow-x:auto">
+        <div style="position:relative;min-width:600px;width:100%;aspect-ratio:920/230">
+          <svg viewBox="0 0 920 230" style="position:absolute;inset:0;width:100%;height:100%">
+            <g fill="none" stroke="#16191f" stroke-width="1.2" stroke-linecap="round">
+              <path d="M 78 168 L 242 168" opacity=".55"></path>
+            </g>
+            <circle cx="70" cy="168" r="5.5" fill="#16191f"></circle>
+            <circle cx="250" cy="168" r="5.5" fill="#16191f"></circle>
+            <text x="70" y="196" text-anchor="middle" fill="#16191f" style="font:400 15px Newsreader,serif">A</text>
+            <text x="250" y="196" text-anchor="middle" fill="#16191f" style="font:400 15px Newsreader,serif">B</text>
+            <g data-twist="tail" style="transition:opacity .7s ease">
+              <path d="M 258 168 L 422 168" fill="none" stroke="#16191f" stroke-width="1.2" opacity=".55" stroke-linecap="round"></path>
+              <path d="M 438 168 L 602 168" fill="none" stroke="#16191f" stroke-width="1.2" opacity=".55" stroke-linecap="round"></path>
+              <circle cx="430" cy="168" r="5.5" fill="#16191f"></circle>
+              <circle cx="610" cy="168" r="5.5" fill="#16191f"></circle>
+              <text x="430" y="196" text-anchor="middle" fill="#16191f" style="font:400 15px Newsreader,serif">C</text>
+              <text x="610" y="196" text-anchor="middle" fill="#16191f" style="font:400 15px Newsreader,serif">D</text>
+            </g>
+            <g data-twist="branch" opacity="0" style="transition:opacity .6s ease">
+              <path d="M 258 162 C 310 148 340 120 388 106" fill="none" stroke="#7c4dff" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="400" style="transition:stroke-dashoffset 1s ease-out"></path>
+              <path d="M 418 96 C 480 74 540 62 596 56" fill="none" stroke="#7c4dff" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="400" style="transition:stroke-dashoffset 1s ease-out .25s"></path>
+              <path d="M 620 54 C 690 48 760 42 826 38" fill="none" stroke="#7c4dff" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="400" style="transition:stroke-dashoffset 1s ease-out .5s"></path>
+              <rect x="392" y="84" width="20" height="20" transform="rotate(45 402 94)" fill="#7c4dff"></rect>
+              <circle cx="606" cy="55" r="5.5" fill="#16191f"></circle>
+              <circle cx="834" cy="37" r="7" fill="#16191f"></circle>
+              <text x="402" y="60" text-anchor="middle" fill="#5a2ce0" style="font:500 11px 'JetBrains Mono',monospace;letter-spacing:.2em">TWIST</text>
+              <text x="606" y="83" text-anchor="middle" fill="#16191f" style="font:400 15px Newsreader,serif">E</text>
+              <text x="834" y="66" text-anchor="middle" fill="#16191f" style="font:400 15px Newsreader,serif">F</text>
+            </g>
+          </svg>
         </div>
       </div>
 
-      <!-- 4.2 Generator -->
-      <div class="mt-4">
-        <h3 class="sub reveal"><span class="tag">4.2</span> Preference-Aligned Plot Generator</h3>
-        <div class="prose reveal mb-2">
-          <p>
-            The generator is Qwen-3-30B-A3B, a mixture-of-experts backbone. It holds 30B total parameters
-            but activates only 3B per token, which is what places it inside our definition of a small
-            language model. Because the base model already follows instructions well, we skip supervised
-            fine-tuning entirely and spend the whole budget on preference optimization.
-          </p>
-          <p>
-            Direct Preference Optimization is used rather than full RLHF: it optimizes the preference
-            objective directly, without a separate reward model in the loop or on-policy reinforcement
-            learning, which is what makes alignment affordable at this scale.
-          </p>
+      <div>
+        <div style="display:flex;align-items:center;gap:12px;height:16px">
+          <span data-twist="cap1" style="font:400 12px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#8c877d;transition:opacity .5s ease">A &rarr; B &rarr; C &rarr; D</span>
+          <span data-twist="cap2" style="font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#5a2ce0;opacity:0;transition:opacity .5s ease;margin-left:-118px">A &rarr; B &rarr; TWIST &#8599; E &rarr; F</span>
         </div>
-
-        <div class="grid-2 reveal">
+        <p style="margin:26px 0 0;max-width:46ch;font:400 16.5px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">The twist is not in the story. It is in the policy. Ranking four candidate plots with the aspect rating reward model produces a preference signal, and direct preference optimisation on 160 high-confidence pairs redirects the generator's path without any reinforcement learning loop or explicit reward at inference time.</p>
+        <div style="display:flex;align-items:flex-end;gap:26px;margin-top:34px;padding-top:26px;border-top:1px solid #e2ded4">
           <div>
-            <p class="sec-label" style="margin-bottom:.9rem">Preference-pair curation</p>
-            <div class="funnel">
-              <div class="funnel-step"><span class="n">5,000</span><span class="t">premises generated from the curated plots using Gemma-27B</span></div>
-              <div class="funnel-arrow">&darr;</div>
-              <div class="funnel-step"><span class="n">4&times;</span><span class="t">candidate plots per premise from the base MoE plus GPT-4.1, Claude Sonnet 4, and Gemini 2.0 Flash</span></div>
-              <div class="funnel-arrow">&darr;</div>
-              <div class="funnel-step"><span class="n">Rank</span><span class="t">all candidates scored by the reward model, aspect ratings averaged into one reward</span></div>
-              <div class="funnel-arrow">&darr;</div>
-              <div class="funnel-step"><span class="n">Filter</span><span class="t">keep only pairs where a frontier model wins outright, scores above 8, and beats the runner-up by at least 0.5</span></div>
-              <div class="funnel-arrow">&darr;</div>
-              <div class="funnel-step final"><span class="n">160</span><span class="t">high-confidence preference pairs used for DPO</span></div>
-            </div>
+            <div style="font:300 40px/1 Newsreader,serif;color:#8c877d">8.03</div>
+            <div style="margin-top:7px;font:500 9.5px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">BASE MoE<br>BEFORE DPO</div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:1.1rem">
-            <div class="callout">
-              <span class="ct">Why so few pairs</span>
-              160 pairs out of 5,000 premises is a severe filter, and that is the point. The thresholds
-              keep only cases where the preference signal is unambiguous, and prior work shows DPO can
-              work well from a small number of high-quality pairs.
-            </div>
-            <div class="card" style="pointer-events:none">
-              <h4>No SFT stage at all</h4>
-              <p>
-                The base model already follows instructions well, so supervised fine-tuning for
-                instruction alignment is skipped entirely. The whole training budget goes to
-                preference optimization, which is what keeps the pipeline affordable.
-              </p>
-            </div>
-            <div class="metrics" style="grid-template-columns:repeat(2,1fr)">
-              <div class="metric">
-                <div class="mv">30B / 3B</div>
-                <div class="ml">Total against active parameters per token</div>
-              </div>
-              <div class="metric">
-                <div class="mv gold">+0.78</div>
-                <div class="ml">Overall gain attributable to DPO alignment</div>
-              </div>
-            </div>
+          <div style="font:400 18px/1;color:#5a2ce0;padding-bottom:26px">&rarr;</div>
+          <div>
+            <div style="font:300 40px/1 Newsreader,serif;color:#5a2ce0">8.81</div>
+            <div style="margin-top:7px;font:500 9.5px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8c877d">AFTER DPO<br>+0.78 OVERALL</div>
           </div>
         </div>
-      </div>
-
-      <!-- 4.3 Jury -->
-      <div class="mt-4">
-        <h3 class="sub reveal"><span class="tag">4.3</span> Agentic Evaluation with a Cross-Family Jury</h3>
-        <div class="prose reveal mb-2">
-          <p>
-            The reward model cannot also be the referee. It is a predictive model fitted to aspect-level
-            signals in its own training data, so scoring generations with it risks rewarding the patterns
-            it learned rather than genuine narrative soundness. Expert human evaluation is the gold
-            standard but is impractical at this scale, so evaluation is handed to an independent agentic
-            module that shares nothing with the training pipeline.
-          </p>
-        </div>
-
-        <figure class="figure reveal">
-          <img src="assets/paper-jury.png" alt="The cross-family jury: five juror models independently score five narrative quality dimensions, two rounds of multi-agent deliberation follow, and a judge model issues the final assessment." loading="lazy" />
-        </figure>
-        <p class="figcaption mb-3"><b>Figure 2.</b> The cross-family jury. Independent scoring, then structured deliberation on contested cells, then consolidation by a held-out judge.</p>
-
-        <p class="sec-label reveal" style="margin-bottom:.9rem">The panel</p>
-        <div class="roster reveal">
-          <div class="juror"><div class="jn">GPT-OSS-120B</div><div class="jf">OpenAI, open-weight</div><div class="jp">MXFP4</div></div>
-          <div class="juror"><div class="jn">Gemma-4-31B</div><div class="jf">Google</div><div class="jp">BF16</div></div>
-          <div class="juror"><div class="jn">Mistral-Medium-3.5</div><div class="jf">Mistral, 128B</div><div class="jp">Q6_K</div></div>
-          <div class="juror"><div class="jn">Nemotron-3-Super</div><div class="jf">NVIDIA, 120B-A12B</div><div class="jp">FP8</div></div>
-          <div class="juror"><div class="jn">GLM-4.6V</div><div class="jf">Zhipu</div><div class="jp">FP8</div></div>
-        </div>
-        <div class="judge-strip reveal">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold)"><path d="M12 3v18"/><path d="m5 7 7-4 7 4"/><path d="M3 11h6l-3 7-3-7z"/><path d="M15 11h6l-3 7-3-7z"/></svg>
-          Held-out judge: <b>Llama-3.3-70B</b>, from a sixth family disjoint from both the panel and the generator
-        </div>
-
-        <div class="grid-3 reveal mt-3">
-          <div class="card">
-            <div class="card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V6a3 3 0 1 1 6 0v5"/><rect x="5" y="11" width="14" height="10" rx="2"/></svg>
-            </div>
-            <h4>Ten criteria per dimension</h4>
-            <p>Each dimension is specified as ten explicit, instruction-level criteria that turn abstract narrative concepts into observable failure modes. Each is scored on [0, 1] and summed to a score out of ten.</p>
-          </div>
-          <div class="card">
-            <div class="card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            </div>
-            <h4>Evidence grounding</h4>
-            <p>Every criterion score must cite a span quoted verbatim from the plot, which turns written justifications into mechanically checkable claims. Between 94% and 99% of roughly 478,000 quoted spans verify against the source text.</p>
-          </div>
-          <div class="card">
-            <div class="card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <h4>Blind deliberation</h4>
-            <p>Cells where jurors differ by at least two points go to two rounds of discussion. Jurors see peers' anonymized, order-shuffled arguments and cited spans, but peer scores stay hidden to prevent vote-matching.</p>
-          </div>
-        </div>
-
-        <div class="callout warn reveal mt-3">
-          <span class="ct">Measured, not enforced</span>
-          Grounding is reported rather than imposed. Unverifiable citations are logged instead of silently
-          dropped, which avoids the selection bias that discarding cells would introduce. Where a juror's
-          stated total disagrees with the sum of its criterion scores by more than a point, the sum is
-          used, so every reported total reflects the cited evidence.
-        </div>
+        <button id="replayBtn" type="button" style="margin-top:28px;display:inline-flex;align-items:center;gap:9px;padding:9px 16px;background:transparent;border:1px solid #16191f;border-radius:999px;cursor:pointer;font:500 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#16191f;transition:background .25s,color .25s">&#8635; TWIST AGAIN</button>
       </div>
     </div>
   </section>
 
-  <!-- ══ EVALUATION VALIDATION ═════════════════════════════════════ -->
-  <section id="evaluation">
-    <div class="container">
-      <div class="sec-head">
-        <p class="sec-label">Validation</p>
-        <h2 class="sec-title">Do the evaluators actually know good writing?</h2>
-        <p class="sec-sub">
-          Before trusting either scorer, we test whether it separates writing that human critics already
-          agreed about. Acclaimed plots come from the 101 Greatest Screenplays of All Time; panned plots
-          come from the Golden Raspberry Screenplay Awards.
-        </p>
-      </div>
+  <div style="display:flex;flex-direction:column;align-items:center;margin-top:80px">
+    <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
+    <div style="position:relative;width:7px;height:7px">
+      <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">STAGE 04 &middot; THE COMPANY OF SMALL MODELS</span>
+    </div>
+    <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
+  </div>
 
-      <div class="prose reveal mb-3">
-        <p>
-          The two sets are imbalanced, 37 Razzie against 94 GSAT, so we use repeated balanced
-          subsampling: fix the Razzie set, draw an equal number of GSAT films, and repeat over 1,000 runs.
-        </p>
-      </div>
+  <!-- ══ THE CAST ══════════════════════════════════════════════ -->
+  <section style="padding:34px 0 0">
+    <div data-reveal style="max-width:700px">
+      <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">THE CAST</span>
+      <h2 style="margin:16px 0 0;font:300 clamp(32px,4.2vw,50px)/1.12 Newsreader,serif;letter-spacing:-.02em">Twelve models, one 3B narrator</h2>
+      <p style="margin:20px 0 0;max-width:60ch;font:400 16.5px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">Large models never write the plot. They rate it before training and judge it after. The model that writes has 3B active parameters per token.</p>
+    </div>
 
-      <div class="grid-2 reveal">
-        <div>
-          <p class="sec-label" style="margin-bottom:.9rem">Aspect Rating Reward Model</p>
-          <div class="split">
-            <div class="side acclaimed">
-              <div class="sv">8.28</div>
-              <div class="sl">Acclaimed<br />(GSAT)</div>
+    <div data-reveal style="margin-top:54px;overflow-x:auto;padding-bottom:8px">
+      <div style="min-width:940px">
+        <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d;margin-bottom:14px">RATERS &middot; SYNTHETIC ASPECT LABELS, POSITIVE-NEGATIVE PROMPTING</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid #ddd8ce;background:#fffdf9">
+            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">Q7</span>
+            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Qwen-2.5-7B</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid #ddd8ce;background:#fffdf9">
+            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">L7</span>
+            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Llama-3.3-70B</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid #ddd8ce;background:#fffdf9">
+            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">L8</span>
+            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Llama-3.1-8B</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid #ddd8ce;background:#fffdf9">
+            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">DS</span>
+            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">DeepSeek-14B</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid #ddd8ce;background:#fffdf9">
+            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">G2</span>
+            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Gemma-27B</span>
+          </div>
+        </div>
+
+        <svg viewBox="0 0 1000 52" preserveAspectRatio="none" style="display:block;width:100%;height:52px">
+          <g stroke="#16191f" stroke-width="1" opacity=".35" fill="none">
+            <path d="M 100 0 L 500 52"></path>
+            <path d="M 300 0 L 500 52"></path>
+            <path d="M 500 0 L 500 52"></path>
+            <path d="M 700 0 L 500 52"></path>
+            <path d="M 900 0 L 500 52"></path>
+          </g>
+        </svg>
+
+        <div style="border:1px solid #16191f;background:#fffdf9;padding:22px 24px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap">
+            <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.24em">PLOTTWIST FRAMEWORK</div>
+            <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8c877d">TRAINED OFFLINE &middot; SINGLE INFERENCE PASS</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:#e2ded4;margin-top:18px">
+            <div style="background:#fffdf9;padding:16px 18px">
+              <div style="font:500 11.5px/1 'JetBrains Mono',monospace">Qwen-3-32B</div>
+              <div style="margin-top:7px;font:400 12.5px/1.5 Archivo,sans-serif;color:#6b7380">Aspect rating reward model. 4-bit quantised, fine-tuned with cross-entropy plus Huber loss on 5,000 rated plots.</div>
             </div>
-            <div class="delta">+1.07</div>
-            <div class="side panned">
-              <div class="sv">7.21</div>
-              <div class="sl">Panned<br />(Razzies)</div>
+            <div style="background:#fffdf9;padding:16px 18px;border-left:2px solid #7c4dff">
+              <div style="font:500 11.5px/1 'JetBrains Mono',monospace;color:#5a2ce0">Qwen-3-30B-A3B</div>
+              <div style="margin-top:7px;font:400 12.5px/1.5 Archivo,sans-serif;color:#6b7380">The plot generator. Mixture-of-experts, 3B active parameters per token, aligned by DPO. This is the only model that writes.</div>
             </div>
           </div>
-          <p class="table-note">
-            95% CI [0.96, 1.19]. GSAT wins in 100% of subsampling runs. Largest gaps in pacing (+1.41),
-            emotional turning points (+1.13), and narrative coherence (+1.12). Effect sizes are large
-            throughout, Cohen's d from 2.77 to 4.68, and Welch's t-test on the aggregate gives
-            t = 9.69, p = 3.41 &times; 10<sup>&minus;18</sup>.
-          </p>
         </div>
-        <div>
-          <p class="sec-label" style="margin-bottom:.9rem">Cross-Family Jury</p>
-          <div class="split">
-            <div class="side acclaimed">
-              <div class="sv">8.33</div>
-              <div class="sl">Acclaimed<br />(GSAT)</div>
-            </div>
-            <div class="delta">+1.75</div>
-            <div class="side panned">
-              <div class="sv">6.58</div>
-              <div class="sl">Panned<br />(Razzies)</div>
-            </div>
-          </div>
-          <p class="table-note">
-            95% CI [1.66, 1.85], again 100% of runs. The jury separates more sharply than the reward model,
-            especially on narrative coherence (+2.64), tone consistency (+1.99), and pacing (+1.91).
-            Cohen's d from 4.36 to 9.34, aggregate t = 16.54,
-            p = 2.96 &times; 10<sup>&minus;38</sup>.
-          </p>
-        </div>
-      </div>
 
-      <div class="callout reveal mt-3">
-        <span class="ct">What this establishes</span>
-        Both scorers reliably distinguish critically acclaimed from critically panned writing across every
-        dimension. The evaluation machinery is anchored to outside human judgment before it is ever used
-        to rank systems.
+        <svg viewBox="0 0 1000 52" preserveAspectRatio="none" style="display:block;width:100%;height:52px">
+          <g stroke="#16191f" stroke-width="1" opacity=".35" fill="none">
+            <path d="M 500 0 L 100 52"></path>
+            <path d="M 500 0 L 300 52"></path>
+            <path d="M 500 0 L 500 52"></path>
+            <path d="M 500 0 L 700 52"></path>
+            <path d="M 500 0 L 900 52"></path>
+          </g>
+        </svg>
+
+        <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d;margin-bottom:14px">JURORS &middot; FIVE FAMILIES, ALL DISJOINT FROM THE GENERATOR</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px dashed #c9c3b6;background:#fffdf9">
+            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">OS</span>
+            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">GPT-OSS-120B</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px dashed #c9c3b6;background:#fffdf9">
+            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">G4</span>
+            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Gemma-4-31B</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px dashed #c9c3b6;background:#fffdf9">
+            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">MM</span>
+            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Mistral-Med-3.5</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px dashed #c9c3b6;background:#fffdf9">
+            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">NV</span>
+            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Nemotron-3-120B</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px dashed #c9c3b6;background:#fffdf9">
+            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">GL</span>
+            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">GLM-4.6V</span>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="width:1px;height:34px;background:#c9c3b6"></div>
+          <div style="display:flex;align-items:center;gap:9px;padding:9px 13px;border:1px solid #16191f;background:#f5f3ee">
+            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;background:#16191f;color:#f5f3ee;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">JU</span>
+            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Llama-3.3-70B &middot; held-out judge</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
+</main>
 
-  <!-- ══ RESULTS ═══════════════════════════════════════════════════ -->
-  <section id="results">
-    <div class="container">
-      <div class="sec-head">
-        <p class="sec-label">Results</p>
-        <h2 class="sec-title">Against eleven baselines</h2>
-        <p class="sec-sub">
-          Baselines were chosen along three orthogonal axes: model scale, architectural design, and
-          generation paradigm. Evaluation runs on a held-out set of 160 premises under the cross-family
-          jury protocol.
-        </p>
+<div style="display:flex;flex-direction:column;align-items:center;margin-top:80px">
+  <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
+  <div style="position:relative;width:7px;height:7px">
+    <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
+    <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">STAGE 05 &middot; THE CONTROL PANEL</span>
+  </div>
+  <div style="width:1px;height:60px;background:#16191f"></div>
+</div>
+
+<!-- ══ EXPERIMENTS (dark) ══════════════════════════════════════ -->
+<section id="experiments" style="background:#16191f;color:#f5f3ee;padding:74px 0 84px;scroll-margin-top:70px">
+  <div style="max-width:1180px;margin:0 auto;padding:0 32px">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap">
+      <div>
+        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">EXPERIMENTAL RESULTS</span>
+        <h2 style="margin:16px 0 0;font:300 clamp(32px,4.2vw,50px)/1.12 Newsreader,serif;letter-spacing:-.02em;color:#f5f3ee">Scored by the jury, not by us</h2>
+      </div>
+      <div style="font:400 10.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.12em;color:#8b8880;text-align:right">160 HELD-OUT PREMISES<br>CROSS-FAMILY JURY &middot; MEAN OF FIVE NQDs</div>
+    </div>
+
+    <div role="tablist" style="display:flex;gap:8px;margin-top:44px;flex-wrap:wrap">
+      <button class="tab" type="button" role="tab" data-tab="baseline" aria-selected="false">BASELINE</button>
+      <button class="tab" type="button" role="tab" data-tab="large" aria-selected="false">LARGE MODEL</button>
+      <button class="tab" type="button" role="tab" data-tab="plottwist" aria-selected="true">PLOTTWIST</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:56px;margin-top:40px;align-items:start">
+      <div style="display:grid;gap:22px">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+            <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">CHARACTER DEVELOPMENT</span>
+            <span data-v="0" style="font:400 15px/1 'JetBrains Mono',monospace">8.11</span>
+          </div>
+          <div style="height:2px;background:rgba(245,243,238,.14);position:relative">
+            <div data-w="0" style="position:absolute;left:0;top:0;height:2px;width:0%;background:#f5f3ee;transition:width .8s cubic-bezier(.2,.7,.2,1)"></div>
+            <div style="position:absolute;left:70.3%;top:-3px;width:1px;height:8px;background:#7c4dff"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+            <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">TONE CONSISTENCY</span>
+            <span data-v="1" style="font:400 15px/1 'JetBrains Mono',monospace">8.42</span>
+          </div>
+          <div style="height:2px;background:rgba(245,243,238,.14);position:relative">
+            <div data-w="1" style="position:absolute;left:0;top:0;height:2px;width:0%;background:#f5f3ee;transition:width .8s cubic-bezier(.2,.7,.2,1)"></div>
+            <div style="position:absolute;left:80.7%;top:-3px;width:1px;height:8px;background:#7c4dff"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+            <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">PACING</span>
+            <span data-v="2" style="font:400 15px/1 'JetBrains Mono',monospace">8.14</span>
+          </div>
+          <div style="height:2px;background:rgba(245,243,238,.14);position:relative">
+            <div data-w="2" style="position:absolute;left:0;top:0;height:2px;width:0%;background:#f5f3ee;transition:width .8s cubic-bezier(.2,.7,.2,1)"></div>
+            <div style="position:absolute;left:71.3%;top:-3px;width:1px;height:8px;background:#7c4dff"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+            <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">NARRATIVE COHERENCE</span>
+            <span data-v="3" style="font:400 15px/1 'JetBrains Mono',monospace">8.51</span>
+          </div>
+          <div style="height:2px;background:rgba(245,243,238,.14);position:relative">
+            <div data-w="3" style="position:absolute;left:0;top:0;height:2px;width:0%;background:#f5f3ee;transition:width .8s cubic-bezier(.2,.7,.2,1)"></div>
+            <div style="position:absolute;left:83.7%;top:-3px;width:1px;height:8px;background:#7c4dff"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+            <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">EMOTIONAL TURNING POINTS</span>
+            <span data-v="4" style="font:400 15px/1 'JetBrains Mono',monospace">8.61</span>
+          </div>
+          <div style="height:2px;background:rgba(245,243,238,.14);position:relative">
+            <div data-w="4" style="position:absolute;left:0;top:0;height:2px;width:0%;background:#f5f3ee;transition:width .8s cubic-bezier(.2,.7,.2,1)"></div>
+            <div style="position:absolute;left:87%;top:-3px;width:1px;height:8px;background:#7c4dff"></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+          <span style="width:1px;height:8px;background:#7c4dff"></span>
+          <span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#8b8880">PLOTTWIST REFERENCE &middot; SCALE 6.0 TO 9.0</span>
+        </div>
       </div>
 
-      <div class="chart-box h-420 reveal mb-2"><canvas id="overallChart"></canvas></div>
-      <p class="figcaption mb-3">Overall jury score, averaged across the five dimensions, for all twelve systems.</p>
+      <div style="border-left:1px solid rgba(245,243,238,.16);padding-left:32px">
+        <div id="mKind" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">PLOTTWIST &middot; MoE, 3B ACTIVE PER TOKEN</div>
+        <div id="mName" style="margin-top:12px;font:300 clamp(30px,3.4vw,40px)/1.05 Newsreader,serif">PlotTwist</div>
+        <div style="display:flex;align-items:flex-end;gap:8px;margin-top:30px">
+          <div id="mOverall" style="font:200 clamp(66px,8vw,96px)/.85 Newsreader,serif">8.36</div>
+          <div style="font:400 10px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880;padding-bottom:12px">OVERALL<br>JURY MEAN</div>
+        </div>
+        <div style="display:grid;gap:1px;background:rgba(245,243,238,.16);margin-top:34px">
+          <div style="background:#16191f;display:flex;justify-content:space-between;gap:16px;padding:13px 0">
+            <span style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">ACTIVE PARAMETERS</span>
+            <span id="mParams" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">3B active of 30B</span>
+          </div>
+          <div style="background:#16191f;display:flex;justify-content:space-between;gap:16px;padding:13px 0">
+            <span style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">PLOTTWIST WIN RATE</span>
+            <span id="mWr" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">n/a</span>
+          </div>
+          <div style="background:#16191f;display:flex;justify-content:space-between;gap:16px;padding:13px 0">
+            <span style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">BOOTSTRAP 95% CI</span>
+            <span id="mCi" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">n/a</span>
+          </div>
+          <div style="background:#16191f;display:flex;justify-content:space-between;gap:16px;padding:13px 0">
+            <span style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">HOLM-CORRECTED p</span>
+            <span id="mPval" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">n/a</span>
+          </div>
+        </div>
+        <p id="mVerdict" style="margin:24px 0 0;max-width:44ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Highest overall jury mean of the twelve systems evaluated, and first in narrative coherence, tone consistency and pacing, with roughly a tenth of the active parameters of the dense 32B baseline.</p>
+      </div>
+    </div>
 
-      <h3 class="sub reveal"><span class="tag">Table 1</span> Per-dimension scores</h3>
-      <div class="table-wrap reveal mt-1">
-        <table>
+    <!-- Full Table 1 -->
+    <div style="margin-top:78px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap">
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">TABLE 1 &middot; EVERY SYSTEM, EVERY DIMENSION</div>
+        <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#71706a">MEAN &plusmn; SD OVER 160 PREMISES</div>
+      </div>
+      <div style="overflow-x:auto;margin-top:20px">
+        <table class="dk" style="min-width:820px">
           <thead>
             <tr>
-              <th>Model</th>
-              <th>Character<br />Development</th>
-              <th>Tone<br />Consistency</th>
-              <th>Pacing</th>
-              <th>Narrative<br />Coherence</th>
-              <th>Emotional<br />Turning Points</th>
-              <th>Overall</th>
+              <th>Model</th><th>Character<br>development</th><th>Tone<br>consistency</th><th>Pacing</th><th>Narrative<br>coherence</th><th>Emotional<br>turning points</th><th>Overall</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Claude Sonnet 4</td>
-              <td><span class="best">8.30</span> <span class="sd">&plusmn;0.41</span></td>
-              <td><span class="second">8.23</span> <span class="sd">&plusmn;0.35</span></td>
-              <td><span class="second">8.09</span> <span class="sd">&plusmn;0.24</span></td>
-              <td><span class="second">8.49</span> <span class="sd">&plusmn;0.38</span></td>
-              <td><span class="best">8.63</span> <span class="sd">&plusmn;0.24</span></td>
-              <td><span class="second">8.35</span> <span class="sd">&plusmn;0.24</span></td>
-            </tr>
-            <tr>
-              <td>Agents' Room</td>
-              <td><span class="second">8.15</span> <span class="sd">&plusmn;0.38</span></td>
-              <td>8.15 <span class="sd">&plusmn;0.37</span></td>
-              <td>7.97 <span class="sd">&plusmn;0.37</span></td>
-              <td>8.40 <span class="sd">&plusmn;0.34</span></td>
-              <td>8.57 <span class="sd">&plusmn;0.38</span></td>
-              <td>8.25 <span class="sd">&plusmn;0.26</span></td>
-            </tr>
-            <tr>
-              <td>GPT-4.1</td>
-              <td>7.88 <span class="sd">&plusmn;0.52</span></td>
-              <td>8.14 <span class="sd">&plusmn;0.29</span></td>
-              <td>7.99 <span class="sd">&plusmn;0.19</span></td>
-              <td>8.37 <span class="sd">&plusmn;0.34</span></td>
-              <td>8.41 <span class="sd">&plusmn;0.28</span></td>
-              <td>8.16 <span class="sd">&plusmn;0.24</span></td>
-            </tr>
-            <tr>
-              <td>Gemini 2.0 Flash</td>
-              <td>8.01 <span class="sd">&plusmn;0.41</span></td>
-              <td>7.98 <span class="sd">&plusmn;0.32</span></td>
-              <td>7.91 <span class="sd">&plusmn;0.19</span></td>
-              <td>8.27 <span class="sd">&plusmn;0.32</span></td>
-              <td>8.40 <span class="sd">&plusmn;0.29</span></td>
-              <td>8.11 <span class="sd">&plusmn;0.24</span></td>
-            </tr>
-            <tr>
-              <td>Qwen3-32B</td>
-              <td>7.66 <span class="sd">&plusmn;0.57</span></td>
-              <td>8.10 <span class="sd">&plusmn;0.34</span></td>
-              <td>7.62 <span class="sd">&plusmn;0.39</span></td>
-              <td>7.83 <span class="sd">&plusmn;0.57</span></td>
-              <td>8.28 <span class="sd">&plusmn;0.31</span></td>
-              <td>7.90 <span class="sd">&plusmn;0.33</span></td>
-            </tr>
-            <tr>
-              <td>Qwen-2.5-14B</td>
-              <td>7.41 <span class="sd">&plusmn;0.59</span></td>
-              <td>7.53 <span class="sd">&plusmn;0.43</span></td>
-              <td>7.52 <span class="sd">&plusmn;0.31</span></td>
-              <td>7.69 <span class="sd">&plusmn;0.48</span></td>
-              <td>7.95 <span class="sd">&plusmn;0.39</span></td>
-              <td>7.62 <span class="sd">&plusmn;0.33</span></td>
-            </tr>
-            <tr>
-              <td>DeepSeek-R1-14B</td>
-              <td>7.29 <span class="sd">&plusmn;0.66</span></td>
-              <td>7.67 <span class="sd">&plusmn;0.42</span></td>
-              <td>7.53 <span class="sd">&plusmn;0.31</span></td>
-              <td>7.61 <span class="sd">&plusmn;0.48</span></td>
-              <td>7.89 <span class="sd">&plusmn;0.41</span></td>
-              <td>7.60 <span class="sd">&plusmn;0.35</span></td>
-            </tr>
-            <tr>
-              <td>Mistral Small 24B</td>
-              <td>7.38 <span class="sd">&plusmn;0.54</span></td>
-              <td>7.70 <span class="sd">&plusmn;0.42</span></td>
-              <td>7.49 <span class="sd">&plusmn;0.31</span></td>
-              <td>7.57 <span class="sd">&plusmn;0.53</span></td>
-              <td>7.85 <span class="sd">&plusmn;0.42</span></td>
-              <td>7.60 <span class="sd">&plusmn;0.34</span></td>
-            </tr>
-            <tr>
-              <td>Llama-3.3-70B</td>
-              <td>7.11 <span class="sd">&plusmn;0.69</span></td>
-              <td>7.39 <span class="sd">&plusmn;0.55</span></td>
-              <td>6.94 <span class="sd">&plusmn;0.56</span></td>
-              <td>6.89 <span class="sd">&plusmn;0.75</span></td>
-              <td>7.56 <span class="sd">&plusmn;0.53</span></td>
-              <td>7.18 <span class="sd">&plusmn;0.48</span></td>
-            </tr>
-            <tr>
-              <td>WizardLM-30B</td>
-              <td>6.52 <span class="sd">&plusmn;0.80</span></td>
-              <td>7.07 <span class="sd">&plusmn;0.55</span></td>
-              <td>6.81 <span class="sd">&plusmn;0.55</span></td>
-              <td>6.53 <span class="sd">&plusmn;0.70</span></td>
-              <td>6.97 <span class="sd">&plusmn;0.62</span></td>
-              <td>6.78 <span class="sd">&plusmn;0.51</span></td>
-            </tr>
-            <tr>
-              <td>Phi-4 Mini</td>
-              <td>6.58 <span class="sd">&plusmn;0.94</span></td>
-              <td>6.95 <span class="sd">&plusmn;1.27</span></td>
-              <td>6.27 <span class="sd">&plusmn;1.55</span></td>
-              <td>6.21 <span class="sd">&plusmn;1.54</span></td>
-              <td>6.88 <span class="sd">&plusmn;1.07</span></td>
-              <td>6.58 <span class="sd">&plusmn;1.18</span></td>
-            </tr>
-            <tr class="highlight">
-              <td>PlotTwist</td>
-              <td>8.11 <span class="sd">&plusmn;0.60</span></td>
-              <td><span class="best">8.42</span> <span class="sd">&plusmn;0.41</span></td>
-              <td><span class="best">8.14</span> <span class="sd">&plusmn;0.33</span></td>
-              <td><span class="best">8.51</span> <span class="sd">&plusmn;0.44</span></td>
-              <td><span class="second">8.61</span> <span class="sd">&plusmn;0.32</span></td>
-              <td><span class="best">8.36</span> <span class="sd">&plusmn;0.35</span></td>
-            </tr>
+            <tr><td>Claude Sonnet 4</td><td><b class="bst">8.30</b> <span class="sd">&plusmn;.41</span></td><td>8.23 <span class="sd">&plusmn;.35</span></td><td>8.09 <span class="sd">&plusmn;.24</span></td><td>8.49 <span class="sd">&plusmn;.38</span></td><td><b class="bst">8.63</b> <span class="sd">&plusmn;.24</span></td><td>8.35 <span class="sd">&plusmn;.24</span></td></tr>
+            <tr><td>Agents' Room</td><td>8.15 <span class="sd">&plusmn;.38</span></td><td>8.15 <span class="sd">&plusmn;.37</span></td><td>7.97 <span class="sd">&plusmn;.37</span></td><td>8.40 <span class="sd">&plusmn;.34</span></td><td>8.57 <span class="sd">&plusmn;.38</span></td><td>8.25 <span class="sd">&plusmn;.26</span></td></tr>
+            <tr><td>GPT-4.1</td><td>7.88 <span class="sd">&plusmn;.52</span></td><td>8.14 <span class="sd">&plusmn;.29</span></td><td>7.99 <span class="sd">&plusmn;.19</span></td><td>8.37 <span class="sd">&plusmn;.34</span></td><td>8.41 <span class="sd">&plusmn;.28</span></td><td>8.16 <span class="sd">&plusmn;.24</span></td></tr>
+            <tr><td>Gemini 2.0 Flash</td><td>8.01 <span class="sd">&plusmn;.41</span></td><td>7.98 <span class="sd">&plusmn;.32</span></td><td>7.91 <span class="sd">&plusmn;.19</span></td><td>8.27 <span class="sd">&plusmn;.32</span></td><td>8.40 <span class="sd">&plusmn;.29</span></td><td>8.11 <span class="sd">&plusmn;.24</span></td></tr>
+            <tr><td>Qwen3-32B</td><td>7.66 <span class="sd">&plusmn;.57</span></td><td>8.10 <span class="sd">&plusmn;.34</span></td><td>7.62 <span class="sd">&plusmn;.39</span></td><td>7.83 <span class="sd">&plusmn;.57</span></td><td>8.28 <span class="sd">&plusmn;.31</span></td><td>7.90 <span class="sd">&plusmn;.33</span></td></tr>
+            <tr><td>Qwen-2.5-14B</td><td>7.41 <span class="sd">&plusmn;.59</span></td><td>7.53 <span class="sd">&plusmn;.43</span></td><td>7.52 <span class="sd">&plusmn;.31</span></td><td>7.69 <span class="sd">&plusmn;.48</span></td><td>7.95 <span class="sd">&plusmn;.39</span></td><td>7.62 <span class="sd">&plusmn;.33</span></td></tr>
+            <tr><td>DeepSeek-R1-14B</td><td>7.29 <span class="sd">&plusmn;.66</span></td><td>7.67 <span class="sd">&plusmn;.42</span></td><td>7.53 <span class="sd">&plusmn;.31</span></td><td>7.61 <span class="sd">&plusmn;.48</span></td><td>7.89 <span class="sd">&plusmn;.41</span></td><td>7.60 <span class="sd">&plusmn;.35</span></td></tr>
+            <tr><td>Mistral Small 24B</td><td>7.38 <span class="sd">&plusmn;.54</span></td><td>7.70 <span class="sd">&plusmn;.42</span></td><td>7.49 <span class="sd">&plusmn;.31</span></td><td>7.57 <span class="sd">&plusmn;.53</span></td><td>7.85 <span class="sd">&plusmn;.42</span></td><td>7.60 <span class="sd">&plusmn;.34</span></td></tr>
+            <tr><td>Llama-3.3-70B</td><td>7.11 <span class="sd">&plusmn;.69</span></td><td>7.39 <span class="sd">&plusmn;.55</span></td><td>6.94 <span class="sd">&plusmn;.56</span></td><td>6.89 <span class="sd">&plusmn;.75</span></td><td>7.56 <span class="sd">&plusmn;.53</span></td><td>7.18 <span class="sd">&plusmn;.48</span></td></tr>
+            <tr><td>WizardLM-30B</td><td>6.52 <span class="sd">&plusmn;.80</span></td><td>7.07 <span class="sd">&plusmn;.55</span></td><td>6.81 <span class="sd">&plusmn;.55</span></td><td>6.53 <span class="sd">&plusmn;.70</span></td><td>6.97 <span class="sd">&plusmn;.62</span></td><td>6.78 <span class="sd">&plusmn;.51</span></td></tr>
+            <tr><td>Phi-4 Mini</td><td>6.58 <span class="sd">&plusmn;.94</span></td><td>6.95 <span class="sd">&plusmn;1.27</span></td><td>6.27 <span class="sd">&plusmn;1.55</span></td><td>6.21 <span class="sd">&plusmn;1.54</span></td><td>6.88 <span class="sd">&plusmn;1.07</span></td><td>6.58 <span class="sd">&plusmn;1.18</span></td></tr>
+            <tr class="me"><td>PlotTwist</td><td>8.11 <span class="sd">&plusmn;.60</span></td><td><b class="bst">8.42</b> <span class="sd">&plusmn;.41</span></td><td><b class="bst">8.14</b> <span class="sd">&plusmn;.33</span></td><td><b class="bst">8.51</b> <span class="sd">&plusmn;.44</span></td><td>8.61 <span class="sd">&plusmn;.32</span></td><td><b class="bst">8.36</b> <span class="sd">&plusmn;.35</span></td></tr>
           </tbody>
         </table>
       </div>
-      <p class="table-note">
-        Mean &plusmn; standard deviation over 160 test premises under the cross-family jury. Best result in
-        each column is <span class="best">bold</span>, second best is <span class="second">underlined</span>.
-        PlotTwist leads on narrative coherence, tone consistency, pacing, and overall score, using 3B active
-        parameters.
-      </p>
-
-      <div class="chart-box h-460 reveal mt-4"><canvas id="radarChart"></canvas></div>
-      <p class="figcaption mb-3">Dimension-by-dimension comparison against the three strongest baselines.</p>
-
-      <!-- Win rates -->
-      <div class="mt-4">
-        <h3 class="sub reveal"><span class="tag">Table 2</span> Per-premise win rates</h3>
-        <p class="sec-sub reveal mb-2">
-          Because the top overall means sit within hundredths of each other, the pre-specified primary
-          endpoint is the paired per-premise win rate, with ties counted as 0.5, premise-level bootstrap
-          confidence intervals, and Holm-corrected exact sign tests.
-        </p>
-
-        <div class="panel reveal">
-          <div class="wr-list" id="wrList">
-            <div class="wr-row"><span class="wr-name">Claude Sonnet 4</span><div class="wr-track"><div class="wr-fill tie" data-w="56.3"></div></div><span class="wr-val">0.563<small>p = 0.13</small></span></div>
-            <div class="wr-row"><span class="wr-name">Agents' Room</span><div class="wr-track"><div class="wr-fill" data-w="73.4"></div></div><span class="wr-val">0.734<small>4.4e&minus;9</small></span></div>
-            <div class="wr-row"><span class="wr-name">GPT-4.1</span><div class="wr-track"><div class="wr-fill" data-w="90.6"></div></div><span class="wr-val">0.906<small>2.0e&minus;27</small></span></div>
-            <div class="wr-row"><span class="wr-name">Gemini 2.0 Flash</span><div class="wr-track"><div class="wr-fill" data-w="93.8"></div></div><span class="wr-val">0.938<small>1.3e&minus;32</small></span></div>
-            <div class="wr-row"><span class="wr-name">Qwen-3-32B</span><div class="wr-track"><div class="wr-fill" data-w="98.7"></div></div><span class="wr-val">0.987<small>2.1e&minus;43</small></span></div>
-            <div class="wr-row"><span class="wr-name">Qwen-2.5-14B</span><div class="wr-track"><div class="wr-fill" data-w="95.0"></div></div><span class="wr-val">0.950<small>6.4e&minus;35</small></span></div>
-            <div class="wr-row"><span class="wr-name">Mistral Small 24B</span><div class="wr-track"><div class="wr-fill" data-w="99.4"></div></div><span class="wr-val">0.994<small>2.4e&minus;45</small></span></div>
-            <div class="wr-row"><span class="wr-name">DeepSeek-R1-14B</span><div class="wr-track"><div class="wr-fill" data-w="99.4"></div></div><span class="wr-val">0.994<small>2.4e&minus;45</small></span></div>
-            <div class="wr-row"><span class="wr-name">Llama-3.3-70B</span><div class="wr-track"><div class="wr-fill" data-w="98.8"></div></div><span class="wr-val">0.988<small>1.2e&minus;43</small></span></div>
-            <div class="wr-row"><span class="wr-name">WizardLM-30B</span><div class="wr-track"><div class="wr-fill" data-w="99.4"></div></div><span class="wr-val">0.994<small>2.4e&minus;45</small></span></div>
-            <div class="wr-row"><span class="wr-name">Phi-4 Mini</span><div class="wr-track"><div class="wr-fill" data-w="99.4"></div></div><span class="wr-val">0.994<small>2.4e&minus;45</small></span></div>
-          </div>
-        </div>
-        <p class="table-note">
-          The tick on each bar marks 0.5, the point of no preference. Grey marks the one comparison that is
-          not statistically resolved.
-        </p>
-
-        <div class="callout warn reveal mt-3">
-          <span class="ct">The honest reading of the Claude comparison</span>
-          At 0.56 with a 95% CI of [0.49, 0.64], neither the sign test (p = 0.13) nor an equivalence test
-          establishes superiority or equivalence. The paper therefore claims only that PlotTwist is
-          <strong>competitive</strong> with Claude Sonnet 4, and nothing stronger. Four jurors individually
-          favour PlotTwist at 0.59 to 0.63, while Gemma-4-31B, the panel's most conservative scorer, favours
-          Claude at 0.34.
-        </div>
-
-        <div class="metrics reveal mt-3">
-          <div class="metric"><div class="mv">0.65 to 0.90</div><div class="ml">Per-juror win rate against GPT-4.1, every juror prefers PlotTwist</div></div>
-          <div class="metric"><div class="mv">&ge; 0.85</div><div class="ml">Panel win rate against GPT-4.1 with any single juror removed</div></div>
-          <div class="metric"><div class="mv">0.99</div><div class="ml">Win rate against dense Qwen3-32B, at roughly a tenth of the active parameters</div></div>
-          <div class="metric"><div class="mv gold">+0.78</div><div class="ml">Overall gain from DPO alignment, 8.03 to 8.81 on the development evaluator</div></div>
-        </div>
-      </div>
     </div>
-  </section>
 
-  <!-- ══ ANALYSIS ══════════════════════════════════════════════════ -->
-  <section id="analysis">
-    <div class="container">
-      <div class="sec-head">
-        <p class="sec-label">Analysis</p>
-        <h2 class="sec-title">Quality-adaptive, not score-inflating</h2>
-        <p class="sec-sub">
-          A generator that simply pushes every score upward would be suspicious. We test what PlotTwist
-          does across source material of different quality, using 160 films split into four IMDb-defined
-          strata of 40 each, comparing generated plots against their paired originals.
-        </p>
+    <!-- Table 2: win rates -->
+    <div style="margin-top:60px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap">
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">TABLE 2 &middot; PER-PREMISE PAIRED WIN RATES</div>
+        <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#71706a">TIES AS 0.5 &middot; HOLM-CORRECTED SIGN TESTS</div>
       </div>
-
-      <div class="chart-box h-340 reveal mb-2"><canvas id="strataChart"></canvas></div>
-      <p class="figcaption mb-3">Original against PlotTwist-generated overall jury score, by source quality stratum.</p>
-
-      <div class="table-wrap reveal">
-        <table>
+      <p style="margin:16px 0 0;max-width:62ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Because the top overall means sit within hundredths of each other, the pre-specified primary endpoint is the paired win rate, not the mean.</p>
+      <div id="wrTable" style="overflow-x:auto;margin-top:24px">
+        <table class="dk" style="min-width:660px">
           <thead>
-            <tr>
-              <th>Stratum</th>
-              <th>Original</th>
-              <th>Generated</th>
-              <th>&Delta;</th>
-              <th>95% CI</th>
-              <th>d<sub>z</sub></th>
-              <th>P(gen &gt; orig)</th>
-            </tr>
+            <tr><th>Baseline</th><th>Mean</th><th style="text-align:left;padding-left:34px">PlotTwist win rate</th><th>95% CI</th><th>p (Holm)</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Excellent <span class="sd">IMDb &gt; 8</span></td>
-              <td>8.14</td><td>8.45</td><td>+0.31</td><td>[0.09, 0.57]</td><td>0.38</td><td>0.65</td>
-            </tr>
-            <tr>
-              <td>Good <span class="sd">7 to 8</span></td>
-              <td>7.75</td><td>8.40</td><td>+0.65</td><td>[0.51, 0.79]</td><td>1.40</td><td>0.93</td>
-            </tr>
-            <tr>
-              <td>Mid <span class="sd">6 to 7</span></td>
-              <td>7.40</td><td>8.37</td><td>+0.98</td><td>[0.81, 1.17]</td><td>1.68</td><td>0.98</td>
-            </tr>
-            <tr>
-              <td>Low <span class="sd">IMDb &le; 6</span></td>
-              <td>7.01</td><td>8.28</td><td>+1.28</td><td>[1.09, 1.48]</td><td>2.01</td><td>1.00</td>
-            </tr>
+            <tr><td>Claude Sonnet 4</td><td>8.35</td><td style="text-align:left;padding-left:34px"><span class="wrbar tie"><i data-wr="56.3"></i></span>0.563</td><td>[0.488, 0.638]</td><td>0.13</td></tr>
+            <tr><td>Agents' Room</td><td>8.25</td><td style="text-align:left;padding-left:34px"><span class="wrbar"><i data-wr="73.4"></i></span>0.734</td><td>[0.663, 0.800]</td><td>4.4e&minus;9</td></tr>
+            <tr><td>GPT-4.1</td><td>8.16</td><td style="text-align:left;padding-left:34px"><span class="wrbar"><i data-wr="90.6"></i></span>0.906</td><td>[0.863, 0.950]</td><td>2.0e&minus;27</td></tr>
+            <tr><td>Gemini 2.0 Flash</td><td>8.11</td><td style="text-align:left;padding-left:34px"><span class="wrbar"><i data-wr="93.8"></i></span>0.938</td><td>[0.900, 0.975]</td><td>1.3e&minus;32</td></tr>
+            <tr><td>Qwen-3-32B</td><td>7.90</td><td style="text-align:left;padding-left:34px"><span class="wrbar"><i data-wr="98.7"></i></span>0.987</td><td>[0.969, 1.000]</td><td>2.1e&minus;43</td></tr>
+            <tr><td>Qwen-2.5-14B</td><td>7.62</td><td style="text-align:left;padding-left:34px"><span class="wrbar"><i data-wr="95.0"></i></span>0.950</td><td>[0.913, 0.981]</td><td>6.4e&minus;35</td></tr>
+            <tr><td>Mistral Small 24B</td><td>7.60</td><td style="text-align:left;padding-left:34px"><span class="wrbar"><i data-wr="99.4"></i></span>0.994</td><td>[0.981, 1.000]</td><td>2.4e&minus;45</td></tr>
+            <tr><td>DeepSeek-R1-14B</td><td>7.60</td><td style="text-align:left;padding-left:34px"><span class="wrbar"><i data-wr="99.4"></i></span>0.994</td><td>[0.981, 1.000]</td><td>2.4e&minus;45</td></tr>
+            <tr><td>Llama-3.3-70B</td><td>7.18</td><td style="text-align:left;padding-left:34px"><span class="wrbar"><i data-wr="98.8"></i></span>0.988</td><td>[0.969, 1.000]</td><td>1.2e&minus;43</td></tr>
+            <tr><td>WizardLM-30B</td><td>6.78</td><td style="text-align:left;padding-left:34px"><span class="wrbar"><i data-wr="99.4"></i></span>0.994</td><td>[0.981, 1.000]</td><td>2.4e&minus;45</td></tr>
+            <tr><td>Phi-4 Mini</td><td>6.58</td><td style="text-align:left;padding-left:34px"><span class="wrbar"><i data-wr="99.4"></i></span>0.994</td><td>[0.981, 1.000]</td><td>2.4e&minus;45</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="table-note">
-        Overall improvement rises monotonically as source quality falls. Note the generated column: it stays
-        near 8.3 to 8.45 regardless of what it started from, which is the signature of a system converging on
-        a quality ceiling rather than adding a constant offset.
-      </p>
+      <p style="margin:20px 0 0;max-width:62ch;font:400 13px/1.7 'JetBrains Mono',monospace;color:#8b8880;text-wrap:pretty">The Claude Sonnet 4 row is the one unresolved comparison. Neither the sign test nor an equivalence test settles it, so the paper claims competitiveness and nothing more.</p>
+    </div>
 
-      <div class="grid-2 reveal mt-3">
-        <div class="card">
-          <h4>Conservative on strong source material</h4>
-          <p>
-            In the Excellent stratum the clearest gains are character development (+0.50) and narrative
-            coherence (+0.40), while pacing is unchanged within uncertainty (&minus;0.02, CI [&minus;0.21, 0.19]).
-            Where the original already works, PlotTwist mostly leaves it alone.
-          </p>
-        </div>
-        <div class="card">
-          <h4>Restructuring on weak source material</h4>
-          <p>
-            In the Low stratum narrative coherence gains +1.82 and tone consistency +1.40, and generated
-            plots beat their paired originals on at least 97.5% of films across every dimension. This is
-            close to full narrative regeneration.
-          </p>
-        </div>
-      </div>
-
-      <!-- Reliability -->
-      <div class="mt-4">
-        <h3 class="sub reveal"><span class="tag">Reliability</span> How much should you trust the jury?</h3>
-        <p class="sec-sub reveal mb-2">
-          The paper is unusually candid here, and reports the weaknesses of its own evaluation protocol
-          alongside the results.
-        </p>
-
-        <div class="grid-2 reveal">
-          <div>
-            <div class="table-wrap">
-              <table style="min-width:0">
-                <thead>
-                  <tr><th>Dimension</th><th>Krippendorff &alpha;</th><th>Gwet AC2</th></tr>
-                </thead>
-                <tbody>
-                  <tr><td>Narrative coherence</td><td>0.504</td><td>0.889</td></tr>
-                  <tr><td>Emotional turning points</td><td>0.280</td><td>0.827</td></tr>
-                  <tr><td>Character development</td><td>0.405</td><td>0.863</td></tr>
-                  <tr><td>Pacing</td><td>0.476</td><td>0.932</td></tr>
-                  <tr><td>Tone consistency</td><td>0.366</td><td>0.911</td></tr>
-                  <tr class="highlight"><td>Pooled</td><td>0.413</td><td>0.887</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <p class="table-note">
-              Raw agreement is only moderate, and lowest on the most subjective dimensions. The
-              skew-robust AC2 stays high everywhere, the pattern you get from judges who agree on ordering
-              but differ in leniency. Recentering each judge lifts pooled &alpha; from 0.413 to 0.641.
-            </p>
+    <!-- Strata + GSAT/Razzie -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:56px;margin-top:60px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
+      <div>
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">INTERVENTION SCALES WITH SOURCE QUALITY</div>
+        <p style="margin:16px 0 26px;max-width:46ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Gain over the paired original plot, by IMDb-defined stratum. PlotTwist lightly refines strong narratives and substantially restructures weak ones.</p>
+        <div style="display:grid;gap:16px">
+          <div style="display:flex;align-items:center;gap:16px">
+            <span style="width:88px;flex:none;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">EXCELLENT</span>
+            <span style="flex:1;height:2px;background:rgba(245,243,238,.14);position:relative"><span style="position:absolute;left:0;top:0;height:2px;width:22%;background:#f5f3ee"></span></span>
+            <span style="width:48px;flex:none;text-align:right;font:400 13px/1 'JetBrains Mono',monospace">+0.31</span>
           </div>
-          <div style="display:flex;flex-direction:column;gap:1.1rem">
-            <div class="callout warn">
-              <span class="ct">Five judges are not five opinions</span>
-              Judge errors are correlated. The Kish effective judge count is <strong>1.35 of 5</strong> on raw
-              scores, and 1.81 after removing system and premise effects. That is why the per-judge and
-              leave-one-judge-out analyses, not the panel average, are treated as the results that carry
-              evidential weight.
-            </div>
-            <div class="callout">
-              <span class="ct">Rankings are stable even so</span>
-              Mean pairwise Spearman across jurors is 0.97 and Kendall's W is 0.98. Enforcing grounding at
-              any threshold leaves the ranking of the twelve systems essentially unchanged, Spearman
-              &ge; 0.99, and moves the two closest win rates by at most 0.04.
-            </div>
+          <div style="display:flex;align-items:center;gap:16px">
+            <span style="width:88px;flex:none;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">GOOD</span>
+            <span style="flex:1;height:2px;background:rgba(245,243,238,.14);position:relative"><span style="position:absolute;left:0;top:0;height:2px;width:46%;background:#f5f3ee"></span></span>
+            <span style="width:48px;flex:none;text-align:right;font:400 13px/1 'JetBrains Mono',monospace">+0.65</span>
           </div>
-        </div>
-
-        <div class="grid-3 reveal mt-3">
-          <div class="card">
-            <div class="card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-            </div>
-            <h4>Same-family bias audit</h4>
-            <p>Adding an in-family Qwen judge shows that judges score their own family 0.82 points higher, CI [0.80, 0.84]. PlotTwist does not benefit: its leniency-corrected same-family inflation is negative at &minus;0.47, and removing all same-family cells leaves the ranking unchanged.</p>
+          <div style="display:flex;align-items:center;gap:16px">
+            <span style="width:88px;flex:none;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">MID</span>
+            <span style="flex:1;height:2px;background:rgba(245,243,238,.14);position:relative"><span style="position:absolute;left:0;top:0;height:2px;width:70%;background:#f5f3ee"></span></span>
+            <span style="width:48px;flex:none;text-align:right;font:400 13px/1 'JetBrains Mono',monospace">+0.98</span>
           </div>
-          <div class="card">
-            <div class="card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg>
-            </div>
-            <h4>Specification curve, 113 analyses</h4>
-            <p>Both close comparisons are recomputed under every defensible combination of juror subset, aggregation, score basis, tie handling, grounding, and length control. Against GPT-4.1 the win rate stays within [0.80, 0.92] and every interval excludes 0.5. Against Claude the median is 0.556 and 94.7% of specifications land at or above 0.5.</p>
-          </div>
-          <div class="card">
-            <div class="card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="m5 7 7-4 7 4"/><path d="M3 11h6l-3 7-3-7z"/><path d="M15 11h6l-3 7-3-7z"/></svg>
-            </div>
-            <h4>Deliberation changes little</h4>
-            <p>Agreement moves only from &alpha; = 0.455 to 0.458, two premise-level verdicts flip, and no conclusion changes. The held-out judge reproduces the panel: 0.89 against GPT-4.1, 0.92 against Gemini 2.0 Flash, 0.74 against Agents' Room, 0.57 against Claude Sonnet 4.</p>
+          <div style="display:flex;align-items:center;gap:16px">
+            <span style="width:88px;flex:none;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">LOW</span>
+            <span style="flex:1;height:2px;background:rgba(245,243,238,.14);position:relative"><span style="position:absolute;left:0;top:0;height:2px;width:91%;background:#7c4dff"></span></span>
+            <span style="width:48px;flex:none;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#a887ff">+1.28</span>
           </div>
         </div>
       </div>
-
-      <!-- Ablation -->
-      <div class="mt-4">
-        <h3 class="sub reveal"><span class="tag">Ablation</span> Where the gains come from</h3>
-        <div class="prose reveal">
-          <p>
-            The jury results rule out scale, architecture, and paradigm as the explanation. PlotTwist beats
-            similarly sized instruction-tuned models (Qwen2.5-14B at 7.62, DeepSeek-R1-14B at 7.60), beats
-            the dense Qwen3-32B baseline at 7.90 while using roughly one tenth as many active parameters per
-            token, and beats the multi-agent Agents' Room framework at 8.25 using a single model and a single
-            inference pass.
-          </p>
-          <p>
-            Isolating preference optimization directly, the base Qwen-3-30B-A3B model scores 8.03 before DPO
-            and 8.81 after, a gain of +0.78 from 160 curated preference pairs.
-          </p>
+      <div>
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">DOES THE EVALUATOR KNOW GOOD WRITING?</div>
+        <p style="margin:16px 0 26px;max-width:46ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Scored against critically acclaimed screenplays and Golden Raspberry winners, under repeated balanced subsampling.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(245,243,238,.16)">
+          <div style="background:#16191f;padding:18px 20px 18px 0">
+            <div style="font:300 34px/1 Newsreader,serif">8.33</div>
+            <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">101 GREATEST<br>SCREENPLAYS</div>
+          </div>
+          <div style="background:#16191f;padding:18px 0 18px 20px">
+            <div style="font:300 34px/1 Newsreader,serif;color:#8b8880">6.58</div>
+            <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">RAZZIE WORST<br>SCREENPLAY</div>
+          </div>
         </div>
+        <p style="margin:22px 0 0;max-width:46ch;font:400 13px/1.6 'JetBrains Mono',monospace;color:#8b8880;text-wrap:pretty">&Delta; +1.75 &middot; 95% CI [1.66, 1.85] &middot; acclaimed ahead in 100% of 1,000 runs &middot; Cohen's d 4.36 to 9.34</p>
       </div>
     </div>
-  </section>
 
-  <!-- ══ EXAMPLE ═══════════════════════════════════════════════════ -->
-  <section id="example">
-    <div class="container">
-      <div class="sec-head">
-        <p class="sec-label">Qualitative</p>
-        <h2 class="sec-title">What it actually writes</h2>
+    <!-- Reliability -->
+    <div style="margin-top:60px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
+      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">HOW MUCH SHOULD YOU TRUST THE JURY?</div>
+      <p style="margin:16px 0 0;max-width:64ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">The paper reports the weaknesses of its own evaluation protocol alongside the results, so the site does too.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:rgba(245,243,238,.16);margin-top:30px">
+        <div style="background:#16191f;padding:20px 20px 20px 0">
+          <div style="font:300 30px/1 Newsreader,serif">0.41 &rarr; 0.64</div>
+          <div style="margin-top:10px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">KRIPPENDORFF &alpha;<br>RAW, THEN RECENTRED PER JUDGE</div>
+        </div>
+        <div style="background:#16191f;padding:20px">
+          <div style="font:300 30px/1 Newsreader,serif">0.89</div>
+          <div style="margin-top:10px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">GWET AC2, SKEW-ROBUST<br>CI [0.880, 0.893]</div>
+        </div>
+        <div style="background:#16191f;padding:20px">
+          <div style="font:300 30px/1 Newsreader,serif;color:#a887ff">1.35 of 5</div>
+          <div style="margin-top:10px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">KISH EFFECTIVE JUDGE COUNT<br>ERRORS ARE CORRELATED</div>
+        </div>
+        <div style="background:#16191f;padding:20px">
+          <div style="font:300 30px/1 Newsreader,serif">113</div>
+          <div style="margin-top:10px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">SPECIFICATIONS PER<br>CLOSE COMPARISON</div>
+        </div>
       </div>
-
-      <div class="premise-box reveal">
-        <p class="pl">Premise</p>
-        <p>
-          Generate a movie plot that follows a dedicated detective as he investigates a murder that
-          implicates his beloved, forcing him to navigate a web of concealed truths, blackmail, and the
-          desperate lengths one will go to protect a dark secret.
-        </p>
-      </div>
-
-      <div class="plot-box reveal">
-        <p class="pl">PlotTwist generated plot, abridged</p>
-        <p>
-          Detective Aris Thorne, a man whose sharp eyes and even sharper instincts have solved countless
-          cases but whose heart remains scarred by the unsolved murder of his wife Elara five years prior,
-          finds his world shattered when the body of City Councilman Silas Croft is discovered in his
-          opulent penthouse with a single, precise stab wound to the heart.
-        </p>
-        <p>
-          The evidence points damningly toward Lena Voss, Aris's former lover and now a devoted social
-          worker fighting for the city's forgotten children. Witnesses report a heated argument hours
-          before the death, and a fragmented security recording captures her leaving the building, her face
-          pale with fear. A rare antique switchblade, identical to one Aris gifted Lena years earlier, is
-          found clutched in Croft's hand.
-        </p>
-        <p>
-          As Aris investigates further, the case reveals a labyrinth of concealed truths. Croft was not
-          merely corrupt; he was the linchpin of an extensive blackmail network exploiting vulnerable
-          families. The encrypted files reveal that Croft had been threatening Lena with exposure, not only
-          of her past, but of evidence tied directly to Elara's death.
-        </p>
-        <p>
-          The blackmail was never solely about Lena. It was about Aris himself. Aris uncovers the final
-          truth: Elara had been investigating Croft's operations as a journalist and was killed in a staged
-          car accident when she came too close. In a climactic confrontation at the rain-lashed docks, Aris
-          dismantles the remnants of Croft's network, but the true reckoning is internal. Choosing love over
-          career, he confesses to the murder to protect Lena, sacrificing his badge and freedom.
-        </p>
-      </div>
-      <p class="figcaption mt-1">
-        Abridged from Appendix D of the paper. The full generated plot appears there in its entirety.
-      </p>
-    </div>
-  </section>
-
-  <!-- ══ RESOURCES / LIMITATIONS ═══════════════════════════════════ -->
-  <section id="resources">
-    <div class="container">
-      <div class="sec-head">
-        <p class="sec-label">Practicalities</p>
-        <h2 class="sec-title">Compute and caveats</h2>
-      </div>
-
-      <div class="grid-2 reveal">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:36px;margin-top:34px">
         <div>
-          <h3 class="sub"><span class="tag">Hardware</span></h3>
-          <div class="panel">
-            <div class="metrics" style="grid-template-columns:repeat(2,1fr);border:none;background:transparent;gap:1.25rem">
-              <div class="metric" style="background:var(--panel-2);border-radius:var(--r-sm)">
-                <div class="mv">4 &times; L40S</div>
-                <div class="ml">NVIDIA GPUs, one dedicated cluster</div>
-              </div>
-              <div class="metric" style="background:var(--panel-2);border-radius:var(--r-sm)">
-                <div class="mv">192 GB</div>
-                <div class="ml">Aggregate GPU memory, 48 GB per card</div>
-              </div>
-            </div>
-            <p class="table-note" style="margin-top:1.1rem">
-              Every open-weight model, including all training, all baselines, the rating ensemble, and the
-              full jury, runs locally on this cluster at pinned revisions and temperature 0.1. Each run
-              records model revision, quantization, serving engine, and decoding parameters in a manifest,
-              so scores can be regenerated. Only the three closed frontier models are accessed through
-              commercial APIs.
-            </p>
-          </div>
+          <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#a887ff">EVIDENCE GROUNDING</div>
+          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Every criterion score cites a span quoted verbatim from the plot. Between 94% and 99% of roughly 478,000 quoted spans verify against the source text. Grounding is measured and reported, never enforced by dropping cells.</p>
         </div>
         <div>
-          <h3 class="sub"><span class="tag">Limitations</span></h3>
-          <div class="panel" style="height:calc(100% - 3.1rem)">
-            <ul class="lim-list">
-              <li>Plot quality is assessed by LLM judges rather than expert annotators, and LLM judges agree only moderately with expert readers on creative writing.</li>
-              <li>The comparison with Claude Sonnet 4 remains statistically unresolved at 160 premises.</li>
-              <li>Correlated juror errors reduce the number of effectively independent opinions the panel provides.</li>
-              <li>Experiments are confined to English, synopsis-style plots scored on five craft-oriented dimensions.</li>
-              <li>Reward and preference data are constructed offline with the aid of larger models.</li>
-              <li>Notions of quality such as novelty are left to future work, as are other narrative forms and languages.</li>
-            </ul>
-          </div>
+          <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#a887ff">SAME-FAMILY BIAS AUDIT</div>
+          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Judges score generators from their own family 0.82 points higher, CI [0.80, 0.84]. PlotTwist does not benefit: its leniency-corrected inflation is negative at &minus;0.47, and removing all same-family cells leaves the ranking unchanged.</p>
+        </div>
+        <div>
+          <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#a887ff">DELIBERATION CHANGES LITTLE</div>
+          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Agreement moves only from &alpha; 0.455 to 0.458 and two premise-level verdicts flip. The held-out judge reproduces the panel: 0.89 against GPT-4.1, 0.92 against Gemini 2.0 Flash, 0.74 against Agents' Room.</p>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ══ CITATION ══════════════════════════════════════════════════ -->
-  <section id="citation">
-    <div class="container">
-      <div class="sec-head">
-        <p class="sec-label">Reference</p>
-        <h2 class="sec-title">Citation</h2>
+<main style="max-width:1180px;margin:0 auto;padding:0 32px">
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div style="width:1px;height:60px;background:#16191f"></div>
+    <div style="position:relative;width:7px;height:7px">
+      <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">STAGE 06 &middot; ALTERNATE REALITIES</span>
+    </div>
+    <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
+  </div>
+
+  <!-- ══ EXAMPLES ══════════════════════════════════════════════ -->
+  <section id="examples" style="padding:34px 0 0;scroll-margin-top:90px">
+    <div data-reveal style="max-width:720px">
+      <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">QUALITATIVE WALKTHROUGH</span>
+      <h2 style="margin:16px 0 0;font:300 clamp(32px,4.2vw,50px)/1.12 Newsreader,serif;letter-spacing:-.02em">One premise, four futures</h2>
+      <p style="margin:20px 0 0;max-width:60ch;font:400 16.5px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">Every premise in the curation set branches into candidate plots. The reward model ranks the branches; only a few premises survive the thresholds and become training signal.</p>
+    </div>
+
+    <div data-reveal style="margin-top:52px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:36px;align-items:start">
+      <div style="border:1px solid #16191f;padding:26px 24px;background:#fffdf9">
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">PREMISE</div>
+        <p style="margin:18px 0 0;font:400 22px/1.35 Newsreader,serif;font-style:italic;text-wrap:pretty">Generate Plot of a Romantic Comedy Set in the Modern Tech Startup Era</p>
+        <div style="margin-top:24px;padding-top:18px;border-top:1px solid #e2ded4;font:400 11.5px/1.7 'JetBrains Mono',monospace;color:#6b7380">
+          5,000 premises derived with Gemma-27B<br>&rarr; 160 high-confidence pairs retained
+        </div>
       </div>
 
-      <div class="bibtex-wrap reveal">
-        <div class="bibtex-header">
-          <span class="bibtex-lang">BibTeX</span>
-          <button class="copy-btn" id="copyBtn" type="button">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Copy
+      <div style="display:grid;gap:0">
+        <div class="acc-row">
+          <button class="acc-head" type="button" aria-expanded="false">
+            <span style="width:16px;flex:none;font:400 13px/1.4 'JetBrains Mono',monospace;color:#8c877d">A</span>
+            <span class="acc-title" style="flex:1;font:400 20px/1.35 Newsreader,serif;font-style:italic;text-wrap:pretty;transition:color .2s">A coder meets an unexpected rival.</span>
+            <span style="flex:none;font:500 10px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8c877d">RANK 3</span>
           </button>
+          <div class="acc-body"><p style="margin:0 0 22px 32px;max-width:52ch;font:400 14.5px/1.65 Archivo,sans-serif;color:#414750;text-wrap:pretty">Rated across all five narrative quality dimensions by the aspect rating reward model; the aspect scores are averaged into one reward per candidate.</p></div>
         </div>
-        <pre class="bibtex" id="bibtexBlock"><span class="brace">@inproceedings{</span><span class="key">thorat2026plottwist</span><span class="brace">,</span>
-  <span class="field">title</span>     = <span class="brace">{</span><span class="val">PlotTwist: A Creative Plot Generation Framework with Small Language Models</span><span class="brace">},</span>
-  <span class="field">author</span>    = <span class="brace">{</span><span class="val">Thorat, Abhinav and Kolla, Ravi and Goel, Jyotin and Pedanekar, Niranjan</span><span class="brace">},</span>
-  <span class="field">booktitle</span> = <span class="brace">{</span><span class="val">Proceedings of LUHME at EMNLP 2026</span><span class="brace">},</span>
-  <span class="field">year</span>      = <span class="brace">{</span><span class="val">2026</span><span class="brace">}</span>
-<span class="brace">}</span></pre>
+        <div class="acc-row" style="border-top-color:#7c4dff">
+          <button class="acc-head" type="button" aria-expanded="false">
+            <span style="width:16px;flex:none;font:400 13px/1.4 'JetBrains Mono',monospace;color:#8c877d">B</span>
+            <span class="acc-title" style="flex:1;font:400 20px/1.35 Newsreader,serif;font-style:italic;text-wrap:pretty;transition:color .2s">Two startups collide over innovation.</span>
+            <span style="flex:none;font:500 10px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#5a2ce0">RANK 1 &middot; ACCEPTED</span>
+          </button>
+          <div class="acc-body"><p style="margin:0 0 22px 32px;max-width:52ch;font:400 14.5px/1.65 Archivo,sans-serif;color:#414750;text-wrap:pretty">Highest reward of the four. It becomes the accepted response of the preference pair only if a frontier model produced it, its score exceeds 8.0, and it beats the next-best candidate by at least 0.5.</p></div>
+        </div>
+        <div class="acc-row">
+          <button class="acc-head" type="button" aria-expanded="false">
+            <span style="width:16px;flex:none;font:400 13px/1.4 'JetBrains Mono',monospace;color:#8c877d">C</span>
+            <span class="acc-title" style="flex:1;font:400 20px/1.35 Newsreader,serif;font-style:italic;text-wrap:pretty;transition:color .2s">A quirky app sparks unlikely romance.</span>
+            <span style="flex:none;font:500 10px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8c877d">RANK 4 &middot; REJECTED</span>
+          </button>
+          <div class="acc-body"><p style="margin:0 0 22px 32px;max-width:52ch;font:400 14.5px/1.65 Archivo,sans-serif;color:#414750;text-wrap:pretty">Lowest reward of the four, and therefore the rejected response the generator is trained away from.</p></div>
+        </div>
+        <div class="acc-row" style="border-bottom:1px solid #e2ded4">
+          <button class="acc-head" type="button" aria-expanded="false">
+            <span style="width:16px;flex:none;font:400 13px/1.4 'JetBrains Mono',monospace;color:#8c877d">D</span>
+            <span class="acc-title" style="flex:1;font:400 20px/1.35 Newsreader,serif;font-style:italic;text-wrap:pretty;transition:color .2s">Love launches amid tech competition.</span>
+            <span style="flex:none;font:500 10px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8c877d">RANK 2</span>
+          </button>
+          <div class="acc-body"><p style="margin:0 0 22px 32px;max-width:52ch;font:400 14.5px/1.65 Archivo,sans-serif;color:#414750;text-wrap:pretty">Second by reward. Ranking across all four candidates gives the ordering B &gt; D &gt; A &gt; C for this premise.</p></div>
+        </div>
+
+        <div style="display:flex;align-items:flex-start;gap:16px;margin-top:34px">
+          <svg viewBox="0 0 40 80" style="width:40px;height:80px;flex:none">
+            <path d="M 8 0 C 8 40 16 56 36 66" fill="none" stroke="#7c4dff" stroke-width="1.4"></path>
+            <circle cx="36" cy="67" r="4.5" fill="#7c4dff"></circle>
+          </svg>
+          <div>
+            <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5a2ce0">THE UNEXPECTED ENDING</div>
+            <p style="margin:14px 0 0;max-width:50ch;font:400 16.5px/1.65 Archivo,sans-serif;color:#414750;text-wrap:pretty">Trained on 160 pairs curated this way, the 3B-active generator is preferred by the jury on 90.6% of held-out premises against GPT-4.1, 93.8% against Gemini 2.0 Flash, and 73.4% against the multi-agent Agents' Room, all from a single model and a single inference pass.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generated plot -->
+    <div data-reveal style="margin-top:96px">
+      <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:26px">
+        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">WHAT IT ACTUALLY WRITES</span>
+        <span style="flex:1;height:1px;background:#e2ded4"></span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:44px;align-items:start">
+        <div>
+          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">PREMISE</div>
+          <p style="margin:16px 0 0;max-width:40ch;font:400 21px/1.45 Newsreader,serif;font-style:italic;text-wrap:pretty">A dedicated detective investigates a murder that implicates his beloved, forcing him through a web of concealed truths, blackmail, and the lengths one will go to protect a dark secret.</p>
+          <div style="margin-top:26px;padding-top:18px;border-top:1px solid #e2ded4;font:400 11.5px/1.7 'JetBrains Mono',monospace;color:#6b7380">
+            Generated by the PlotTwist MoE<br>3B active parameters &middot; single pass
+          </div>
+        </div>
+        <div style="border-left:1px solid #16191f;padding-left:28px">
+          <p style="margin:0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">Detective Aris Thorne, whose heart remains scarred by the unsolved murder of his wife Elara five years prior, finds his world shattered when City Councilman Silas Croft is discovered in his penthouse with a single, precise stab wound to the heart.</p>
+          <p style="margin:16px 0 0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">The evidence points damningly toward Lena Voss, Aris's former lover, now a social worker fighting for the city's forgotten children. A rare antique switchblade, identical to one Aris gifted her years earlier, is found clutched in Croft's hand.</p>
+          <p style="margin:16px 0 0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">Croft was not merely corrupt. He was the linchpin of a blackmail network exploiting vulnerable families, and the encrypted files reveal he had been threatening Lena with evidence tied directly to Elara's death. The blackmail was never solely about Lena. It was about Aris himself.</p>
+          <p style="margin:16px 0 0;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">Elara had been investigating Croft as a journalist and was killed in a staged accident when she came too close. At the rain-lashed docks Aris dismantles the network, but the true reckoning is internal. Choosing love over career, he confesses to the murder to protect Lena, sacrificing his badge and his freedom.</p>
+          <p style="margin:22px 0 0;font:400 11.5px/1.7 'JetBrains Mono',monospace;color:#8c877d">Abridged from Appendix D of the paper.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Limitations -->
+    <div data-reveal style="margin-top:96px">
+      <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:26px">
+        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">WHAT THIS DOES NOT SHOW</span>
+        <span style="flex:1;height:1px;background:#e2ded4"></span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:#e2ded4;border-top:1px solid #e2ded4;border-bottom:1px solid #e2ded4">
+        <div style="background:#f5f3ee;padding:22px 22px 22px 0">
+          <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#5a2ce0">LLM JUDGES, NOT EXPERTS</div>
+          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#414750;text-wrap:pretty">Plot quality is assessed by language models rather than expert annotators, and LLM judges agree only moderately with expert readers on creative writing.</p>
+        </div>
+        <div style="background:#f5f3ee;padding:22px">
+          <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#5a2ce0">ONE COMPARISON UNRESOLVED</div>
+          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#414750;text-wrap:pretty">The comparison with Claude Sonnet 4 remains statistically unresolved at 160 premises, and correlated juror errors reduce the number of effectively independent opinions.</p>
+        </div>
+        <div style="background:#f5f3ee;padding:22px">
+          <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.16em;color:#5a2ce0">NARROW SCOPE</div>
+          <p style="margin:12px 0 0;font:400 14.5px/1.65 Archivo,sans-serif;color:#414750;text-wrap:pretty">English, synopsis-style plots, five craft-oriented dimensions. Reward and preference data are built offline with the aid of larger models, and novelty is left to future work.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ══ FOOTER ════════════════════════════════════════════════════ -->
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-brand">Sony Research India &middot; 2026</div>
-      <div class="footer-venue">Accepted at LUHME &middot; EMNLP 2026</div>
+  <div style="display:flex;flex-direction:column;align-items:center;margin-top:84px">
+    <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
+    <div style="position:relative;width:7px;height:7px">
+      <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">END OF PATH &middot; THE PAPER</span>
     </div>
-  </footer>
+    <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
+  </div>
+
+  <!-- ══ PAPER ═════════════════════════════════════════════════ -->
+  <section id="paper" style="padding:30px 0 0;scroll-margin-top:90px">
+    <div data-reveal style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:48px">
+      <div>
+        <h2 style="margin:0;max-width:22ch;font:300 clamp(28px,3.6vw,42px)/1.14 Newsreader,serif;letter-spacing:-.02em;text-wrap:pretty">PlotTwist: A Creative Plot Generation Framework with Small Language Models</h2>
+        <p style="margin:24px 0 0;max-width:52ch;font:400 15.5px/1.75 Archivo,sans-serif;color:#414750;text-wrap:pretty">Abhinav Thorat<sup style="font-size:.7em">*</sup>, Ravi Kolla<sup style="font-size:.7em">*</sup>, Jyotin Goel<sup style="font-size:.7em">&dagger;</sup>, Madhav Kataria<sup style="font-size:.7em">&dagger;</sup>, Niranjan Pedanekar</p>
+        <p style="margin:10px 0 0;font:400 12px/1.7 'JetBrains Mono',monospace;color:#8c877d">Sony Research India &middot; arXiv:2603.16410 [cs.CL]<br><sup>*</sup>Equal contribution &middot; <sup>&dagger;</sup>Work done during an internship</p>
+        <p style="margin:16px 0 0;font:500 11px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;color:#5a2ce0">ACCEPTED AT LUHME &middot; EMNLP 2026</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:30px">
+          <a href="https://arxiv.org/abs/2603.16410" class="btn btn-solid">ARXIV <span style="opacity:.4">&#8599;</span></a>
+          <a href="assets/plottwist-emnlp-2026.pdf" class="btn">PDF <span style="opacity:.4">&#8599;</span></a>
+        </div>
+      </div>
+      <div id="bibtex" style="scroll-margin-top:90px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">BIBTEX</div>
+          <button id="copyBtn" type="button" style="padding:6px 12px;background:transparent;border:1px solid #ddd8ce;border-radius:999px;cursor:pointer;font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#6b7380;transition:all .25s">COPY</button>
+        </div>
+        <pre id="bibtexBlock" style="margin:16px 0 0;padding:20px;background:#fffdf9;border:1px solid #e2ded4;overflow-x:auto;font:400 11.5px/1.8 'JetBrains Mono',monospace;color:#414750">@inproceedings{thorat2026plottwist,
+  title     = {PlotTwist: A Creative Plot Generation
+               Framework with Small Language Models},
+  author    = {Thorat, Abhinav and Kolla, Ravi and
+               Goel, Jyotin and Kataria, Madhav and
+               Pedanekar, Niranjan},
+  booktitle = {Proceedings of LUHME at EMNLP 2026},
+  year      = {2026}
+}</pre>
+        <p style="margin:20px 0 0;max-width:46ch;font:400 13px/1.7 Archivo,sans-serif;color:#6b7380;text-wrap:pretty">Limitations, full rubrics, all reward-model and juror prompts, and the 113-specification robustness analysis are in the appendices of the paper.</p>
+      </div>
+    </div>
+
+    <footer style="margin-top:96px;padding:26px 0 44px;border-top:1px solid #e2ded4;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">PLOT <span style="color:#7c4dff">/</span> TWIST</span>
+      <span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#b0aa9e">SONY RESEARCH INDIA &middot; 2026</span>
+    </footer>
+  </section>
+</main>
 </div>
 
 <script>
 (function () {
   'use strict';
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ── Scroll progress ─────────────────────────────────────────── */
-  var progress = document.getElementById('progress');
-  function updateProgress() {
-    var h = document.documentElement;
-    var max = h.scrollHeight - h.clientHeight;
-    progress.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
-  }
-  window.addEventListener('scroll', updateProgress, { passive: true });
-  updateProgress();
+  /* ── Contributions data ─────────────────────────────────── */
+  var NODES = [[310,52],[104,145],[516,145],[156,308],[464,308]];
+  var CONTRIBS = [
+    ['01 &middot; WORKFLOW', 'Structured workflow using SLMs for plot generation',
+     'A modular framework of three specialised components: an aspect rating reward model, a DPO-trained mixture-of-experts plot generator, and an independent agentic evaluation module.'],
+    ['02 &middot; POS-NEG', 'Positive-negative prompting for aspect rating reward modelling',
+     'Each aspect is rated twice, once counting only what the plot does well and once counting only what it does badly, and the final rating is the summed difference across five rater models. The strategy mitigates the positivity bias of LLM evaluation and yields reliable aspect-level supervision across all five dimensions.'],
+    ['03 &middot; JURY', 'Agentic evaluation using a cross-family jury',
+     'Five open-weight jurors drawn from five model families disjoint from the generator, a pre-registered evaluation protocol, two rounds of structured deliberation, a held-out sixth-family judge, and reliability analyses reported alongside the scores.'],
+    ['04 &middot; VALIDATION', 'External validation of the evaluation components',
+     'Both the reward model and the agentic evaluator separate critically acclaimed screenplays from critically panned ones across every narrative quality dimension, with acclaimed plots ahead in 100% of 1,000 balanced subsampling runs.'],
+    ['05 &middot; ADAPTIVE', 'Efficient, quality-adaptive plot generation',
+     'PlotTwist outperforms all baselines across multiple dimensions with only 3B active parameters, and scales its intervention to the source: lightly refining strong narratives, substantially restructuring weak ones.']
+  ];
 
-  /* ── Scroll reveal ───────────────────────────────────────────── */
-  var revealObs = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) {
-      if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }
+  var ring = document.getElementById('selRing');
+  var cK = document.getElementById('cKicker'), cT = document.getElementById('cTitle'), cB = document.getElementById('cBody');
+  function pick(i) {
+    var n = NODES[i]; if (!n) return;
+    ring.setAttribute('cx', n[0]); ring.setAttribute('cy', n[1]);
+    cK.innerHTML = CONTRIBS[i][0]; cT.textContent = CONTRIBS[i][1]; cB.textContent = CONTRIBS[i][2];
+    document.querySelectorAll('[data-pick]').forEach(function (g) {
+      g.querySelector('[data-dot]').setAttribute('fill', +g.dataset.pick === i ? '#7c4dff' : '#16191f');
     });
-  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-  document.querySelectorAll('.reveal').forEach(function (el) { revealObs.observe(el); });
+  }
+  document.querySelectorAll('[data-pick]').forEach(function (g) {
+    var i = +g.dataset.pick;
+    g.addEventListener('click', function () { pick(i); });
+    g.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(i); }
+    });
+  });
+  pick(0);
 
-  /* ── Win-rate bar fill on reveal ─────────────────────────────── */
-  var wrList = document.getElementById('wrList');
-  if (wrList) {
-    var wrObs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        wrList.querySelectorAll('.wr-fill').forEach(function (bar, i) {
-          setTimeout(function () { bar.style.width = bar.dataset.w + '%'; }, i * 65);
-        });
-        wrObs.disconnect();
+  /* ── Experiments variant panel ──────────────────────────── */
+  var DATA = {
+    baseline: { name:'Qwen-2.5-14B', kind:'BASELINE &middot; DENSE 14B, INSTRUCTION-TUNED', s:[7.41,7.53,7.52,7.69,7.95],
+      overall:'7.62', params:'14B (dense)', wr:'0.950', ci:'[0.913, 0.981]', pval:'6.4 × 10⁻³⁵',
+      verdict:'PlotTwist wins on 95% of premises against this similarly sized instruction-tuned model, and on at least 95% against every open-weight baseline in the study.' },
+    large: { name:'Claude Sonnet 4', kind:'FRONTIER &middot; UNDISCLOSED SCALE', s:[8.30,8.23,8.09,8.49,8.63],
+      overall:'8.35', params:'undisclosed', wr:'0.563', ci:'[0.488, 0.638]', pval:'0.13',
+      verdict:'The only inconclusive comparison. Neither the sign test nor the equivalence test resolves it at 160 premises, so the paper claims competitiveness, not superiority.' },
+    plottwist: { name:'PlotTwist', kind:'PLOTTWIST &middot; MoE, 3B ACTIVE PER TOKEN', s:[8.11,8.42,8.14,8.51,8.61],
+      overall:'8.36', params:'3B active of 30B', wr:'n/a', ci:'n/a', pval:'n/a',
+      verdict:'Highest overall jury mean of the twelve systems evaluated, and first in narrative coherence, tone consistency and pacing, with roughly a tenth of the active parameters of the dense 32B baseline.' }
+  };
+  var vEls = document.querySelectorAll('[data-v]'), wEls = document.querySelectorAll('[data-w]');
+  var mK = document.getElementById('mKind'), mN = document.getElementById('mName'), mO = document.getElementById('mOverall');
+  var mP = document.getElementById('mParams'), mW = document.getElementById('mWr'), mC = document.getElementById('mCi');
+  var mV = document.getElementById('mPval'), mVer = document.getElementById('mVerdict');
+  var variant = 'plottwist', barsShown = false;
+
+  function paint(v) {
+    var d = DATA[v]; if (!d) return;
+    variant = v;
+    document.querySelectorAll('.tab').forEach(function (t) {
+      t.setAttribute('aria-selected', t.dataset.tab === v ? 'true' : 'false');
+    });
+    vEls.forEach(function (el, i) { el.textContent = d.s[i].toFixed(2); });
+    if (barsShown) {
+      wEls.forEach(function (el, i) {
+        el.style.width = Math.round(((d.s[i] - 6) / 3) * 1000) / 10 + '%';
       });
-    }, { threshold: 0.25 });
-    wrObs.observe(wrList);
+    }
+    mK.innerHTML = d.kind; mN.textContent = d.name; mO.textContent = d.overall;
+    mP.textContent = d.params; mW.textContent = d.wr; mC.textContent = d.ci;
+    mV.textContent = d.pval; mVer.textContent = d.verdict;
   }
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () { paint(t.dataset.tab); });
+  });
+  paint('plottwist');
 
-  /* ── Active nav link ─────────────────────────────────────────── */
-  var links = Array.prototype.slice.call(document.querySelectorAll('.nav-links a'));
-  var sections = links
-    .map(function (l) { return document.querySelector(l.getAttribute('href')); })
-    .filter(Boolean);
-
-  function syncNav() {
-    var pos = window.scrollY + 140;
-    var current = sections[0];
-    sections.forEach(function (s) { if (s.offsetTop <= pos) current = s; });
-    links.forEach(function (l) {
-      l.classList.toggle('active', l.getAttribute('href') === '#' + current.id);
-    });
-  }
-  window.addEventListener('scroll', syncNav, { passive: true });
-  syncNav();
-
-  /* ── Chart defaults ──────────────────────────────────────────── */
-  if (window.Chart) {
-    Chart.defaults.font.family = "'Inter', sans-serif";
-    Chart.defaults.font.size = 11;
-    Chart.defaults.color = '#8593a7';
-    Chart.defaults.animation.duration = 900;
-  }
-
-  var GRID = 'rgba(148,163,184,.10)';
-  var TEAL = '#14b8a6';
-  var TEAL_L = '#5eead4';
-  var GREY = 'rgba(100,116,139,.55)';
-
-  function tip(extra) {
-    return Object.assign({
-      backgroundColor: '#0b0f16',
-      borderColor: 'rgba(148,163,184,.22)',
-      borderWidth: 1,
-      titleColor: '#f2f6fa',
-      bodyColor: '#c3cedd',
-      padding: 10,
-      cornerRadius: 8,
-      displayColors: false
-    }, extra || {});
-  }
-
-  /* Render a chart only once its container is on screen, so the
-     canvas has a settled size and cannot enter a resize feedback loop. */
-  function whenVisible(el, fn) {
-    if (!el) return;
-    var o = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) { o.disconnect(); fn(); } });
-    }, { threshold: 0.05 });
-    o.observe(el);
-  }
-
-  /* ── Chart 1: overall scores ─────────────────────────────────── */
-  var overallEl = document.getElementById('overallChart');
-  whenVisible(overallEl, function () {
-    var rows = [
-      ['PlotTwist', 8.36], ['Claude Sonnet 4', 8.35], ['Agents’ Room', 8.25],
-      ['GPT-4.1', 8.16], ['Gemini 2.0 Flash', 8.11], ['Qwen3-32B', 7.90],
-      ['Qwen-2.5-14B', 7.62], ['DeepSeek-R1-14B', 7.60], ['Mistral Small 24B', 7.60],
-      ['Llama-3.3-70B', 7.18], ['WizardLM-30B', 6.78], ['Phi-4 Mini', 6.58]
-    ];
-    new Chart(overallEl.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: rows.map(function (r) { return r[0]; }),
-        datasets: [{
-          data: rows.map(function (r) { return r[1]; }),
-          backgroundColor: rows.map(function (r) { return r[0] === 'PlotTwist' ? TEAL : GREY; }),
-          borderColor: rows.map(function (r) { return r[0] === 'PlotTwist' ? TEAL_L : 'rgba(148,163,184,.3)'; }),
-          borderWidth: 1, borderRadius: 5, borderSkipped: false, barThickness: 'flex', maxBarThickness: 22
-        }]
-      },
-      options: {
-        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-        layout: { padding: { right: 14 } },
-        plugins: {
-          legend: { display: false },
-          tooltip: tip({ callbacks: { label: function (c) { return 'Overall jury score: ' + c.parsed.x.toFixed(2); } } })
-        },
-        scales: {
-          x: {
-            min: 6, max: 8.8,
-            grid: { color: GRID }, border: { display: false },
-            title: { display: true, text: 'Overall jury score, mean of five dimensions', color: '#64748b', font: { size: 10.5 } }
-          },
-          y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 11.5 } } }
-        }
-      }
+  /* ── Examples accordion ─────────────────────────────────── */
+  document.querySelectorAll('.acc-head').forEach(function (head) {
+    head.addEventListener('click', function () {
+      var body = head.nextElementSibling;
+      var open = head.getAttribute('aria-expanded') === 'true';
+      head.setAttribute('aria-expanded', open ? 'false' : 'true');
+      body.style.maxHeight = open ? '0px' : body.scrollHeight + 'px';
     });
   });
 
-  /* ── Chart 2: radar across dimensions ────────────────────────── */
-  var radarEl = document.getElementById('radarChart');
-  whenVisible(radarEl, function () {
-    new Chart(radarEl.getContext('2d'), {
-      type: 'radar',
-      data: {
-        labels: ['Character\nDevelopment', 'Tone\nConsistency', 'Pacing', 'Narrative\nCoherence', 'Emotional\nTurning Points'],
-        datasets: [
-          { label: 'PlotTwist', data: [8.11, 8.42, 8.14, 8.51, 8.61],
-            borderColor: TEAL_L, backgroundColor: 'rgba(20,184,166,.18)',
-            pointBackgroundColor: TEAL_L, pointRadius: 3.5, borderWidth: 2 },
-          { label: 'Claude Sonnet 4', data: [8.30, 8.23, 8.09, 8.49, 8.63],
-            borderColor: '#e6b980', backgroundColor: 'rgba(230,185,128,.09)',
-            pointBackgroundColor: '#e6b980', pointRadius: 2.5, borderWidth: 1.5 },
-          { label: 'GPT-4.1', data: [7.88, 8.14, 7.99, 8.37, 8.41],
-            borderColor: '#94a3b8', backgroundColor: 'rgba(148,163,184,.06)',
-            pointBackgroundColor: '#94a3b8', pointRadius: 2.5, borderWidth: 1.5 },
-          { label: 'Agents’ Room', data: [8.15, 8.15, 7.97, 8.40, 8.57],
-            borderColor: '#64748b', backgroundColor: 'rgba(100,116,139,.05)',
-            pointBackgroundColor: '#64748b', pointRadius: 2.5, borderWidth: 1.5, borderDash: [4, 3] }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, padding: 16, usePointStyle: true, pointStyle: 'circle' } },
-          tooltip: tip({ displayColors: true, callbacks: { label: function (c) { return c.dataset.label + ': ' + c.parsed.r.toFixed(2); } } })
-        },
-        scales: {
-          r: {
-            min: 7.5, max: 8.8,
-            grid: { color: GRID }, angleLines: { color: GRID },
-            pointLabels: { font: { size: 10.5 }, color: '#8593a7' },
-            ticks: { stepSize: 0.4, backdropColor: 'transparent', color: '#475569', font: { size: 9.5 } }
-          }
-        }
-      }
-    });
-  });
+  /* ── The twist animation ────────────────────────────────── */
+  var tw = {
+    tail: document.querySelector('[data-twist="tail"]'),
+    branch: document.querySelector('[data-twist="branch"]'),
+    cap1: document.querySelector('[data-twist="cap1"]'),
+    cap2: document.querySelector('[data-twist="cap2"]')
+  };
+  var twTimer;
+  function doTwist(delay) {
+    if (!tw.branch) return;
+    clearTimeout(twTimer);
+    twTimer = setTimeout(function () {
+      if (tw.tail) tw.tail.style.opacity = '.13';
+      tw.branch.style.opacity = '1';
+      tw.branch.querySelectorAll('path').forEach(function (p) { p.style.strokeDashoffset = '0'; });
+      if (tw.cap1) tw.cap1.style.opacity = '0';
+      if (tw.cap2) tw.cap2.style.opacity = '1';
+    }, reduce ? 0 : (delay || 0));
+  }
+  function resetTwist() {
+    if (!tw.branch) return;
+    if (tw.tail) tw.tail.style.opacity = '1';
+    tw.branch.style.opacity = '0';
+    tw.branch.querySelectorAll('path').forEach(function (p) { p.style.strokeDashoffset = '400'; });
+    if (tw.cap1) tw.cap1.style.opacity = '1';
+    if (tw.cap2) tw.cap2.style.opacity = '0';
+  }
+  var replay = document.getElementById('replayBtn');
+  if (replay) replay.addEventListener('click', function () { resetTwist(); doTwist(420); });
 
-  /* ── Chart 3: quality strata ─────────────────────────────────── */
-  var strataEl = document.getElementById('strataChart');
-  whenVisible(strataEl, function () {
-    new Chart(strataEl.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: ['Excellent\nIMDb > 8', 'Good\n7 to 8', 'Mid\n6 to 7', 'Low\nIMDb ≤ 6'],
-        datasets: [
-          { label: 'Original plot', data: [8.14, 7.75, 7.40, 7.01],
-            backgroundColor: GREY, borderColor: 'rgba(148,163,184,.3)',
-            borderWidth: 1, borderRadius: 5, borderSkipped: false, maxBarThickness: 46 },
-          { label: 'PlotTwist generated', data: [8.45, 8.40, 8.37, 8.28],
-            backgroundColor: TEAL, borderColor: TEAL_L,
-            borderWidth: 1, borderRadius: 5, borderSkipped: false, maxBarThickness: 46 }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, padding: 16, usePointStyle: true, pointStyle: 'circle' } },
-          tooltip: tip({ displayColors: true, callbacks: { label: function (c) { return c.dataset.label + ': ' + c.parsed.y.toFixed(2); } } })
-        },
-        scales: {
-          y: {
-            min: 6.5, max: 8.8,
-            grid: { color: GRID }, border: { display: false },
-            title: { display: true, text: 'Overall jury score', color: '#64748b', font: { size: 10.5 } }
-          },
-          x: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 10.5 } } }
-        }
-      }
-    });
-  });
+  /* ── Observers: reveal, twist, bars ─────────────────────── */
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.style.transition = 'opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1)';
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'none';
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-reveal]').forEach(function (el) { io.observe(el); });
 
-  /* ── Copy BibTeX ─────────────────────────────────────────────── */
-  var COPY_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-  var OK_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
-  var btn = document.getElementById('copyBtn');
-  if (btn) {
-    btn.addEventListener('click', function () {
-      var text = document.getElementById('bibtexBlock').innerText;
-      navigator.clipboard.writeText(text).then(function () {
-        btn.classList.add('copied');
-        btn.innerHTML = OK_SVG + ' Copied';
+    var tbox = document.querySelector('[data-twistbox]');
+    if (tbox) {
+      var tio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) { doTwist(900); tio.disconnect(); } });
+      }, { threshold: 0.4 });
+      tio.observe(tbox);
+    }
+
+    var barHost = document.querySelector('[data-w]');
+    if (barHost) {
+      var bio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          barsShown = true; paint(variant); bio.disconnect();
+        });
+      }, { threshold: 0.3 });
+      bio.observe(barHost.closest('div[style*="display:grid"]') || barHost);
+    }
+
+    var wrHost = document.getElementById('wrTable');
+    if (wrHost) {
+      var wio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          wrHost.querySelectorAll('[data-wr]').forEach(function (b, i) {
+            setTimeout(function () { b.style.width = b.dataset.wr + '%'; }, i * 55);
+          });
+          wio.disconnect();
+        });
+      }, { threshold: 0.2 });
+      wio.observe(wrHost);
+    }
+  } else {
+    document.querySelectorAll('[data-reveal]').forEach(function (el) {
+      el.style.opacity = '1'; el.style.transform = 'none';
+    });
+    barsShown = true; paint(variant);
+    document.querySelectorAll('[data-wr]').forEach(function (b) { b.style.width = b.dataset.wr + '%'; });
+    doTwist(0);
+  }
+
+  /* ── Scroll: progress, framework illumination, nav spy ──── */
+  var progress = document.getElementById('progress');
+  var fwBox = document.querySelector('[data-fwbox]');
+  var fwGroups = Array.prototype.slice.call(document.querySelectorAll('[data-fw]'));
+  var spyLinks = Array.prototype.slice.call(document.querySelectorAll('[data-spy]'));
+  fwGroups.forEach(function (el) { el.style.transition = 'opacity .6s ease'; });
+
+  function illuminate() {
+    if (!fwBox || !fwGroups.length) return;
+    var r = fwBox.getBoundingClientRect();
+    var t = (window.innerHeight * 0.8 - r.top) / Math.max(1, r.height * 0.75);
+    fwGroups.forEach(function (el) {
+      el.style.opacity = (t * 7 >= parseFloat(el.getAttribute('data-fw')) - 1.15) ? '1' : '0.2';
+    });
+  }
+  function spy() {
+    var active = null;
+    spyLinks.forEach(function (link) {
+      var sec = document.getElementById(link.getAttribute('data-spy'));
+      if (sec && sec.getBoundingClientRect().top < window.innerHeight * 0.4) active = link;
+    });
+    spyLinks.forEach(function (link) { link.style.color = link === active ? '#7c4dff' : '#8c877d'; });
+  }
+  var raf = null;
+  function onScroll() {
+    if (raf) return;
+    raf = requestAnimationFrame(function () {
+      raf = null;
+      var d = document.documentElement;
+      var max = Math.max(1, d.scrollHeight - d.clientHeight);
+      progress.style.width = Math.min(100, Math.max(0, (d.scrollTop / max) * 100)) + '%';
+      illuminate(); spy();
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  illuminate(); spy(); onScroll();
+
+  /* ── Copy BibTeX ────────────────────────────────────────── */
+  var copyBtn = document.getElementById('copyBtn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function () {
+      navigator.clipboard.writeText(document.getElementById('bibtexBlock').innerText).then(function () {
+        copyBtn.textContent = 'COPIED';
+        copyBtn.style.borderColor = '#7c4dff';
+        copyBtn.style.color = '#5a2ce0';
         setTimeout(function () {
-          btn.classList.remove('copied');
-          btn.innerHTML = COPY_SVG + ' Copy';
-        }, 2200);
+          copyBtn.textContent = 'COPY';
+          copyBtn.style.borderColor = '#ddd8ce';
+          copyBtn.style.color = '#6b7380';
+        }, 2000);
       });
     });
   }
