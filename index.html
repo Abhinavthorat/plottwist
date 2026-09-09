@@ -100,8 +100,8 @@
   .nov-r .nov-tip{left:auto;right:-8px}
   .nov-dn .nov-tip{bottom:auto;top:100%;margin-bottom:0;margin-top:11px;transform:translateY(-5px)}
   .nov-dn:hover .nov-tip,.nov-dn:focus-visible .nov-tip{transform:none}
-  .on-dark .nov{border-color:rgba(168,135,255,.45);background:rgba(124,77,255,.18);color:#b79bff}
-  .on-dark .nov-tip{background:#faf8f4;color:#2c313a;box-shadow:0 12px 36px rgba(0,0,0,.45)}
+  .on-dark .nov{border-color:rgba(168,135,255,.45);background:rgba(124,77,255,.18);color:#a887ff}
+  .on-dark .nov-tip{background:#faf8f4;color:#414750;box-shadow:0 12px 36px rgba(0,0,0,.45)}
   .on-dark .nov-tip b{color:#5a2ce0}
 
   /* ── Continuous signal flow along the pipeline ── */
@@ -838,7 +838,7 @@
     </div>
 
     <!-- Performance against scale -->
-    <div class="sc" style="margin-top:78px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
+    <div class="sc" style="margin-top:60px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap">
         <div class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880"><svg class="mi"><use href="#ic-reel"/></svg>PERFORMANCE AGAINST SCALE<span class="nov nov-dn" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW<span class="nov-tip"><b>NEW IN THIS WORK</b>Every open-weight baseline from 3.8B to 70B lands between 6.58 and 7.90. Adding parameters moves the score very little. PlotTwist sits at the far left of the axis and above all of them, which is the paper's central claim made visible: structure buys more than scale.</span></span></div>
         <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#71706a">ACTIVE PARAMETERS, LOG SCALE</div>
@@ -883,7 +883,7 @@
 
           <!-- comparison connector: PlotTwist to Llama-70B -->
           <path class="sc-grow" d="M 168 78 C 400 46 700 40 780 226" fill="none" stroke="rgba(168,135,255,.4)" stroke-width="1" stroke-dasharray="1000" style="transition-delay:.9s"></path>
-          <text class="sc-fade" x="470" y="40" text-anchor="middle" fill="#b79bff" style="font:400 11px 'JetBrains Mono',monospace;letter-spacing:.1em;transition-delay:1.5s">23&times; THE ACTIVE PARAMETERS, 1.18 LOWER</text>
+          <text class="sc-fade" x="470" y="40" text-anchor="middle" fill="#a887ff" style="font:400 11px 'JetBrains Mono',monospace;letter-spacing:.1em;transition-delay:1.5s">23&times; THE ACTIVE PARAMETERS, 1.18 LOWER</text>
 
           <!-- baselines -->
           <g class="sc-dot"><circle class="sc-pt" cx="199.6" cy="315.5" r="5" fill="none" stroke="#8b8880" stroke-width="1.4" style="transition-delay:.35s"></circle>
@@ -903,7 +903,7 @@
           <!-- PlotTwist -->
           <circle class="sc-halo" cx="151.9" cy="72.7" r="10" fill="#7c4dff"></circle>
           <g class="sc-pt" style="transition-delay:1.05s"><rect x="141.9" y="62.7" width="20" height="20" transform="rotate(45 151.9 72.7)" fill="#7c4dff"></rect></g>
-          <text class="sc-fade" x="151.9" y="106" text-anchor="middle" fill="#b79bff" style="font:500 11.5px 'JetBrains Mono',monospace;letter-spacing:.06em;transition-delay:1.2s">PlotTwist</text>
+          <text class="sc-fade" x="151.9" y="106" text-anchor="middle" fill="#a887ff" style="font:500 11.5px 'JetBrains Mono',monospace;letter-spacing:.06em;transition-delay:1.2s">PlotTwist</text>
           <text class="sc-fade" x="151.9" y="122" text-anchor="middle" fill="#8b8880" style="font:400 10px 'JetBrains Mono',monospace;transition-delay:1.25s">3B active &middot; 8.36</text>
         </svg>
         </div>
@@ -911,19 +911,19 @@
 
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:rgba(245,243,238,.16);margin-top:30px">
         <div style="background:#16191f;padding:18px 20px 18px 0">
-          <div style="font:300 28px/1 Newsreader,serif">10.7&times;</div>
+          <div style="font:300 30px/1 Newsreader,serif">10.7&times;</div>
           <div style="margin-top:9px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">FEWER ACTIVE PARAMS THAN<br>DENSE QWEN3-32B &middot; WIN RATE 0.99</div>
         </div>
         <div style="background:#16191f;padding:18px 20px">
-          <div style="font:300 28px/1 Newsreader,serif">23&times;</div>
+          <div style="font:300 30px/1 Newsreader,serif">23&times;</div>
           <div style="margin-top:9px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">FEWER THAN LLAMA-3.3-70B<br>WIN RATE 0.99</div>
         </div>
         <div style="background:#16191f;padding:18px 20px">
-          <div style="font:300 28px/1 Newsreader,serif;color:#b79bff">+0.46</div>
+          <div style="font:300 30px/1 Newsreader,serif;color:#a887ff">+0.46</div>
           <div style="margin-top:9px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">OVER THE BEST OPEN-WEIGHT<br>BASELINE OF ANY SIZE</div>
         </div>
         <div style="background:#16191f;padding:18px 20px">
-          <div style="font:300 28px/1 Newsreader,serif">1.32</div>
+          <div style="font:300 30px/1 Newsreader,serif">1.32</div>
           <div style="margin-top:9px;font:500 9.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8b8880">TOTAL SPREAD ACROSS 3.8B<br>TO 70B OF OPEN BASELINES</div>
         </div>
       </div>
@@ -932,7 +932,7 @@
     <!-- Full Table 1 -->
     <div style="margin-top:60px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap">
-        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">TABLE 1 &middot; EVERY SYSTEM, EVERY DIMENSION</div>
+        <div class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880"><svg class="mi"><use href="#ic-film"/></svg>TABLE 1 &middot; EVERY SYSTEM, EVERY DIMENSION</div>
         <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#71706a">MEAN &plusmn; SD OVER 160 PREMISES</div>
       </div>
       <div class="sx dark" style="margin-top:20px">
@@ -966,7 +966,7 @@
     <!-- Table 2: win rates -->
     <div style="margin-top:60px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
       <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap">
-        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">TABLE 2 &middot; PER-PREMISE PAIRED WIN RATES</div>
+        <div class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880"><svg class="mi"><use href="#ic-ticket"/></svg>TABLE 2 &middot; PER-PREMISE PAIRED WIN RATES</div>
         <div style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.12em;color:#71706a">TIES AS 0.5 &middot; HOLM-CORRECTED SIGN TESTS</div>
       </div>
       <p style="margin:16px 0 0;max-width:62ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Because the top overall means sit within hundredths of each other, the pre-specified primary endpoint is the paired win rate, not the mean.</p>
@@ -999,7 +999,7 @@
     <!-- Strata + GSAT/Razzie -->
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:56px;margin-top:60px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
       <div>
-        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">INTERVENTION SCALES WITH SOURCE QUALITY<span class="nov nov-dn" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW<span class="nov-tip"><b>NEW IN THIS WORK</b>A generator that lifts every score equally is just inflating them. Splitting by source quality shows the gain rising monotonically as the original gets weaker, while the generated score stays near 8.3 throughout. That is a system converging on a ceiling, not adding a constant.</span></span></div>
+        <div class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880"><svg class="mi"><use href="#ic-clap"/></svg>INTERVENTION SCALES WITH SOURCE QUALITY<span class="nov nov-dn" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW<span class="nov-tip"><b>NEW IN THIS WORK</b>A generator that lifts every score equally is just inflating them. Splitting by source quality shows the gain rising monotonically as the original gets weaker, while the generated score stays near 8.3 throughout. That is a system converging on a ceiling, not adding a constant.</span></span></div>
         <p style="margin:16px 0 26px;max-width:46ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Gain over the paired original plot, by IMDb-defined stratum. PlotTwist lightly refines strong narratives and substantially restructures weak ones.</p>
         <div style="display:grid;gap:16px">
           <div style="display:flex;align-items:center;gap:16px">
@@ -1029,11 +1029,11 @@
         <p style="margin:16px 0 26px;max-width:46ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Scored against critically acclaimed screenplays and Golden Raspberry winners, under repeated balanced subsampling.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(245,243,238,.16)">
           <div style="background:#16191f;padding:18px 20px 18px 0">
-            <div style="display:flex;align-items:baseline;gap:9px"><svg class="mi mi-solid" style="width:13px;height:13px;color:#b79bff"><use href="#ic-star"/></svg><span style="font:300 34px/1 Newsreader,serif" data-count="8.33" data-dec="2">8.33</span></div>
+            <div style="display:flex;align-items:baseline;gap:9px"><svg class="mi mi-solid" style="width:13px;height:13px;color:#a887ff"><use href="#ic-star"/></svg><span style="font:300 34px/1 Newsreader,serif" data-count="8.33" data-dec="2">8.33</span></div>
             <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">101 GREATEST<br>SCREENPLAYS</div>
           </div>
           <div style="background:#16191f;padding:18px 0 18px 20px">
-            <div style="display:flex;align-items:baseline;gap:9px"><svg class="mi" style="width:13px;height:13px;color:#5f5e59"><use href="#ic-star"/></svg><span style="font:300 34px/1 Newsreader,serif;color:#8b8880" data-count="6.58" data-dec="2">6.58</span></div>
+            <div style="display:flex;align-items:baseline;gap:9px"><svg class="mi" style="width:13px;height:13px;color:#71706a"><use href="#ic-star"/></svg><span style="font:300 34px/1 Newsreader,serif;color:#8b8880" data-count="6.58" data-dec="2">6.58</span></div>
             <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">RAZZIE WORST<br>SCREENPLAY</div>
           </div>
         </div>
@@ -1043,7 +1043,7 @@
 
     <!-- Reliability -->
     <div style="margin-top:60px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
-      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">HOW MUCH SHOULD YOU TRUST THE JURY?<span class="nov nov-dn" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW<span class="nov-tip"><b>NEW IN THIS WORK</b>Most LLM-as-judge panels report agreement and stop. This one reports what agreement is worth: correlated errors leave five judges behaving like 1.35 independent ones, so every close claim is re-run across 113 analysis specifications and the weakest result is shown, not the best.</span></span></div>
+      <div class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880"><svg class="mi"><use href="#ic-seat"/></svg>HOW MUCH SHOULD YOU TRUST THE JURY?<span class="nov nov-dn" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW<span class="nov-tip"><b>NEW IN THIS WORK</b>Most LLM-as-judge panels report agreement and stop. This one reports what agreement is worth: correlated errors leave five judges behaving like 1.35 independent ones, so every close claim is re-run across 113 analysis specifications and the weakest result is shown, not the best.</span></span></div>
       <p style="margin:16px 0 0;max-width:64ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">The paper reports the weaknesses of its own evaluation protocol alongside the results, so the site does too.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:rgba(245,243,238,.16);margin-top:30px">
         <div style="background:#16191f;padding:20px 20px 20px 0">
@@ -1166,7 +1166,7 @@
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:44px;align-items:start">
         <div>
-          <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">PREMISE</div>
+          <div class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-clap"/></svg>PREMISE</div>
           <p style="margin:16px 0 0;max-width:40ch;font:400 21px/1.45 Newsreader,serif;font-style:italic;text-wrap:pretty">A dedicated detective investigates a murder that implicates his beloved, forcing him through a web of concealed truths, blackmail, and the lengths one will go to protect a dark secret.</p>
           <div style="margin-top:26px;padding-top:18px;border-top:1px solid #e2ded4;font:400 11.5px/1.7 'JetBrains Mono',monospace;color:#6b7380">
             Generated by the PlotTwist MoE<br>3B active parameters &middot; single pass
@@ -1185,7 +1185,7 @@
     <!-- Limitations -->
     <div data-reveal style="margin-top:96px">
       <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:26px">
-        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">WHAT THIS DOES NOT SHOW</span>
+        <span class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-cam"/></svg>WHAT THIS DOES NOT SHOW</span>
         <span style="flex:1;height:1px;background:#e2ded4"></span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:#e2ded4;border-top:1px solid #e2ded4;border-bottom:1px solid #e2ded4">
