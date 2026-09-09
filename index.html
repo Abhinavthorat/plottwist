@@ -74,6 +74,36 @@
   .sx-hint span{animation:nudge 1.5s ease-in-out infinite}
   @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
 
+  /* ── Movie icons ── */
+  .mi{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:1.4;
+    stroke-linecap:round;stroke-linejoin:round;vertical-align:-2.5px}
+  .mi-lg{width:19px;height:19px;vertical-align:-4px}
+  .mi-solid{fill:currentColor;stroke:none}
+  .kick{display:inline-flex;align-items:center;gap:8px}
+
+  /* ── "What is new here" hover ── */
+  .nov{position:relative;display:inline-flex;align-items:center;gap:5px;margin-left:10px;
+    padding:2px 9px 2px 7px;border:1px solid rgba(124,77,255,.4);border-radius:999px;
+    background:rgba(124,77,255,.07);color:#5a2ce0;
+    font:500 8.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:none;
+    cursor:help;vertical-align:middle;transition:background .25s,border-color .25s}
+  .nov:hover,.nov:focus-visible{background:rgba(124,77,255,.15);border-color:#7c4dff;outline:none}
+  .nov .sp{width:8px;height:8px;fill:currentColor;stroke:none;flex:none}
+  .nov-tip{position:absolute;left:-8px;bottom:100%;margin-bottom:11px;width:max-content;max-width:288px;
+    padding:12px 14px;border-radius:9px;background:#16191f;color:#e3e0d8;text-align:left;
+    font:400 12px/1.55 Archivo,sans-serif;letter-spacing:0;
+    opacity:0;transform:translateY(5px);pointer-events:none;
+    transition:opacity .25s ease,transform .25s ease;z-index:40;box-shadow:0 12px 36px rgba(0,0,0,.24)}
+  .nov:hover .nov-tip,.nov:focus-visible .nov-tip{opacity:1;transform:none}
+  .nov-tip b{display:block;margin-bottom:7px;color:#a887ff;
+    font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.2em}
+  .nov-r .nov-tip{left:auto;right:-8px}
+  .nov-dn .nov-tip{bottom:auto;top:100%;margin-bottom:0;margin-top:11px;transform:translateY(-5px)}
+  .nov-dn:hover .nov-tip,.nov-dn:focus-visible .nov-tip{transform:none}
+  .on-dark .nov{border-color:rgba(168,135,255,.45);background:rgba(124,77,255,.18);color:#b79bff}
+  .on-dark .nov-tip{background:#faf8f4;color:#2c313a;box-shadow:0 12px 36px rgba(0,0,0,.45)}
+  .on-dark .nov-tip b{color:#5a2ce0}
+
   /* ── Diagram labels: short by default, detail on hover ── */
   .fw-lab{cursor:default}
   .fw-tip{position:absolute;left:50%;bottom:100%;margin-bottom:9px;transform:translate(-50%,4px);
@@ -102,10 +132,59 @@
   @media (max-width:720px){
     .nav-links{display:none!important}
     .hide-sm{display:none!important}
+    /* Float has nowhere to go on a narrow screen, so dock the card instead.
+       position:fixed also keeps it out of the document's scroll width. */
+    .nov-tip,.nov-r .nov-tip,.nov-dn .nov-tip{
+      position:fixed;left:50%;right:auto;top:auto;bottom:20px;margin:0;
+      width:calc(100vw - 36px);max-width:380px;transform:translate(-50%,8px)}
+    .nov:hover .nov-tip,.nov:focus-visible .nov-tip,
+    .nov-dn:hover .nov-tip,.nov-dn:focus-visible .nov-tip{transform:translate(-50%,0)}
   }
 </style>
 </head>
 <body>
+
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false"><defs>
+  <symbol id="ic-clap" viewBox="0 0 24 24">
+    <path d="M2.6 8.4h18.8v11.1a1.6 1.6 0 0 1-1.6 1.6H4.2a1.6 1.6 0 0 1-1.6-1.6z"/>
+    <path d="M2.8 8.4 3.5 4.8a1.1 1.1 0 0 1 1.3-.87l15.9 2.2a1.1 1.1 0 0 1 .94 1.24l-.12.9"/>
+    <path d="M7.9 4.5 6.4 8.4M12.6 5.15 11.1 8.4M17.3 5.8 15.8 8.4"/>
+  </symbol>
+  <symbol id="ic-film" viewBox="0 0 24 24">
+    <rect x="2.6" y="4.6" width="18.8" height="14.8" rx="2"/>
+    <path d="M7.2 4.6v14.8M16.8 4.6v14.8"/>
+    <path d="M2.6 9.5h4.6M2.6 14.5h4.6M16.8 9.5h4.6M16.8 14.5h4.6"/>
+  </symbol>
+  <symbol id="ic-reel" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="8.9"/><circle cx="12" cy="12" r="1.9"/>
+    <circle cx="12" cy="6.7" r="1.9"/><circle cx="16.6" cy="14.6" r="1.9"/><circle cx="7.4" cy="14.6" r="1.9"/>
+  </symbol>
+  <symbol id="ic-script" viewBox="0 0 24 24">
+    <path d="M5.8 2.7h8.5l4.9 4.9v13.7a1 1 0 0 1-1 1H5.8a1 1 0 0 1-1-1V3.7a1 1 0 0 1 1-1z"/>
+    <path d="M14.3 2.7v5.4h4.9"/>
+    <path d="M8.3 12.4h7.4M8.3 15.7h7.4M8.3 19h4.3"/>
+  </symbol>
+  <symbol id="ic-star" viewBox="0 0 24 24">
+    <path d="m12 3.4 2.63 5.33 5.88.86-4.25 4.15 1 5.86L12 16.83l-5.26 2.77 1-5.86L3.49 9.59l5.88-.86z"/>
+  </symbol>
+  <symbol id="ic-seat" viewBox="0 0 24 24">
+    <path d="M5.4 11.2V6.9a2.6 2.6 0 0 1 2.6-2.6h8a2.6 2.6 0 0 1 2.6 2.6v4.3"/>
+    <rect x="2.4" y="11.2" width="19.2" height="6.1" rx="1.7"/>
+    <path d="M6.4 17.3v2.5M17.6 17.3v2.5"/>
+  </symbol>
+  <symbol id="ic-ticket" viewBox="0 0 24 24">
+    <path d="M3.1 7.9a1.6 1.6 0 0 1 1.6-1.6h14.6a1.6 1.6 0 0 1 1.6 1.6v1.7a2.5 2.5 0 0 0 0 4.8v1.7a1.6 1.6 0 0 1-1.6 1.6H4.7a1.6 1.6 0 0 1-1.6-1.6v-1.7a2.5 2.5 0 0 0 0-4.8z"/>
+    <path d="M14.6 6.5v11" stroke-dasharray="2 2.2"/>
+  </symbol>
+  <symbol id="ic-cam" viewBox="0 0 24 24">
+    <rect x="2.5" y="7.6" width="12.6" height="9.4" rx="1.7"/>
+    <path d="m15.1 13 5 3.1a.6.6 0 0 0 .9-.5V9a.6.6 0 0 0-.9-.5l-5 3.1z"/>
+    <circle cx="6.4" cy="5.2" r="2.4"/><circle cx="11.9" cy="5.2" r="2.4"/>
+  </symbol>
+  <symbol id="ic-spark" viewBox="0 0 24 24">
+    <path d="M12 2.2 14 9l6.8 2-6.8 2-2 6.8-2-6.8L3.2 11 10 9z"/>
+  </symbol>
+</defs></svg>
 
 <div style="position:relative;padding-top:58px">
 
@@ -200,7 +279,7 @@
     <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
     <div style="position:relative;width:7px;height:7px">
       <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
-      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">STAGE 01 &middot; THE PREMISE</span>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-6px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-script"/></svg>STAGE 01 &middot; THE PREMISE</span>
     </div>
     <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
   </div>
@@ -238,7 +317,10 @@
     <!-- Contributions: interactive node graph -->
     <div data-reveal style="margin-top:96px">
       <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px">
-        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">CONTRIBUTIONS</span>
+        <span class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-spark"/></svg>CONTRIBUTIONS</span>
+        <span class="nov" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW
+          <span class="nov-tip"><b>NEW IN THIS WORK</b>Most plot-generation work scales the writer. PlotTwist keeps the writer small and moves the intelligence outward, into an aspect-level reward model and an independent jury, so a 3B-active model reaches frontier-competitive quality.</span>
+        </span>
         <span style="flex:1;height:1px;background:#e2ded4"></span>
         <span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#b0aa9e">SELECT A NODE</span>
       </div>
@@ -298,7 +380,7 @@
     <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
     <div style="position:relative;width:7px;height:7px">
       <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
-      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">STAGE 02 &middot; THE POSSIBILITIES BRANCH</span>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-6px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-film"/></svg>STAGE 02 &middot; THE POSSIBILITIES BRANCH</span>
     </div>
     <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
   </div>
@@ -306,7 +388,10 @@
   <!-- ══ FRAMEWORK ═════════════════════════════════════════════ -->
   <section id="framework" style="padding:30px 0 0;scroll-margin-top:90px">
     <div data-reveal style="max-width:760px">
-      <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">THE FRAMEWORK</span>
+      <span class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-clap"/></svg>THE FRAMEWORK</span>
+      <span class="nov" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW
+        <span class="nov-tip"><b>NEW IN THIS WORK</b>The reward model, the generator and the evaluator are three separate models that never share weights or training data. Nothing that scores a plot has any stake in producing it.</span>
+      </span>
       <h2 style="margin:16px 0 0;font:300 clamp(34px,4.4vw,54px)/1.1 Newsreader,serif;letter-spacing:-.02em">The story-generation machine</h2>
       <p style="margin:20px 0 0;max-width:62ch;font:400 16.5px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">One premise enters. Candidate plots branch out, a reward model rates every branch across five dimensions, preference optimisation turns the ranking into a twist in the generator's policy, and an independent jury decides what comes out.</p>
     </div>
@@ -396,14 +481,19 @@
     <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
     <div style="position:relative;width:7px;height:7px">
       <div style="width:7px;height:7px;border-radius:50%;background:#7c4dff"></div>
-      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5a2ce0">STAGE 03 &middot; THE TWIST</span>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-6px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5a2ce0"><svg class="mi"><use href="#ic-clap"/></svg>STAGE 03 &middot; THE TWIST</span>
     </div>
     <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
   </div>
 
   <!-- ══ THE TWIST ═════════════════════════════════════════════ -->
   <section data-twistbox style="padding:40px 0 0">
-    <h2 data-reveal style="margin:0;max-width:26ch;font:300 clamp(40px,6.2vw,86px)/1.02 Newsreader,serif;letter-spacing:-.03em;text-wrap:pretty">What happens when the plot takes a <span style="font-style:italic">different turn?</span></h2>
+    <div data-reveal>
+      <span class="nov" style="margin-left:0;margin-bottom:20px" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW
+        <span class="nov-tip"><b>NEW IN THIS WORK</b>No reinforcement learning loop, and no reward model at inference. The reward model is used once, offline, to rank candidates into preference pairs. After DPO the generator carries the preference in its weights and runs in a single pass.</span>
+      </span>
+      <h2 style="margin:0;max-width:26ch;font:300 clamp(40px,6.2vw,86px)/1.02 Newsreader,serif;letter-spacing:-.03em;text-wrap:pretty">What happens when the plot takes a <span style="font-style:italic">different turn?</span></h2>
+    </div>
 
     <div style="margin-top:54px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:44px;align-items:center">
       <div class="sx">
@@ -467,7 +557,7 @@
     <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
     <div style="position:relative;width:7px;height:7px">
       <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
-      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">STAGE 04 &middot; THE COMPANY OF SMALL MODELS</span>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-6px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-reel"/></svg>STAGE 04 &middot; THE COMPANY OF SMALL MODELS</span>
     </div>
     <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
   </div>
@@ -475,7 +565,10 @@
   <!-- ══ THE CAST ══════════════════════════════════════════════ -->
   <section style="padding:34px 0 0">
     <div data-reveal style="max-width:700px">
-      <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">THE CAST</span>
+      <span class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-reel"/></svg>THE CAST</span>
+      <span class="nov" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW
+        <span class="nov-tip"><b>NEW IN THIS WORK</b>Positive-negative prompting. Every rater scores each aspect twice, once for what works and once for what fails, and the rating is the difference. Asking for one verdict invites the positivity bias LLM judges are known for; asking for both poles cancels it.</span>
+      </span>
       <h2 style="margin:16px 0 0;font:300 clamp(32px,4.2vw,50px)/1.12 Newsreader,serif;letter-spacing:-.02em">Twelve models, one 3B narrator</h2>
       <p style="margin:20px 0 0;max-width:60ch;font:400 16.5px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">Large models never write the plot. They rate it before training and judge it after. The model that writes has 3B active parameters per token.</p>
     </div>
@@ -586,17 +679,20 @@
   <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
   <div style="position:relative;width:7px;height:7px">
     <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
-    <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">STAGE 05 &middot; THE CONTROL PANEL</span>
+    <span class="hide-sm" style="position:absolute;left:20px;top:-6px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-seat"/></svg>STAGE 05 &middot; THE CONTROL PANEL</span>
   </div>
   <div style="width:1px;height:60px;background:#16191f"></div>
 </div>
 
 <!-- ══ EXPERIMENTS (dark) ══════════════════════════════════════ -->
-<section id="experiments" style="background:#16191f;color:#f5f3ee;padding:74px 0 84px;scroll-margin-top:70px">
+<section id="experiments" class="on-dark" style="background:#16191f;color:#f5f3ee;padding:74px 0 84px;scroll-margin-top:70px">
   <div style="max-width:1180px;margin:0 auto;padding:0 32px">
     <div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap">
       <div>
-        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">EXPERIMENTAL RESULTS</span>
+        <span class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880"><svg class="mi"><use href="#ic-seat"/></svg>EXPERIMENTAL RESULTS</span>
+        <span class="nov" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW
+          <span class="nov-tip"><b>NEW IN THIS WORK</b>The jury is cross-family by construction: five open-weight judges from five vendors, none sharing a family with the generator, plus a held-out sixth-family judge. Every score must quote a verbatim span from the plot, so a claim can be checked mechanically rather than trusted.</span>
+        </span>
         <h2 style="margin:16px 0 0;font:300 clamp(32px,4.2vw,50px)/1.12 Newsreader,serif;letter-spacing:-.02em;color:#f5f3ee">Scored by the jury, not by us</h2>
       </div>
       <div style="font:400 10.5px/1.6 'JetBrains Mono',monospace;letter-spacing:.12em;color:#8b8880;text-align:right">160 HELD-OUT PREMISES<br>CROSS-FAMILY JURY &middot; MEAN OF FIVE NQDs</div>
@@ -765,7 +861,7 @@
     <!-- Strata + GSAT/Razzie -->
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:56px;margin-top:60px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
       <div>
-        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">INTERVENTION SCALES WITH SOURCE QUALITY</div>
+        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">INTERVENTION SCALES WITH SOURCE QUALITY<span class="nov nov-dn" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW<span class="nov-tip"><b>NEW IN THIS WORK</b>A generator that lifts every score equally is just inflating them. Splitting by source quality shows the gain rising monotonically as the original gets weaker, while the generated score stays near 8.3 throughout. That is a system converging on a ceiling, not adding a constant.</span></span></div>
         <p style="margin:16px 0 26px;max-width:46ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Gain over the paired original plot, by IMDb-defined stratum. PlotTwist lightly refines strong narratives and substantially restructures weak ones.</p>
         <div style="display:grid;gap:16px">
           <div style="display:flex;align-items:center;gap:16px">
@@ -791,15 +887,15 @@
         </div>
       </div>
       <div>
-        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">DOES THE EVALUATOR KNOW GOOD WRITING?</div>
+        <div class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880"><svg class="mi"><use href="#ic-star"/></svg>DOES THE EVALUATOR KNOW GOOD WRITING?<span class="nov nov-dn nov-r" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW<span class="nov-tip"><b>NEW IN THIS WORK</b>Papers usually validate the model and take the evaluator on trust. Here the evaluator is tested first, against writing critics already agreed about: the 101 Greatest Screenplays against Razzie winners for Worst Screenplay. It separates them on every dimension, in 100% of 1,000 balanced runs.</span></span></div>
         <p style="margin:16px 0 26px;max-width:46ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Scored against critically acclaimed screenplays and Golden Raspberry winners, under repeated balanced subsampling.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(245,243,238,.16)">
           <div style="background:#16191f;padding:18px 20px 18px 0">
-            <div style="font:300 34px/1 Newsreader,serif" data-count="8.33" data-dec="2">8.33</div>
+            <div style="display:flex;align-items:baseline;gap:9px"><svg class="mi mi-solid" style="width:13px;height:13px;color:#b79bff"><use href="#ic-star"/></svg><span style="font:300 34px/1 Newsreader,serif" data-count="8.33" data-dec="2">8.33</span></div>
             <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">101 GREATEST<br>SCREENPLAYS</div>
           </div>
           <div style="background:#16191f;padding:18px 0 18px 20px">
-            <div style="font:300 34px/1 Newsreader,serif;color:#8b8880" data-count="6.58" data-dec="2">6.58</div>
+            <div style="display:flex;align-items:baseline;gap:9px"><svg class="mi" style="width:13px;height:13px;color:#5f5e59"><use href="#ic-star"/></svg><span style="font:300 34px/1 Newsreader,serif;color:#8b8880" data-count="6.58" data-dec="2">6.58</span></div>
             <div style="margin-top:8px;font:500 9.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">RAZZIE WORST<br>SCREENPLAY</div>
           </div>
         </div>
@@ -809,7 +905,7 @@
 
     <!-- Reliability -->
     <div style="margin-top:60px;padding-top:44px;border-top:1px solid rgba(245,243,238,.16)">
-      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">HOW MUCH SHOULD YOU TRUST THE JURY?</div>
+      <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8b8880">HOW MUCH SHOULD YOU TRUST THE JURY?<span class="nov nov-dn" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW<span class="nov-tip"><b>NEW IN THIS WORK</b>Most LLM-as-judge panels report agreement and stop. This one reports what agreement is worth: correlated errors leave five judges behaving like 1.35 independent ones, so every close claim is re-run across 113 analysis specifications and the weakest result is shown, not the best.</span></span></div>
       <p style="margin:16px 0 0;max-width:64ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">The paper reports the weaknesses of its own evaluation protocol alongside the results, so the site does too.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:rgba(245,243,238,.16);margin-top:30px">
         <div style="background:#16191f;padding:20px 20px 20px 0">
@@ -852,7 +948,7 @@
     <div style="width:1px;height:60px;background:#16191f"></div>
     <div style="position:relative;width:7px;height:7px">
       <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
-      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">STAGE 06 &middot; ALTERNATE REALITIES</span>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-6px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-cam"/></svg>STAGE 06 &middot; ALTERNATE REALITIES</span>
     </div>
     <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
   </div>
@@ -860,14 +956,17 @@
   <!-- ══ EXAMPLES ══════════════════════════════════════════════ -->
   <section id="examples" style="padding:34px 0 0;scroll-margin-top:90px">
     <div data-reveal style="max-width:720px">
-      <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">QUALITATIVE WALKTHROUGH</span>
+      <span class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-film"/></svg>QUALITATIVE WALKTHROUGH</span>
+      <span class="nov" tabindex="0"><svg class="sp" viewBox="0 0 24 24"><use href="#ic-spark"/></svg>WHAT IS NEW
+        <span class="nov-tip"><b>NEW IN THIS WORK</b>Only 160 of 5,000 premises become training data. A pair survives only when a frontier model wins outright, scores above 8, and beats the runner-up by 0.5. Alignment here is a curation problem, not a data-volume one.</span>
+      </span>
       <h2 style="margin:16px 0 0;font:300 clamp(32px,4.2vw,50px)/1.12 Newsreader,serif;letter-spacing:-.02em">One premise, four futures</h2>
       <p style="margin:20px 0 0;max-width:60ch;font:400 16.5px/1.7 Archivo,sans-serif;color:#414750;text-wrap:pretty">Every premise in the curation set branches into candidate plots. The reward model ranks the branches; only a few premises survive the thresholds and become training signal.</p>
     </div>
 
     <div data-reveal style="margin-top:52px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:36px;align-items:start">
       <div style="border:1px solid #16191f;padding:26px 24px;background:#fffdf9">
-        <div style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">PREMISE</div>
+        <div class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-clap"/></svg>PREMISE</div>
         <p style="margin:18px 0 0;font:400 22px/1.35 Newsreader,serif;font-style:italic;text-wrap:pretty">Generate Plot of a Romantic Comedy Set in the Modern Tech Startup Era</p>
         <div style="margin-top:24px;padding-top:18px;border-top:1px solid #e2ded4;font:400 11.5px/1.7 'JetBrains Mono',monospace;color:#6b7380">
           5,000 premises derived with Gemma-27B<br>&rarr; 160 high-confidence pairs retained
@@ -924,7 +1023,7 @@
     <!-- Generated plot -->
     <div data-reveal style="margin-top:96px">
       <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:26px">
-        <span style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">WHAT IT ACTUALLY WRITES</span>
+        <span class="kick" style="font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-script"/></svg>WHAT IT ACTUALLY WRITES</span>
         <span style="flex:1;height:1px;background:#e2ded4"></span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:44px;align-items:start">
@@ -972,7 +1071,7 @@
     <div style="width:1px;height:78px;background:linear-gradient(#e2ded4,#16191f)"></div>
     <div style="position:relative;width:7px;height:7px">
       <div style="width:7px;height:7px;border-radius:50%;background:#16191f"></div>
-      <span class="hide-sm" style="position:absolute;left:20px;top:-3px;white-space:nowrap;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d">END OF PATH &middot; THE PAPER</span>
+      <span class="hide-sm" style="position:absolute;left:20px;top:-6px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d"><svg class="mi"><use href="#ic-ticket"/></svg>END OF PATH &middot; THE PAPER</span>
     </div>
     <div style="width:1px;height:78px;background:linear-gradient(#16191f,#e2ded4)"></div>
   </div>
