@@ -105,15 +105,25 @@
   .on-dark .nov-tip b{color:#5a2ce0}
 
   /* ── Continuous signal flow along the pipeline ── */
-  .flow path{fill:none;stroke:#7c4dff;stroke-width:2.2;stroke-linecap:round;
-    stroke-dasharray:6 94;stroke-dashoffset:100;opacity:0}
+  .flow path{fill:none;stroke:#7c4dff;stroke-width:3;stroke-linecap:round;
+    stroke-dasharray:16 84;stroke-dashoffset:100;opacity:0;
+    filter:drop-shadow(0 0 3px rgba(124,77,255,.55))}
   @keyframes flowDash{
     0%{stroke-dashoffset:100;opacity:0}
-    6%{opacity:.95}
-    82%{opacity:.95}
+    8%{opacity:1}
+    80%{opacity:1}
     100%{stroke-dashoffset:0;opacity:0}
   }
-  [data-fwbox].live .flow path{animation:flowDash 2.8s linear infinite}
+  [data-fwbox].live .flow path{animation:flowDash 2.2s linear infinite}
+
+  /* ── Plot being written at the end of the pipeline ── */
+  .fw-out{position:absolute;right:12px;top:6px;width:252px;text-align:right}
+  .fw-out-k{font:500 8.5px/1 'JetBrains Mono',monospace;letter-spacing:.18em;color:#b0aa9e;margin-bottom:7px}
+  .fw-type{font:400 13px/1.5 Newsreader,serif;font-style:italic;color:#16191f;min-height:3em}
+  .fw-caret{display:inline-block;width:1.5px;height:.95em;background:#7c4dff;
+    vertical-align:-1px;margin-left:2px}
+  [data-fwbox].live .fw-caret{animation:caretBlink 1s steps(1) infinite}
+  @keyframes caretBlink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
 
   /* ── Scale chart ── */
   .sc-pt{opacity:0;transform:scale(.35);transform-box:fill-box;transform-origin:center;
@@ -131,19 +141,19 @@
   .sc.on .sc-dot:hover .sc-name{opacity:1}
 
   /* ── Diagram labels: short by default, detail on hover ── */
-  .fw-lab{cursor:default}
-  .fw-tip{position:absolute;left:50%;bottom:100%;margin-bottom:9px;transform:translate(-50%,4px);
-    width:max-content;max-width:186px;padding:7px 10px;border-radius:7px;background:#16191f;color:#e8e5dd;
+  /* Every label sits the same distance from its own node, above or below it.
+     left/top are the node's exact position in the 1240x540 viewBox. */
+  .fw-lab{position:absolute;cursor:default;white-space:nowrap}
+  .fw-lab.up{transform:translate(-50%,calc(-100% - 15px))}
+  .fw-lab.dn{transform:translate(-50%,15px)}
+  /* Fixed, not absolute: the diagram sits in an overflow:auto/hidden box, so an
+     absolute tip would both widen its scroll width and get clipped. JS positions it. */
+  .fw-tip{position:fixed;left:0;top:0;width:max-content;max-width:200px;
+    padding:8px 11px;border-radius:7px;background:#16191f;color:#e8e5dd;
     font:400 11px/1.45 Archivo,sans-serif;text-align:center;opacity:0;pointer-events:none;
-    transition:opacity .25s ease,transform .25s ease;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.18)}
-  .fw-lab:hover .fw-tip,.fw-lab:focus-visible .fw-tip{opacity:1;transform:translate(-50%,0)}
-  /* labels sitting below their node: open downward instead */
-  .fw-lab.dn .fw-tip{bottom:auto;top:100%;margin-bottom:0;margin-top:9px}
-  /* edge labels: anchor inward so the tip never widens the scroll box */
-  .fw-lab.el .fw-tip{left:0;right:auto;transform:translate(0,4px)}
-  .fw-lab.el:hover .fw-tip,.fw-lab.el:focus-visible .fw-tip{transform:translate(0,0)}
-  .fw-lab.er .fw-tip{left:auto;right:0;transform:translate(0,4px)}
-  .fw-lab.er:hover .fw-tip,.fw-lab.er:focus-visible .fw-tip{transform:translate(0,0)}
+    transform:translateY(4px);transition:opacity .22s ease,transform .22s ease;
+    z-index:70;box-shadow:0 8px 24px rgba(0,0,0,.22)}
+  .fw-tip.show{opacity:1;transform:translateY(0)}
   .fw-key{position:relative;display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border-radius:5px;
     transition:background .25s ease}
   .fw-lab:hover .fw-key{background:rgba(124,77,255,.09)}
@@ -497,26 +507,31 @@
           </g>
         </svg>
 
-        <div class="fw-lab el" data-fw="1" tabindex="0" style="position:absolute;left:7.66%;top:50%;transform:translate(-50%,-50%);width:126px;text-align:center;padding-bottom:52px">
+        <div class="fw-lab up" data-fw="1" tabindex="0" style="left:7.661%;top:48.148%">
           <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>PREMISE<span class="fw-tip">Setting, genre and thematic constraint, in one line</span></span>
         </div>
-        <div class="fw-lab" data-fw="2" tabindex="0" style="position:absolute;left:20.56%;top:50%;transform:translate(-50%,-50%);width:132px;text-align:center;padding-bottom:60px">
+        <div class="fw-lab up" data-fw="2" tabindex="0" style="left:20.565%;top:48.148%">
           <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>CANDIDATES<span class="fw-tip">Base MoE plus GPT-4.1, Claude Sonnet 4 and Gemini 2.0 Flash, on one premise</span></span>
         </div>
-        <div class="fw-lab" data-fw="3" tabindex="0" style="position:absolute;left:47.18%;top:50%;transform:translate(-50%,-50%);width:150px;text-align:center;padding-bottom:66px">
+        <div class="fw-lab up" data-fw="3" tabindex="0" style="left:47.177%;top:48.148%">
           <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>REWARD MODEL<span class="fw-tip">Qwen-3-32B, cross-entropy plus Huber loss, scoring five dimensions</span></span>
         </div>
-        <div class="fw-lab dn" data-fw="4" tabindex="0" style="position:absolute;left:60.08%;top:50%;transform:translate(-50%,-50%);width:132px;text-align:center;padding-top:74px">
+        <div class="fw-lab dn" data-fw="4" tabindex="0" style="left:60.081%;top:48.148%">
           <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.2em;color:#5a2ce0"><i class="fw-dot" style="background:#7c4dff"></i>DPO<span class="fw-tip">The twist. 160 high-confidence pairs redirect the policy</span></span>
         </div>
-        <div class="fw-lab" data-fw="5" tabindex="0" style="position:absolute;left:72.58%;top:30.56%;transform:translate(-50%,-50%);width:146px;text-align:center;padding-bottom:62px">
+        <div class="fw-lab up" data-fw="5" tabindex="0" style="left:72.581%;top:30.556%">
           <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>GENERATOR<span class="fw-tip">Qwen-3-30B-A3B, 3B active per token. The only model that writes</span></span>
         </div>
-        <div class="fw-lab dn" data-fw="6" tabindex="0" style="position:absolute;left:83.87%;top:55.56%;transform:translate(-50%,-50%);width:146px;text-align:center;padding-top:70px">
+        <div class="fw-lab dn" data-fw="6" tabindex="0" style="left:83.871%;top:55.556%">
           <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>JURY<span class="fw-tip">Five jurors, two deliberation rounds, one held-out judge</span></span>
         </div>
-        <div class="fw-lab er" data-fw="7" tabindex="0" style="position:absolute;left:92.34%;top:32.41%;transform:translate(-50%,-50%);width:120px;text-align:center;padding-bottom:56px">
+        <div class="fw-lab up" data-fw="7" tabindex="0" style="left:92.339%;top:32.407%">
           <span class="fw-key" style="font:500 10.5px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em"><i class="fw-dot"></i>PLOT<span class="fw-tip">Jury mean 8.36, the highest of the twelve systems</span></span>
+        </div>
+
+        <div class="fw-out" aria-hidden="true">
+          <div class="fw-out-k">NOW WRITING</div>
+          <div class="fw-type"><span id="fwType"></span><i class="fw-caret"></i></div>
         </div>
       </div>
       </div>
@@ -1427,14 +1442,76 @@
 
   /* ── Pipeline flow: only animate while the diagram is on screen ── */
   var fwBoxEl = document.querySelector('[data-fwbox]');
-  if (fwBoxEl && 'IntersectionObserver' in window) {
+  var typeEl = document.getElementById('fwType');
+  var TYPE_LINES = [
+    'Two startups collide over innovation.',
+    'A detective’s beloved becomes the prime suspect.',
+    'Mars colonists learn the mission was a lie.'
+  ];
+  var tLine = 0, tChar = 0, tTimer = null;
+
+  function typeStop() { clearTimeout(tTimer); tTimer = null; }
+  function typeStep() {
+    if (!typeEl) return;
+    var line = TYPE_LINES[tLine];
+    if (tChar <= line.length) {
+      typeEl.textContent = line.slice(0, tChar++);
+      tTimer = setTimeout(typeStep, 34 + Math.random() * 46);
+    } else {
+      tTimer = setTimeout(function () {
+        tChar = 0;
+        tLine = (tLine + 1) % TYPE_LINES.length;
+        typeEl.textContent = '';
+        tTimer = setTimeout(typeStep, 320);
+      }, 2100);
+    }
+  }
+  function typeStart() { if (!tTimer && typeEl) typeStep(); }
+
+  /* Diagram tooltips are re-parented to <body>. The label carries a transform,
+     which would otherwise make a position:fixed child resolve against the label
+     instead of the viewport, and the diagram's scroll box would count its width. */
+  document.querySelectorAll('.fw-lab').forEach(function (lab) {
+    var tip = lab.querySelector('.fw-tip');
+    var chip = lab.querySelector('.fw-key');
+    if (!tip || !chip) return;
+    tip.setAttribute('data-tip-for', lab.getAttribute('data-fw'));
+    document.body.appendChild(tip);
+
+    function place() {
+      var c = chip.getBoundingClientRect();
+      var w = tip.offsetWidth, h = tip.offsetHeight, pad = 12;
+      var x = c.left + c.width / 2 - w / 2;
+      x = Math.max(pad, Math.min(x, window.innerWidth - w - pad));
+      var y = lab.classList.contains('dn') ? c.bottom + 10 : c.top - h - 10;
+      if (y < pad) y = c.bottom + 10;
+      tip.style.left = Math.round(x) + 'px';
+      tip.style.top = Math.round(y) + 'px';
+    }
+    function show() { place(); tip.classList.add('show'); }
+    function hide() { tip.classList.remove('show'); }
+
+    lab.addEventListener('mouseenter', show);
+    lab.addEventListener('mouseleave', hide);
+    lab.addEventListener('focus', show);
+    lab.addEventListener('blur', hide);
+  });
+
+  if (fwBoxEl) {
     if (reduce) {
       fwBoxEl.classList.remove('live');
-    } else {
+      if (typeEl) typeEl.textContent = TYPE_LINES[0];
+    } else if ('IntersectionObserver' in window) {
       var fio = new IntersectionObserver(function (es) {
-        es.forEach(function (e) { fwBoxEl.classList.toggle('live', e.isIntersecting); });
-      }, { threshold: 0.12 });
+        es.forEach(function (e) {
+          fwBoxEl.classList.toggle('live', e.isIntersecting);
+          if (e.isIntersecting) typeStart(); else typeStop();
+        });
+      }, { threshold: 0, rootMargin: '120px 0px 120px 0px' });
       fio.observe(fwBoxEl);
+    } else {
+      fwBoxEl.classList.add('live');
+      typeStart();
     }
   }
 
