@@ -30,7 +30,13 @@
 
   .node-hit{cursor:pointer}
   .node-hit:hover circle[data-dot]{r:7}
-  .node-hit circle[data-dot]{transition:r .2s ease}
+  .node-hit circle[data-dot]{transition:r .2s ease,stroke-width .2s ease}
+  /* Chrome paints a 5px near-black outline on a focused SVG <g>, even for a
+     mouse click. Drop it and give keyboard focus its own mark instead. */
+  .node-hit:focus{outline:none}
+  .node-hit:focus-visible circle[data-dot]{stroke:#7c4dff;stroke-width:3;r:7}
+  .fw-lab:focus{outline:none}
+  .fw-lab:focus-visible .fw-key{background:rgba(124,77,255,.14);box-shadow:0 0 0 1.5px #7c4dff}
 
   .acc-row{border-top:1px solid #e2ded4}
   .acc-head{cursor:pointer;display:flex;align-items:baseline;gap:16px;padding:20px 0;background:none;border:0;width:100%;text-align:left;font:inherit;color:inherit}
@@ -883,20 +889,20 @@
         </div>
         <div style="display:grid;gap:1px;background:rgba(245,243,238,.16);margin-top:34px">
           <div style="background:#16191f;display:flex;justify-content:space-between;gap:16px;padding:13px 0">
-            <span style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">ACTIVE PARAMETERS</span>
-            <span id="mParams" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">3B active of 30B</span>
+            <span data-rl="0" style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">ACTIVE PARAMETERS</span>
+            <span data-rv="0" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">3B active of 30B</span>
           </div>
           <div style="background:#16191f;display:flex;justify-content:space-between;gap:16px;padding:13px 0">
-            <span style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">PLOTTWIST WIN RATE</span>
-            <span id="mWr" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">n/a</span>
+            <span data-rl="1" style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">RESOLVED IN ITS FAVOUR</span>
+            <span data-rv="1" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">10 of 11 baselines</span>
           </div>
           <div style="background:#16191f;display:flex;justify-content:space-between;gap:16px;padding:13px 0">
-            <span style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">BOOTSTRAP 95% CI</span>
-            <span id="mCi" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">n/a</span>
+            <span data-rl="2" style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">GAIN FROM DPO</span>
+            <span data-rv="2" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">+0.78 &middot; 8.03 to 8.81</span>
           </div>
           <div style="background:#16191f;display:flex;justify-content:space-between;gap:16px;padding:13px 0">
-            <span style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">HOLM-CORRECTED p</span>
-            <span id="mPval" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">n/a</span>
+            <span data-rl="3" style="font:500 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.16em;color:#8b8880">SPREAD OVER 160 PREMISES</span>
+            <span data-rv="3" style="font:400 12px/1.4 'JetBrains Mono',monospace;text-align:right">&plusmn; 0.35</span>
           </div>
         </div>
         <p id="mVerdict" style="margin:24px 0 0;max-width:42ch;font:400 15px/1.65 Archivo,sans-serif;color:#c9c5bc;text-wrap:pretty">Highest overall mean of the twelve systems, and first in coherence, tone and pacing, on roughly a tenth of the dense 32B baseline&rsquo;s active parameters.</p>
@@ -1361,19 +1367,34 @@
   /* ── Experiments variant panel ──────────────────────────── */
   var DATA = {
     baseline: { name:'Qwen-2.5-14B', kind:'BASELINE &middot; DENSE 14B, INSTRUCTION-TUNED', s:[7.41,7.53,7.52,7.69,7.95],
-      overall:'7.62', params:'14B (dense)', wr:'0.950', ci:'[0.913, 0.981]', pval:'6.4 × 10⁻³⁵',
+      overall:'7.62',
+      rows:[['ACTIVE PARAMETERS','14B (dense)'],
+            ['PLOTTWIST WIN RATE','0.950'],
+            ['BOOTSTRAP 95% CI','[0.913, 0.981]'],
+            ['HOLM-CORRECTED p','6.4 × 10⁻³⁵']],
       verdict:'PlotTwist wins 95% of premises here, and at least 95% against every open-weight baseline in the study.' },
     large: { name:'Claude Sonnet 4', kind:'FRONTIER &middot; UNDISCLOSED SCALE', s:[8.30,8.23,8.09,8.49,8.63],
-      overall:'8.35', params:'undisclosed', wr:'0.563', ci:'[0.488, 0.638]', pval:'0.13',
+      overall:'8.35',
+      rows:[['ACTIVE PARAMETERS','undisclosed'],
+            ['PLOTTWIST WIN RATE','0.563'],
+            ['BOOTSTRAP 95% CI','[0.488, 0.638]'],
+            ['HOLM-CORRECTED p','0.13']],
       verdict:'The one inconclusive comparison. Neither the sign test nor the equivalence test resolves it, so the claim is competitiveness, not superiority.' },
+    /* PlotTwist has no win rate against itself, so this column reports what the
+       paper does measure about it: Table 2 resolves 10 of 11 baselines in its
+       favour, the DPO ablation moves 8.03 to 8.81, and Table 1 gives the spread. */
     plottwist: { name:'PlotTwist', kind:'PLOTTWIST &middot; MoE, 3B ACTIVE PER TOKEN', s:[8.11,8.42,8.14,8.51,8.61],
-      overall:'8.36', params:'3B active of 30B', wr:'n/a', ci:'n/a', pval:'n/a',
+      overall:'8.36',
+      rows:[['ACTIVE PARAMETERS','3B active of 30B'],
+            ['RESOLVED IN ITS FAVOUR','10 of 11 baselines'],
+            ['GAIN FROM DPO','+0.78 &middot; 8.03 to 8.81'],
+            ['SPREAD OVER 160 PREMISES','&plusmn; 0.35']],
       verdict:'Highest overall mean of the twelve systems, and first in coherence, tone and pacing, on roughly a tenth of the dense 32B baseline’s active parameters.' }
   };
   var vEls = document.querySelectorAll('[data-v]'), wEls = document.querySelectorAll('[data-w]');
   var mK = document.getElementById('mKind'), mN = document.getElementById('mName'), mO = document.getElementById('mOverall');
-  var mP = document.getElementById('mParams'), mW = document.getElementById('mWr'), mC = document.getElementById('mCi');
-  var mV = document.getElementById('mPval'), mVer = document.getElementById('mVerdict');
+  var rowLabels = document.querySelectorAll('[data-rl]'), rowVals = document.querySelectorAll('[data-rv]');
+  var mVer = document.getElementById('mVerdict');
   var variant = 'plottwist', barsShown = false;
 
   function paint(v) {
@@ -1389,8 +1410,11 @@
       });
     }
     mK.innerHTML = d.kind; mN.textContent = d.name; mO.textContent = d.overall;
-    mP.textContent = d.params; mW.textContent = d.wr; mC.textContent = d.ci;
-    mV.textContent = d.pval; mVer.textContent = d.verdict;
+    d.rows.forEach(function (r, i) {
+      if (rowLabels[i]) rowLabels[i].innerHTML = r[0];
+      if (rowVals[i]) rowVals[i].innerHTML = r[1];
+    });
+    mVer.textContent = d.verdict;
   }
   document.querySelectorAll('.tab').forEach(function (t) {
     t.addEventListener('click', function () { paint(t.dataset.tab); });
