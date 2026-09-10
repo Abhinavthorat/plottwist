@@ -81,6 +81,17 @@
   .mi-solid{fill:currentColor;stroke:none}
   .kick{display:inline-flex;align-items:center;gap:8px}
 
+  /* ── Marginalia: a director's name surfaces in the gutter now and then ── */
+  #cinema{position:fixed;z-index:4;pointer-events:none;user-select:none;
+    writing-mode:vertical-rl;white-space:nowrap;
+    font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.3em;text-transform:uppercase;
+    color:#16191f;opacity:0;transition:opacity 1.8s ease}
+  #cinema.on{opacity:.085}
+  #cinema.rev{color:#f5f3ee}
+  #cinema.rev.on{opacity:.13}
+  /* no gutter to hide in below this width, so it stays away entirely */
+  @media (max-width:1023px){#cinema{display:none}}
+
   /* ── Model chips: family glyph, name, details on hover ── */
   .mcard{display:flex;align-items:center;gap:9px;padding:9px 11px;
     border:1px solid #ddd8ce;background:#fffdf9;cursor:help;
@@ -277,6 +288,8 @@
     <path d="M12 2.2 14 9l6.8 2-6.8 2-2 6.8-2-6.8L3.2 11 10 9z"/>
   </symbol>
 </defs></svg>
+
+<div id="cinema" aria-hidden="true"></div>
 
 <div style="position:relative;padding-top:58px">
 
@@ -1709,6 +1722,64 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll);
   illuminate(); spy(); onScroll();
+
+  /* ── Marginalia: directors surfacing in the gutter ──────── */
+  (function () {
+    var el = document.getElementById('cinema');
+    if (!el || reduce) return;
+
+    var NAMES = [
+      'Kurosawa', 'Hitchcock', 'Kubrick', 'Tarkovsky', 'Varda', 'Fellini',
+      'Bergman', 'Ozu', 'Satyajit Ray', 'Guru Dutt', 'Ritwik Ghatak',
+      'Coppola', 'Scorsese', 'Kiarostami', 'Wong Kar-wai', 'Miyazaki',
+      'Welles', 'Chaplin', 'Godard', 'Truffaut', 'Akerman', 'Campion',
+      'Lynch', 'Malick', 'Almodóvar', 'Claire Denis'
+    ];
+    var bag = [], timer = null;
+
+    function next() {
+      if (!bag.length) {                       // reshuffle so names do not repeat
+        bag = NAMES.slice();
+        for (var i = bag.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = bag[i]; bag[i] = bag[j]; bag[j] = t;
+        }
+      }
+      return bag.pop();
+    }
+
+    function overDarkBand(topPx) {
+      var dark = document.getElementById('experiments');
+      if (!dark) return false;
+      var r = dark.getBoundingClientRect();
+      return topPx > r.top && topPx < r.bottom;
+    }
+
+    function cue() {
+      if (document.hidden) { timer = setTimeout(cue, 4000); return; }
+      el.textContent = next();
+      el.classList.remove('on');
+
+      // sit in the gutter beside the 1180px column, never over the text
+      var gutter = Math.max(0, (window.innerWidth - 1180) / 2);
+      var inset = gutter > 34 ? Math.round(gutter / 2 - 6) : 11;
+      var top = Math.round(window.innerHeight * (0.16 + Math.random() * 0.56));
+
+      el.style.top = top + 'px';
+      if (Math.random() < 0.5) { el.style.left = inset + 'px'; el.style.right = 'auto'; }
+      else { el.style.right = inset + 'px'; el.style.left = 'auto'; }
+      el.classList.toggle('rev', overDarkBand(top + 40));
+
+      requestAnimationFrame(function () { el.classList.add('on'); });
+      setTimeout(function () { el.classList.remove('on'); }, 4200);
+      timer = setTimeout(cue, 9000 + Math.random() * 9000);
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { el.classList.remove('on'); }
+    });
+    timer = setTimeout(cue, 5200);
+  })();
 
   /* ── Copy BibTeX ────────────────────────────────────────── */
   var copyBtn = document.getElementById('copyBtn');
