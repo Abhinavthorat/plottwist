@@ -81,6 +81,20 @@
   .mi-solid{fill:currentColor;stroke:none}
   .kick{display:inline-flex;align-items:center;gap:8px}
 
+  /* ── Model chips: family glyph, name, details on hover ── */
+  .mcard{display:flex;align-items:center;gap:9px;padding:9px 11px;
+    border:1px solid #ddd8ce;background:#fffdf9;cursor:help;
+    transition:border-color .22s ease,background .22s ease}
+  .mcard:hover,.mcard:focus-visible{border-color:#7c4dff;background:#fcfaff;outline:none}
+  .mcard.dash{border-style:dashed;border-color:#c9c3b6}
+  .mcard.dash:hover,.mcard.dash:focus-visible{border-style:solid;border-color:#7c4dff}
+  .mcard.solid{border-color:#16191f;background:#f5f3ee;padding:9px 13px}
+  .mcard.solid:hover,.mcard.solid:focus-visible{border-color:#7c4dff}
+  .mg{width:21px;height:21px;flex:none;fill:none;stroke:#16191f;stroke-width:1.3;
+    stroke-linecap:round;stroke-linejoin:round;transition:stroke .22s ease}
+  .mcard:hover .mg,.mcard:focus-visible .mg{stroke:#5a2ce0}
+  .mname{font:500 11.5px/1.2 'JetBrains Mono',monospace;white-space:nowrap}
+
   /* ── "What is new here" hover ── */
   .nov{position:relative;display:inline-flex;align-items:center;gap:5px;margin-left:10px;
     padding:2px 9px 2px 7px;border:1px solid rgba(124,77,255,.4);border-radius:999px;
@@ -156,6 +170,10 @@
     transform:translateY(4px);transition:opacity .22s ease,transform .22s ease;
     z-index:70;box-shadow:0 8px 24px rgba(0,0,0,.22)}
   .fw-tip.show{opacity:1;transform:translateY(0)}
+  /* detail card: a spec line above the description */
+  .fw-tip.tip-d{text-align:left;max-width:234px}
+  .fw-tip b{display:block;margin-bottom:6px;color:#a887ff;
+    font:500 8.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em}
   .fw-key{position:relative;display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border-radius:5px;
     transition:background .25s ease}
   .fw-lab:hover .fw-key{background:rgba(124,77,255,.09)}
@@ -219,6 +237,42 @@
     <path d="m15.1 13 5 3.1a.6.6 0 0 0 .9-.5V9a.6.6 0 0 0-.9-.5l-5 3.1z"/>
     <circle cx="6.4" cy="5.2" r="2.4"/><circle cx="11.9" cy="5.2" r="2.4"/>
   </symbol>
+  <!-- Model family marks: line-art in the same stroke language as the diagrams,
+       deliberately not vendor logos, so the page keeps one visual voice. -->
+  <symbol id="g-qwen" viewBox="0 0 24 24">
+    <path d="M12 3.4 20.2 8v8L12 20.6 3.8 16V8z"/>
+    <path d="M12 8.4l4.1 2.3v4.6L12 17.6l-4.1-2.3v-4.6z"/>
+  </symbol>
+  <symbol id="g-llama" viewBox="0 0 24 24">
+    <path d="M3.8 12c0-2.9 1.5-4.8 3.5-4.8 3 0 4.3 4.8 8.4 4.8 2 0 3.5-1.9 3.5-4.8"/>
+    <path d="M3.8 12c0 2.9 1.5 4.8 3.5 4.8 3 0 4.3-4.8 8.4-4.8 2 0 3.5 1.9 3.5 4.8"/>
+  </symbol>
+  <symbol id="g-deepseek" viewBox="0 0 24 24">
+    <path d="M3.4 15.2c3.6 0 5.4-1.7 7-4.3s3.4-4.6 6.6-4.6c1.9 0 3.3 1.1 3.3 2.8"/>
+    <circle cx="17.9" cy="8.9" r="1" fill="currentColor" stroke="none"/>
+    <path d="M3.4 19c4.3 0 7.4-1.1 10-3.3"/>
+  </symbol>
+  <symbol id="g-gemma" viewBox="0 0 24 24">
+    <path d="M12 3.2c0 4.4 4.4 8.8 8.8 8.8-4.4 0-8.8 4.4-8.8 8.8 0-4.4-4.4-8.8-8.8-8.8 4.4 0 8.8-4.4 8.8-8.8z"/>
+  </symbol>
+  <symbol id="g-openai" viewBox="0 0 24 24">
+    <ellipse cx="12" cy="12" rx="3.5" ry="8.4"/>
+    <ellipse cx="12" cy="12" rx="3.5" ry="8.4" transform="rotate(60 12 12)"/>
+    <ellipse cx="12" cy="12" rx="3.5" ry="8.4" transform="rotate(120 12 12)"/>
+  </symbol>
+  <symbol id="g-mistral" viewBox="0 0 24 24">
+    <path d="M4 5.8h16M4 10.1h16M4 14.4h16M4 18.7h16"/>
+    <path d="M8.7 5.8v12.9M15.3 5.8v12.9"/>
+  </symbol>
+  <symbol id="g-nvidia" viewBox="0 0 24 24">
+    <path d="M12 6.6c-4.4 0-7.9 2.4-7.9 5.4s3.5 5.4 7.9 5.4 7.9-2.4 7.9-5.4-3.5-5.4-7.9-5.4z"/>
+    <path d="M12 9.3c-1.7 0-3.1 1.2-3.1 2.7s1.4 2.7 3.1 2.7"/>
+  </symbol>
+  <symbol id="g-glm" viewBox="0 0 24 24">
+    <path d="M12 3.6 20.4 18.2H3.6z"/>
+    <path d="M12 10.4 15.9 18.2H8.1z"/>
+  </symbol>
+
   <symbol id="ic-spark" viewBox="0 0 24 24">
     <path d="M12 2.2 14 9l6.8 2-6.8 2-2 6.8-2-6.8L3.2 11 10 9z"/>
   </symbol>
@@ -654,26 +708,11 @@
       <div style="min-width:940px">
         <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d;margin-bottom:14px">RATERS &middot; SYNTHETIC ASPECT LABELS, POSITIVE-NEGATIVE PROMPTING</div>
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
-          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid #ddd8ce;background:#fffdf9">
-            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">Q7</span>
-            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Qwen-2.5-7B</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid #ddd8ce;background:#fffdf9">
-            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">L7</span>
-            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Llama-3.3-70B</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid #ddd8ce;background:#fffdf9">
-            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">L8</span>
-            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Llama-3.1-8B</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid #ddd8ce;background:#fffdf9">
-            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">DS</span>
-            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">DeepSeek-14B</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid #ddd8ce;background:#fffdf9">
-            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">G2</span>
-            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Gemma-27B</span>
-          </div>
+          <div class="mcard" tabindex="0"><svg class="mg"><use href="#g-qwen"/></svg><span class="mname">Qwen-2.5-7B</span><span class="fw-tip tip-d"><b>QWEN 2.5 &middot; 7B DENSE</b>Alibaba Qwen. One of five raters that score every plot twice per aspect, once for what works and once for what fails.</span></div>
+          <div class="mcard" tabindex="0"><svg class="mg"><use href="#g-llama"/></svg><span class="mname">Llama-3.3-70B</span><span class="fw-tip tip-d"><b>LLAMA 3.3 &middot; 70B DENSE</b>Meta. Rater in the ensemble, and separately the largest open-weight baseline in the study at 7.18, and the held-out judge.</span></div>
+          <div class="mcard" tabindex="0"><svg class="mg"><use href="#g-llama"/></svg><span class="mname">Llama-3.1-8B</span><span class="fw-tip tip-d"><b>LLAMA 3.1 &middot; 8B DENSE</b>Meta. Rater in the five-model ensemble that builds the synthetic aspect labels.</span></div>
+          <div class="mcard" tabindex="0"><svg class="mg"><use href="#g-deepseek"/></svg><span class="mname">DeepSeek-14B</span><span class="fw-tip tip-d"><b>DEEPSEEK &middot; 14B</b>DeepSeek. Rater in the ensemble. Its R1 distilled sibling appears separately as a 14B baseline scoring 7.60.</span></div>
+          <div class="mcard" tabindex="0"><svg class="mg"><use href="#g-gemma"/></svg><span class="mname">Gemma-27B</span><span class="fw-tip tip-d"><b>GEMMA &middot; 27B</b>Google. Rater, and the model that derives all 5,000 premises from the source plots.</span></div>
         </div>
 
         <svg viewBox="0 0 1000 52" preserveAspectRatio="none" style="display:block;width:100%;height:52px">
@@ -693,11 +732,11 @@
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:#e2ded4;margin-top:18px">
             <div style="background:#fffdf9;padding:16px 18px">
-              <div style="font:500 11.5px/1 'JetBrains Mono',monospace">Qwen-3-32B</div>
+              <div style="display:flex;align-items:center;gap:8px;font:500 11.5px/1 'JetBrains Mono',monospace"><svg class="mg" style="width:18px;height:18px"><use href="#g-qwen"/></svg>Qwen-3-32B</div>
               <div style="margin-top:7px;font:400 12.5px/1.5 Archivo,sans-serif;color:#6b7380">Aspect rating reward model. 4-bit quantised, fine-tuned with cross-entropy plus Huber loss on 5,000 rated plots.</div>
             </div>
             <div style="background:#fffdf9;padding:16px 18px;border-left:2px solid #7c4dff">
-              <div style="font:500 11.5px/1 'JetBrains Mono',monospace;color:#5a2ce0">Qwen-3-30B-A3B</div>
+              <div style="display:flex;align-items:center;gap:8px;font:500 11.5px/1 'JetBrains Mono',monospace;color:#5a2ce0"><svg class="mg" style="width:18px;height:18px;stroke:#5a2ce0"><use href="#g-qwen"/></svg>Qwen-3-30B-A3B</div>
               <div style="margin-top:7px;font:400 12.5px/1.5 Archivo,sans-serif;color:#6b7380">The plot generator. Mixture-of-experts, 3B active parameters per token, aligned by DPO. This is the only model that writes.</div>
             </div>
           </div>
@@ -715,34 +754,16 @@
 
         <div style="font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.2em;color:#8c877d;margin-bottom:14px">JURORS &middot; FIVE FAMILIES, ALL DISJOINT FROM THE GENERATOR</div>
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
-          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px dashed #c9c3b6;background:#fffdf9">
-            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">OS</span>
-            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">GPT-OSS-120B</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px dashed #c9c3b6;background:#fffdf9">
-            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">G4</span>
-            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Gemma-4-31B</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px dashed #c9c3b6;background:#fffdf9">
-            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">MM</span>
-            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Mistral-Med-3.5</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px dashed #c9c3b6;background:#fffdf9">
-            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">NV</span>
-            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Nemotron-3-120B</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px dashed #c9c3b6;background:#fffdf9">
-            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">GL</span>
-            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">GLM-4.6V</span>
-          </div>
+          <div class="mcard dash" tabindex="0"><svg class="mg"><use href="#g-openai"/></svg><span class="mname">GPT-OSS-120B</span><span class="fw-tip tip-d"><b>GPT-OSS &middot; 120B</b>OpenAI, open-weight. Juror, served locally at MXFP4 precision, temperature 0.1.</span></div>
+          <div class="mcard dash" tabindex="0"><svg class="mg"><use href="#g-gemma"/></svg><span class="mname">Gemma-4-31B</span><span class="fw-tip tip-d"><b>GEMMA 4 &middot; 31B</b>Google. Juror at BF16, and the panel&rsquo;s most conservative scorer: the one juror that favours Claude Sonnet 4 over PlotTwist, at 0.34.</span></div>
+          <div class="mcard dash" tabindex="0"><svg class="mg"><use href="#g-mistral"/></svg><span class="mname">Mistral-Med-3.5</span><span class="fw-tip tip-d"><b>MISTRAL MEDIUM 3.5 &middot; 128B</b>Mistral. Juror, served locally at Q6_K precision.</span></div>
+          <div class="mcard dash" tabindex="0"><svg class="mg"><use href="#g-nvidia"/></svg><span class="mname">Nemotron-3-120B</span><span class="fw-tip tip-d"><b>NEMOTRON 3 SUPER &middot; 120B-A12B</b>NVIDIA. Juror, served locally at FP8 precision.</span></div>
+          <div class="mcard dash" tabindex="0"><svg class="mg"><use href="#g-glm"/></svg><span class="mname">GLM-4.6V</span><span class="fw-tip tip-d"><b>GLM 4.6V</b>Zhipu. Juror, served locally at FP8 precision.</span></div>
         </div>
 
         <div style="display:flex;flex-direction:column;align-items:center">
           <div style="width:1px;height:34px;background:#c9c3b6"></div>
-          <div style="display:flex;align-items:center;gap:9px;padding:9px 13px;border:1px solid #16191f;background:#f5f3ee">
-            <span style="width:22px;height:22px;flex:none;border:1px solid #16191f;background:#16191f;color:#f5f3ee;display:grid;place-items:center;font:500 8.5px/1 'JetBrains Mono',monospace">JU</span>
-            <span style="font:500 11.5px/1.2 'JetBrains Mono',monospace">Llama-3.3-70B &middot; held-out judge</span>
-          </div>
+          <div class="mcard solid" tabindex="0"><svg class="mg"><use href="#g-llama"/></svg><span class="mname">Llama-3.3-70B &middot; held-out judge</span><span class="fw-tip tip-d"><b>LLAMA 3.3 &middot; 70B</b>Meta. The held-out judge, from a sixth family disjoint from both the panel and the generator. It consolidates contested cells after two rounds of deliberation.</span></div>
         </div>
       </div>
       </div>
@@ -1485,6 +1506,34 @@
   /* Diagram tooltips are re-parented to <body>. The label carries a transform,
      which would otherwise make a position:fixed child resolve against the label
      instead of the viewport, and the diagram's scroll box would count its width. */
+  function wireTip(host, anchor, below) {
+    var tip = host.querySelector('.fw-tip');
+    if (!tip || !anchor) return;
+    document.body.appendChild(tip);
+
+    function place() {
+      var c = anchor.getBoundingClientRect();
+      var w = tip.offsetWidth, h = tip.offsetHeight, pad = 12;
+      var x = c.left + c.width / 2 - w / 2;
+      x = Math.max(pad, Math.min(x, window.innerWidth - w - pad));
+      var y = below ? c.bottom + 10 : c.top - h - 10;
+      if (y < pad) y = c.bottom + 10;
+      if (y + h > window.innerHeight - pad) y = Math.max(pad, c.top - h - 10);
+      tip.style.left = Math.round(x) + 'px';
+      tip.style.top = Math.round(y) + 'px';
+    }
+    function show() { place(); tip.classList.add('show'); }
+    function hide() { tip.classList.remove('show'); }
+    host.addEventListener('mouseenter', show);
+    host.addEventListener('mouseleave', hide);
+    host.addEventListener('focus', show);
+    host.addEventListener('blur', hide);
+  }
+
+  document.querySelectorAll('.mcard').forEach(function (card) {
+    wireTip(card, card, true);
+  });
+
   document.querySelectorAll('.fw-lab').forEach(function (lab) {
     var tip = lab.querySelector('.fw-tip');
     var chip = lab.querySelector('.fw-key');
