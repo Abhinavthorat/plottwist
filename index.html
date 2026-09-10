@@ -185,6 +185,7 @@
   .fw-tip.show{opacity:1;transform:translateY(0)}
   /* detail card: a spec line above the description */
   .fw-tip.tip-d{text-align:left;max-width:234px}
+  .fw-tip.tip-w{max-width:262px}
   .fw-tip b{display:block;margin-bottom:6px;color:#a887ff;
     font:500 8.5px/1.5 'JetBrains Mono',monospace;letter-spacing:.16em}
   .fw-key{position:relative;display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border-radius:5px;
@@ -1731,38 +1732,38 @@
     if (!el || reduce) return;
 
     var NAMES = [
-      ['Nolan',         'Plots that play with time'],
-      ['Kurosawa',      'One event, four irreconcilable accounts'],
-      ['Hitchcock',     'Tell the audience about the bomb, then wait'],
-      ['Kubrick',       'Structure as cold, deliberate architecture'],
-      ['Tarkovsky',     'Time allowed to pass at its own pace'],
-      ['Varda',         'The essay and the story braided together'],
-      ['Fellini',       'Memory and spectacle in place of plot'],
-      ['Bergman',       'Interiors, faces, and the long confession'],
-      ['Ozu',           'Plot receding until only the family remains'],
-      ['Satyajit Ray',  'The small domestic turn that changes everything'],
-      ['Guru Dutt',     'Melodrama lit like a confession'],
-      ['Ritwik Ghatak', 'Partition as the wound under every plot'],
-      ['Coppola',       'The family saga told as tragedy'],
-      ['Scorsese',      'Voiceover as unreliable confession'],
-      ['Kiarostami',    'The line between document and fiction'],
-      ['Wong Kar-wai',  'Mood carrying what the plot refuses to'],
-      ['Miyazaki',      'Journeys that need no villain'],
-      ['Welles',        'A life assembled by the people who lost it'],
-      ['Chaplin',       'Pathos smuggled inside slapstick'],
-      ['Godard',        'The cut used as an argument'],
-      ['Truffaut',      'The character outrunning the plot'],
-      ['Akerman',       'Duration as the whole of the event'],
-      ['Campion',       'Desire rendered as landscape'],
-      ['Lynch',         'Dream logic in place of causality'],
-      ['Malick',        'Narration drifting free of the scene'],
-      ['Almodóvar',     'Coincidence pushed to its limit'],
-      ['Claire Denis',  'Ellipsis doing the storytelling']
+      ['Nolan',         'Plots that play with time. Ask for it in the premise; narrative coherence is what scores whether it holds.'],
+      ['Kurosawa',      'One event, four irreconcilable accounts. Coherence is scored on causal connectivity, not on the accounts agreeing.'],
+      ['Hitchcock',     'Tell the audience about the bomb, then wait. Emotional turning points scores precisely that release.'],
+      ['Kubrick',       'Structure as cold, deliberate architecture. Pacing is scored apart from tone, so precision is not read as flatness.'],
+      ['Tarkovsky',     'Time allowed to pass at its own pace. Pacing rewards how progression is distributed, not how fast it moves.'],
+      ['Varda',         'The essay and the story braided together. A register may shift where the shift serves the narrative.'],
+      ['Fellini',       'Memory and spectacle in place of plot. Tone consistency can carry what event ordering does not.'],
+      ['Bergman',       'Interiors, faces, the long confession. Character development scores the arc, not the count of incidents.'],
+      ['Ozu',           'Plot receding until only the family remains. Character development can carry a plot that stays almost still.'],
+      ['Satyajit Ray',  'The small domestic turn that changes everything. Turning points are scored by consequence, not by scale.'],
+      ['Guru Dutt',     'Melodrama lit like a confession. Tone consistency rewards a register held all the way to the end.'],
+      ['Ritwik Ghatak', 'Partition as the wound under every plot. History can sit beneath the arc and still score as coherence.'],
+      ['Coppola',       'The family saga told as tragedy. Character development is scored across the whole arc, not a scene.'],
+      ['Scorsese',      'Voiceover as unreliable confession. A narrator can be wrong without the plot losing coherence.'],
+      ['Kiarostami',    'The line between document and fiction. The rubric scores the plot as written, not its claim on truth.'],
+      ['Wong Kar-wai',  'Mood carrying what the plot refuses to. Tone consistency is scored on an axis of its own.'],
+      ['Miyazaki',      'Journeys that need no villain. Conflict focus asks for a sustained centre, not an antagonist.'],
+      ['Welles',        'A life assembled by the people who lost it. Fractured order still scores under causal connectivity.'],
+      ['Chaplin',       'Pathos smuggled inside slapstick. Intentional tonal shifts are rewarded where they serve the narrative.'],
+      ['Godard',        'The cut used as an argument. Coherence is scored on whether events connect, not on convention.'],
+      ['Truffaut',      'The character outrunning the plot. Character development and coherence are scored separately.'],
+      ['Akerman',       'Duration as the whole of the event. Pacing rewards rhythm that fits the story, not momentum for its own sake.'],
+      ['Campion',       'Desire rendered as landscape. Emotional turning points are scored on payoff, not on dialogue.'],
+      ['Lynch',         'Dream logic in place of causality. Coherence is scored against the plot&rsquo;s own rules.'],
+      ['Malick',        'Narration drifting free of the scene. Structure is scored separately from voice.'],
+      ['Almodóvar',     'Coincidence pushed to its limit. Coherence asks that events connect, not that they be likely.'],
+      ['Claire Denis',  'Ellipsis doing the storytelling. What is left out is scored under pacing.']
     ];
     var bag = [], timer = null, hideTimer = null, hovering = false, current = NAMES[0];
 
     var tip = document.createElement('span');
-    tip.className = 'fw-tip tip-d';
+    tip.className = 'fw-tip tip-d tip-w';
     document.body.appendChild(tip);
 
     function placeTip() {
