@@ -82,13 +82,15 @@
   .kick{display:inline-flex;align-items:center;gap:8px}
 
   /* ── Marginalia: a director's name surfaces in the gutter now and then ── */
-  #cinema{position:fixed;z-index:4;pointer-events:none;user-select:none;
-    writing-mode:vertical-rl;white-space:nowrap;
-    font:500 9.5px/1 'JetBrains Mono',monospace;letter-spacing:.3em;text-transform:uppercase;
-    color:#16191f;opacity:0;transition:opacity 1.8s ease}
-  #cinema.on{opacity:.085}
+  #cinema{position:fixed;z-index:6;pointer-events:none;user-select:none;cursor:help;
+    writing-mode:vertical-rl;white-space:nowrap;padding:14px 11px;
+    font:500 10px/1 'JetBrains Mono',monospace;letter-spacing:.3em;text-transform:uppercase;
+    color:#16191f;opacity:0;transition:opacity 1.4s ease,color .3s ease}
+  #cinema.on{opacity:.24;pointer-events:auto}
+  #cinema.on:hover{opacity:.92;color:#5a2ce0;transition:opacity .2s ease,color .2s ease}
   #cinema.rev{color:#f5f3ee}
-  #cinema.rev.on{opacity:.13}
+  #cinema.rev.on{opacity:.3}
+  #cinema.rev.on:hover{opacity:1;color:#a887ff}
   /* no gutter to hide in below this width, so it stays away entirely */
   @media (max-width:1023px){#cinema{display:none}}
 
@@ -1729,13 +1731,63 @@
     if (!el || reduce) return;
 
     var NAMES = [
-      'Kurosawa', 'Hitchcock', 'Kubrick', 'Tarkovsky', 'Varda', 'Fellini',
-      'Bergman', 'Ozu', 'Satyajit Ray', 'Guru Dutt', 'Ritwik Ghatak',
-      'Coppola', 'Scorsese', 'Kiarostami', 'Wong Kar-wai', 'Miyazaki',
-      'Welles', 'Chaplin', 'Godard', 'Truffaut', 'Akerman', 'Campion',
-      'Lynch', 'Malick', 'Almodóvar', 'Claire Denis'
+      ['Nolan',         'Plots that play with time'],
+      ['Kurosawa',      'One event, four irreconcilable accounts'],
+      ['Hitchcock',     'Tell the audience about the bomb, then wait'],
+      ['Kubrick',       'Structure as cold, deliberate architecture'],
+      ['Tarkovsky',     'Time allowed to pass at its own pace'],
+      ['Varda',         'The essay and the story braided together'],
+      ['Fellini',       'Memory and spectacle in place of plot'],
+      ['Bergman',       'Interiors, faces, and the long confession'],
+      ['Ozu',           'Plot receding until only the family remains'],
+      ['Satyajit Ray',  'The small domestic turn that changes everything'],
+      ['Guru Dutt',     'Melodrama lit like a confession'],
+      ['Ritwik Ghatak', 'Partition as the wound under every plot'],
+      ['Coppola',       'The family saga told as tragedy'],
+      ['Scorsese',      'Voiceover as unreliable confession'],
+      ['Kiarostami',    'The line between document and fiction'],
+      ['Wong Kar-wai',  'Mood carrying what the plot refuses to'],
+      ['Miyazaki',      'Journeys that need no villain'],
+      ['Welles',        'A life assembled by the people who lost it'],
+      ['Chaplin',       'Pathos smuggled inside slapstick'],
+      ['Godard',        'The cut used as an argument'],
+      ['Truffaut',      'The character outrunning the plot'],
+      ['Akerman',       'Duration as the whole of the event'],
+      ['Campion',       'Desire rendered as landscape'],
+      ['Lynch',         'Dream logic in place of causality'],
+      ['Malick',        'Narration drifting free of the scene'],
+      ['Almodóvar',     'Coincidence pushed to its limit'],
+      ['Claire Denis',  'Ellipsis doing the storytelling']
     ];
-    var bag = [], timer = null;
+    var bag = [], timer = null, hideTimer = null, hovering = false, current = NAMES[0];
+
+    var tip = document.createElement('span');
+    tip.className = 'fw-tip tip-d';
+    document.body.appendChild(tip);
+
+    function placeTip() {
+      var c = el.getBoundingClientRect();
+      var w = tip.offsetWidth, h = tip.offsetHeight, pad = 12;
+      var x = c.left < window.innerWidth / 2 ? c.right + 10 : c.left - w - 10;
+      x = Math.max(pad, Math.min(x, window.innerWidth - w - pad));
+      var y = Math.round(c.top + c.height / 2 - h / 2);
+      y = Math.max(pad, Math.min(y, window.innerHeight - h - pad));
+      tip.style.left = Math.round(x) + 'px';
+      tip.style.top = y + 'px';
+    }
+
+    el.addEventListener('mouseenter', function () {
+      hovering = true;
+      clearTimeout(hideTimer);
+      tip.innerHTML = '<b>' + current[0] + '</b>' + current[1];
+      placeTip();
+      tip.classList.add('show');
+    });
+    el.addEventListener('mouseleave', function () {
+      hovering = false;
+      tip.classList.remove('show');
+      hideTimer = setTimeout(function () { el.classList.remove('on'); }, 1200);
+    });
 
     function next() {
       if (!bag.length) {                       // reshuffle so names do not repeat
@@ -1756,8 +1808,9 @@
     }
 
     function cue() {
-      if (document.hidden) { timer = setTimeout(cue, 4000); return; }
-      el.textContent = next();
+      if (document.hidden || hovering) { timer = setTimeout(cue, 4000); return; }
+      current = next();
+      el.textContent = current[0];
       el.classList.remove('on');
 
       // sit in the gutter beside the 1180px column, never over the text
@@ -1771,8 +1824,11 @@
       el.classList.toggle('rev', overDarkBand(top + 40));
 
       requestAnimationFrame(function () { el.classList.add('on'); });
-      setTimeout(function () { el.classList.remove('on'); }, 4200);
-      timer = setTimeout(cue, 9000 + Math.random() * 9000);
+      // stays put while the cursor is on it, so a chance hover can be read
+      hideTimer = setTimeout(function () {
+        if (!hovering) el.classList.remove('on');
+      }, 6500);
+      timer = setTimeout(cue, 8000 + Math.random() * 7000);
     }
 
     document.addEventListener('visibilitychange', function () {
