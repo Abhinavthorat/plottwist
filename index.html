@@ -114,7 +114,9 @@
     80%{opacity:1}
     100%{stroke-dashoffset:0;opacity:0}
   }
-  [data-fwbox].live .flow path{animation:flowDash 2.2s linear infinite}
+  .live .flow path{animation:flowDash 2.2s linear infinite}
+  /* the hero sits on a lighter ground and reads better a touch finer */
+  [data-herobox] .flow path{stroke-width:2.6}
 
   /* ── Plot being written at the end of the pipeline ── */
   .fw-out{position:absolute;right:12px;top:6px;width:252px;text-align:right}
@@ -267,7 +269,7 @@
       </div>
     </div>
 
-    <div>
+    <div data-herobox>
       <svg viewBox="0 0 640 340" style="width:100%;height:auto;overflow:visible" aria-label="Narrative graph: a premise branches into ideas, meets a twist, and resolves into a plot">
         <g fill="none" stroke="#16191f" stroke-width="1" stroke-linecap="round">
           <path d="M 66 170 L 244 170" opacity=".45" stroke-dasharray="200" style="animation:drawIn .8s ease-out .30s both"></path>
@@ -278,6 +280,18 @@
           <path d="M 256 270 C 340 270 350 170 414 170" opacity=".45" stroke-dasharray="260" style="animation:drawIn .9s ease-out 1.19s both"></path>
         </g>
         <path d="M 448 168 C 500 166 512 122 582 120" fill="none" stroke="#7c4dff" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="200" style="animation:drawIn .9s ease-out 1.75s both"></path>
+
+        <!-- Continuous signal, starting once the one-shot draw-in has finished -->
+        <g class="flow" aria-hidden="true">
+          <path pathLength="100" d="M 66 170 C 130 170 150 70 244 70" style="animation-delay:2.7s"></path>
+          <path pathLength="100" d="M 66 170 L 244 170" style="animation-delay:2.7s"></path>
+          <path pathLength="100" d="M 66 170 C 130 170 150 270 244 270" style="animation-delay:2.7s"></path>
+          <path pathLength="100" d="M 256 70 C 340 70 350 170 414 170" style="animation-delay:3.1s"></path>
+          <path pathLength="100" d="M 256 170 L 414 170" style="animation-delay:3.1s"></path>
+          <path pathLength="100" d="M 256 270 C 340 270 350 170 414 170" style="animation-delay:3.1s"></path>
+          <path pathLength="100" d="M 448 168 C 500 166 512 122 582 120" style="animation-delay:3.5s"></path>
+        </g>
+
         <g style="animation:nIn .8s ease-out 2.3s both">
           <path d="M 444 182 C 470 232 498 252 556 258" fill="none" stroke="#16191f" stroke-width="1" stroke-dasharray="3 4" opacity=".3"></path>
           <circle cx="564" cy="259" r="4" fill="#f5f3ee" stroke="#16191f" stroke-width="1" opacity=".45"></circle>
@@ -1496,6 +1510,19 @@
     lab.addEventListener('focus', show);
     lab.addEventListener('blur', hide);
   });
+
+  /* Hero diagram: same continuous signal, armed while it is on screen. */
+  var heroBox = document.querySelector('[data-herobox]');
+  if (heroBox && !reduce) {
+    if ('IntersectionObserver' in window) {
+      var hio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { heroBox.classList.toggle('live', e.isIntersecting); });
+      }, { threshold: 0, rootMargin: '120px 0px 120px 0px' });
+      hio.observe(heroBox);
+    } else {
+      heroBox.classList.add('live');
+    }
+  }
 
   if (fwBoxEl) {
     if (reduce) {
