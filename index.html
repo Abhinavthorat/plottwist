@@ -448,7 +448,7 @@
           <span class="nov-tip"><b>NEW IN THIS WORK</b>Most plot-generation work scales the writer. PlotTwist keeps the writer small and moves the intelligence outward, into an aspect-level reward model and an independent jury, so a 3B-active model reaches frontier-competitive quality.</span>
         </span>
         <span style="flex:1;height:1px;background:#e2ded4"></span>
-        <span style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#b0aa9e">SELECT A NODE</span>
+        <span id="cHint" style="font:400 10px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#b0aa9e">SELECT A NODE TO PIN</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;align-items:center;margin-top:24px">
         <svg viewBox="0 0 620 380" style="width:100%;height:auto;overflow:visible">
@@ -933,12 +933,18 @@
       <div class="sx dark" style="margin-top:26px">
         <div class="sx-hint">SCROLL <span>&rarr;</span></div>
         <div class="sx-in">
-        <svg viewBox="0 0 900 430" style="width:100%;min-width:620px;height:auto;display:block" role="img" aria-label="Scatter plot of overall jury score against active parameters. Open-weight baselines from 3.8B to 70B score between 6.58 and 7.90, while PlotTwist at 3B active scores 8.36.">
+        <svg viewBox="0 0 900 430" style="width:100%;min-width:620px;height:auto;display:block" role="img" aria-label="Scatter plot of overall jury score against active parameters. Open-weight baselines from 3.8B to 70B score between 6.58 and 7.90, while PlotTwist at 3B active scores 8.36. Claude Sonnet 4, GPT-4.1 and Gemini 2.0 Flash are drawn as horizontal lines because their sizes are undisclosed.">
           <!-- frontier band -->
+          <!-- Frontier models: the score is known, the size is not, so each is a
+               line across the whole axis rather than a point at some x. -->
           <rect class="sc-fade" x="70" y="74.1" width="790" height="32.7" fill="rgba(245,243,238,.055)" style="transition-delay:.15s"></rect>
-          <line class="sc-fade" x1="70" y1="74.1" x2="860" y2="74.1" stroke="rgba(245,243,238,.28)" stroke-width="1" stroke-dasharray="4 4" style="transition-delay:.15s"></line>
-          <line class="sc-fade" x1="70" y1="106.8" x2="860" y2="106.8" stroke="rgba(245,243,238,.28)" stroke-width="1" stroke-dasharray="4 4" style="transition-delay:.15s"></line>
-          <text class="sc-fade" x="258" y="100" fill="#8b8880" style="font:400 10px 'JetBrains Mono',monospace;letter-spacing:.1em;transition-delay:.3s">FRONTIER MODELS &middot; SIZE UNDISCLOSED &middot; 8.11 TO 8.35</text>
+          <line class="sc-fade" x1="70" y1="74.1" x2="860" y2="74.1" stroke="rgba(245,243,238,.3)" stroke-width="1" stroke-dasharray="4 4" style="transition-delay:.15s"></line>
+          <line class="sc-fade" x1="70" y1="100" x2="860" y2="100" stroke="rgba(245,243,238,.22)" stroke-width="1" stroke-dasharray="4 4" style="transition-delay:.2s"></line>
+          <line class="sc-fade" x1="70" y1="106.8" x2="860" y2="106.8" stroke="rgba(245,243,238,.3)" stroke-width="1" stroke-dasharray="4 4" style="transition-delay:.15s"></line>
+          <text class="sc-fade" x="215" y="96" fill="#71706a" style="font:400 9.5px 'JetBrains Mono',monospace;letter-spacing:.14em;transition-delay:.3s">FRONTIER &middot; SIZE UNDISCLOSED</text>
+          <text class="sc-fade" x="856" y="68" text-anchor="end" fill="#c9c5bc" style="font:400 10px 'JetBrains Mono',monospace;transition-delay:.35s">Claude Sonnet 4 &middot; 8.35</text>
+          <text class="sc-fade" x="856" y="96" text-anchor="end" fill="#c9c5bc" style="font:400 10px 'JetBrains Mono',monospace;transition-delay:.4s">GPT-4.1 &middot; 8.16</text>
+          <text class="sc-fade" x="856" y="120" text-anchor="end" fill="#c9c5bc" style="font:400 10px 'JetBrains Mono',monospace;transition-delay:.45s">Gemini 2.0 Flash &middot; 8.11</text>
 
           <!-- y grid -->
           <g stroke="rgba(245,243,238,.12)" stroke-width="1">
@@ -1368,14 +1374,50 @@
       g.querySelector('[data-dot]').setAttribute('fill', +g.dataset.pick === i ? '#7c4dff' : '#16191f');
     });
   }
+  /* Nodes sit at top, upper-left, upper-right, lower-left, lower-right, so
+     clockwise from the top is workflow, jury, adaptive, validation, pos-neg. */
+  var CW = [0, 2, 4, 3, 1];
+  var cwPos = 0, cwTimer = null, pinned = false;
+  var cHint = document.getElementById('cHint');
+
+  function stopRotation() { clearInterval(cwTimer); cwTimer = null; }
+  function startRotation() {
+    if (pinned || reduce || cwTimer) return;
+    cwTimer = setInterval(function () {
+      cwPos = (cwPos + 1) % CW.length;
+      pick(CW[cwPos]);
+    }, 20000);
+  }
+  function pinTo(i) {
+    pinned = true;
+    stopRotation();
+    var at = CW.indexOf(i);
+    cwPos = at < 0 ? 0 : at;
+    pick(i);
+    if (cHint) cHint.textContent = 'PINNED';
+  }
+
   document.querySelectorAll('[data-pick]').forEach(function (g) {
     var i = +g.dataset.pick;
-    g.addEventListener('click', function () { pick(i); });
+    g.addEventListener('click', function () { pinTo(i); });
     g.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(i); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pinTo(i); }
     });
   });
   pick(0);
+
+  if (reduce && cHint) cHint.textContent = 'SELECT A NODE';
+
+  // only rotate while the graph is actually on screen
+  var cwHost = document.querySelector('[data-pick]');
+  cwHost = cwHost && cwHost.ownerSVGElement;
+  if (cwHost && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) {
+      es.forEach(function (e) { e.isIntersecting ? startRotation() : stopRotation(); });
+    }, { threshold: 0.25 }).observe(cwHost);
+  } else {
+    startRotation();
+  }
 
   /* ── Experiments variant panel ──────────────────────────── */
   var DATA = {
