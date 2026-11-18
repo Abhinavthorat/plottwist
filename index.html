@@ -222,6 +222,18 @@
     .nov:hover .nov-tip,.nov:focus-visible .nov-tip,
     .nov-dn:hover .nov-tip,.nov-dn:focus-visible .nov-tip{transform:translate(-50%,0)}
   }
+  /* presentation viewer */
+  #deck{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;background:rgba(22,25,31,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  #deck.open{display:flex}
+  #deck .deck-stage{position:relative;width:min(92vw,calc((100vh - 140px)*16/9));display:flex;flex-direction:column;align-items:center;gap:14px}
+  #deck canvas{display:block;width:100%;height:auto;background:#fff;border-radius:6px;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+  #deck .deck-bar{display:flex;align-items:center;gap:14px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#f5f3ee}
+  #deck button{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:999px;border:1px solid rgba(245,243,238,.35);background:rgba(245,243,238,.08);color:#f5f3ee;font:500 18px/1 Archivo,sans-serif;cursor:pointer;transition:background .2s,border-color .2s}
+  #deck button:hover:not(:disabled){background:rgba(124,77,255,.35);border-color:#7c4dff}
+  #deck button:disabled{opacity:.3;cursor:default}
+  #deck .deck-close{position:fixed;top:18px;right:18px}
+  #deck .deck-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#8c877d}
+  @media (max-width:640px){#deck .deck-stage{width:calc(100vw - 32px)}#deck .deck-close{top:12px;right:12px}}
 </style>
 </head>
 <body>
@@ -347,7 +359,7 @@
       <p class="hero-authors" style="margin:22px 0 0;padding-top:18px;border-top:1px solid #e2ded4;color:#16191f">Abhinav Thorat, Ravi Kolla, Jyotin Goel, Madhav Kataria, Niranjan Pedanekar</p>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:28px">
         <a href="https://arxiv.org/abs/2603.16410" class="btn btn-solid">PAPER <span style="opacity:.4">&#8599;</span></a>
-        <a href="assets/plottwist-deck-emnlp-2026.pdf" target="_blank" rel="noopener" class="btn">PRESENTATION <span style="opacity:.4">&#8599;</span></a>
+        <a href="assets/plottwist-deck-emnlp-2026.pdf" class="btn">PRESENTATION <span style="opacity:.4">&#8599;</span></a>
         <a href="assets/plottwist-emnlp-2026.pdf" class="btn">PDF <span style="opacity:.4">&#8599;</span></a>
         <a href="#bibtex" class="btn">BIBTEX</a>
       </div>
@@ -1323,7 +1335,7 @@
         <p style="margin:16px 0 0;font:500 11px/1.7 'JetBrains Mono',monospace;letter-spacing:.1em;color:#5a2ce0">ACCEPTED AT LUHME &middot; EMNLP 2026</p>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:30px">
           <a href="https://arxiv.org/abs/2603.16410" class="btn btn-solid">ARXIV <span style="opacity:.4">&#8599;</span></a>
-          <a href="assets/plottwist-deck-emnlp-2026.pdf" target="_blank" rel="noopener" class="btn">PRESENTATION <span style="opacity:.4">&#8599;</span></a>
+          <a href="assets/plottwist-deck-emnlp-2026.pdf" class="btn">PRESENTATION <span style="opacity:.4">&#8599;</span></a>
           <a href="assets/plottwist-emnlp-2026.pdf" class="btn">PDF <span style="opacity:.4">&#8599;</span></a>
         </div>
       </div>
@@ -1980,6 +1992,70 @@
       });
     });
   }
+})();
+</script>
+<div id="deck" role="dialog" aria-modal="true" aria-label="Presentation">
+  <button class="deck-close" type="button" aria-label="Close presentation">&#10005;</button>
+  <div class="deck-stage">
+    <div style="position:relative;width:100%"><canvas></canvas><div class="deck-loading">LOADING SLIDES</div></div>
+    <div class="deck-bar">
+      <button class="deck-prev" type="button" aria-label="Previous slide">&#8592;</button>
+      <span class="deck-count">&ndash; / &ndash;</span>
+      <button class="deck-next" type="button" aria-label="Next slide">&#8594;</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var SRC='assets/plottwist-deck-emnlp-2026.pdf', LIB='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+  var deck=document.getElementById('deck'), canvas=deck.querySelector('canvas'), loading=deck.querySelector('.deck-loading'),
+      prev=deck.querySelector('.deck-prev'), next=deck.querySelector('.deck-next'), count=deck.querySelector('.deck-count');
+  var doc=null, page=1, rendering=null, pending=null, libPromise=null, lastFocus=null;
+  function loadLib(){
+    if(libPromise) return libPromise;
+    libPromise=new Promise(function(res,rej){
+      var sc=document.createElement('script'); sc.src=LIB+'pdf.min.js';
+      sc.onload=function(){ pdfjsLib.GlobalWorkerOptions.workerSrc=LIB+'pdf.worker.min.js'; res(); };
+      sc.onerror=rej; document.head.appendChild(sc);
+    });
+    return libPromise;
+  }
+  function render(n){
+    if(rendering){ pending=n; return; }
+    rendering=doc.getPage(n).then(function(p){
+      var w=canvas.parentNode.clientWidth||800, base=p.getViewport({scale:1});
+      var vp=p.getViewport({scale:(w/base.width)*Math.min(window.devicePixelRatio||1,2)});
+      canvas.width=vp.width; canvas.height=vp.height;
+      return p.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+    }).then(function(){
+      loading.style.display='none'; rendering=null;
+      if(pending!==null){ var q=pending; pending=null; render(q); }
+    });
+    page=n; count.textContent=n+' / '+doc.numPages;
+    prev.disabled=n<=1; next.disabled=n>=doc.numPages;
+  }
+  function go(d){ if(!doc) return; var n=page+d; if(n>=1&&n<=doc.numPages) render(n); }
+  function open(e){
+    if(e){ if(e.metaKey||e.ctrlKey||e.shiftKey||e.button===1) return; e.preventDefault(); }
+    lastFocus=document.activeElement; deck.classList.add('open'); document.body.style.overflow='hidden';
+    deck.querySelector('.deck-close').focus();
+    if(doc){ render(page); return; }
+    loadLib().then(function(){ return pdfjsLib.getDocument(SRC).promise; })
+      .then(function(d){ doc=d; render(1); })
+      .catch(function(){ loading.textContent='COULD NOT LOAD SLIDES'; });
+  }
+  function close(){ deck.classList.remove('open'); document.body.style.overflow=''; if(lastFocus) lastFocus.focus(); }
+  document.querySelectorAll('a[href="'+SRC+'"]').forEach(function(a){ a.addEventListener('click',open); });
+  prev.addEventListener('click',function(){go(-1);}); next.addEventListener('click',function(){go(1);});
+  deck.querySelector('.deck-close').addEventListener('click',close);
+  deck.addEventListener('click',function(e){ if(e.target===deck) close(); });
+  document.addEventListener('keydown',function(e){
+    if(!deck.classList.contains('open')) return;
+    if(e.key==='Escape') close(); else if(e.key==='ArrowLeft') go(-1); else if(e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); go(1); }
+  });
+  var tx=null; canvas.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;},{passive:true});
+  canvas.addEventListener('touchend',function(e){ if(tx===null) return; var dx=e.changedTouches[0].clientX-tx; if(Math.abs(dx)>40) go(dx<0?1:-1); tx=null; });
+  window.addEventListener('resize',function(){ if(doc&&deck.classList.contains('open')) render(page); });
 })();
 </script>
 </body>
